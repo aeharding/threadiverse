@@ -25,7 +25,7 @@ pnpm i threadiverse
 ```ts
 import { ThreadiverseClient } from "threadiverse";
 
-const client = new ThreadiverseClient("lemmy.world");
+const client = new ThreadiverseClient("https://lemmy.world");
 
 const posts = await client.getPosts();
 ```

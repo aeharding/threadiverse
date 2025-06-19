@@ -8,13 +8,12 @@ import { BaseClient, BaseClientOptions, ProviderInfo } from "./BaseClient";
 // TODO: some way to reset this for server-side/testing usage
 const discoveryCache = new Map<string, ReturnType<typeof resolveSoftware>>();
 
+// Function to clear the discovery cache (mainly for testing)
+export function clearCache(): void {
+  discoveryCache.clear();
+}
+
 export default class ThreadiverseClient implements BaseClient {
-  get name() {
-    if (!this.delegateClient) throw new Error("Client not initialized");
-
-    return this.delegateClient.name;
-  }
-
   private hostname: string;
   private options: BaseClientOptions;
   private discoveredSoftware:
@@ -27,16 +26,38 @@ export default class ThreadiverseClient implements BaseClient {
     this.options = options;
   }
 
-  async getSoftware(): Promise<ProviderInfo> {
+  get name() {
+    if (!this.delegateClient)
+      throw new Error(
+        "Client not initialized. Wait for getSoftware() or any other async method to resolve first",
+      );
+
+    return this.delegateClient.name;
+  }
+
+  get software(): ProviderInfo {
     if (
       !this.delegateClient ||
       !this.delegateClient.name ||
       !this.discoveredSoftware
     )
-      throw new Error("Client not initialized");
+      throw new Error(
+        "Client not initialized. Wait for getSoftware() or any other async method to resolve first",
+      );
 
     return {
       name: this.delegateClient.name,
+      version: this.discoveredSoftware.version,
+    };
+  }
+
+  async getSoftware(): Promise<ProviderInfo> {
+    const client = await this.ensureClient();
+
+    if (!this.discoveredSoftware) throw new Error("Internal error");
+
+    return {
+      name: client.name,
       version: this.discoveredSoftware.version,
     };
   }
