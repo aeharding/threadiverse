@@ -8,7 +8,7 @@ Unified typescript client for threadiverse instances (Lemmy, Piefed, Mbin etc)
 
 - 🧙‍♂️ Automagic software detection via `.well-known`
 - 📦 Supported threadiverse APIs:
-  - ✅ Lemmy - full suppport
+  - ✅ Lemmy - full suppport (soon!)
   - ⚠️ Piefed - partial, uber-experimental support
   - ❌ Mbin/Kbin - no support yet (PRs welcome!)
 - 🛡️ Strongly typed internally: Uses official software types (Swagger from Piefed, `lemmy-js-client` from Lemmy) to enforce compat layer type correctness
