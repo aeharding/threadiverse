@@ -296,4 +296,14 @@ export default class ThreadiverseClient implements BaseClient {
     const client = await this.ensureClient();
     return client.deleteImage(...params);
   }
+
+  async register(...params: Parameters<BaseClient["register"]>) {
+    const client = await this.ensureClient();
+    return client.register(...params);
+  }
+
+  async getCaptcha(...params: Parameters<BaseClient["getCaptcha"]>) {
+    const client = await this.ensureClient();
+    return client.getCaptcha(...params);
+  }
 }
