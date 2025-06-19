@@ -1,5 +1,3 @@
-import { PostAggregates } from "lemmy-js-client";
-
 import { Community, Person, Post } from ".";
 
 export interface PostView {
@@ -16,7 +14,7 @@ export interface PostView {
   unread_comments: number;
 }
 
-export interface PostAggregates extends PostAggregates {
+export interface PostAggregates {
   comments: number;
   score: number;
   upvotes: number;

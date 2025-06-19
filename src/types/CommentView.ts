@@ -1,5 +1,3 @@
-import { CommentView } from "lemmy-js-client";
-
 import { Comment } from "./Comment";
 import { Community } from "./Community";
 import { Person } from "./Person";
@@ -28,5 +26,3 @@ export interface CommentAggregates {
    */
   child_count: number;
 }
-
-type v = CommentView["comment"];

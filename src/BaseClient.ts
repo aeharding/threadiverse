@@ -13,7 +13,6 @@ import {
   ResolveObjectResponse,
   SiteResponse,
 } from "./types";
-import { Nodeinfo21Payload } from "./wellknown";
 
 export interface ProviderInfo {
   name: "lemmy" | "piefed";

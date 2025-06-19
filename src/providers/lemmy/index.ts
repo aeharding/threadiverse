@@ -8,7 +8,7 @@ import {
 } from "./compat";
 
 export default class LemmyClient implements BaseClient {
-  name: "lemmy" = "lemmy";
+  name = "lemmy" as const;
 
   private client: LemmyHttp;
 

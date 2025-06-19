@@ -1,8 +1,6 @@
 export type CommunityAggregates =
   | BaseCommunityAggregates
-  | (BaseCommunityAggregates & {
-      LemmyCommunityAggregates;
-    });
+  | (BaseCommunityAggregates & LemmyCommunityAggregates);
 
 type BaseCommunityAggregates = {
   subscribers: number;

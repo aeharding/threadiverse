@@ -19,6 +19,15 @@ export function compatPiefedPerson(person: components["schemas"]["Person"]) {
   };
 }
 
+export function compatPiefedPersonView(
+  personView: components["schemas"]["PersonView"],
+) {
+  return {
+    ...personView,
+    person: compatPiefedPerson(personView.person),
+  };
+}
+
 export function compatPiefedPost(post: components["schemas"]["Post"]) {
   return {
     ...post,
