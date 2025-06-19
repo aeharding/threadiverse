@@ -1,4 +1,10 @@
-import { CommentView, CommunityView, PostView } from "lemmy-js-client";
+import {
+  CommentReplyView,
+  CommentView,
+  CommunityView,
+  PersonMentionView,
+  PostView,
+} from "lemmy-js-client";
 
 export function compatLemmyCommunityView(communityView: CommunityView) {
   return {
@@ -18,5 +24,19 @@ export function compatLemmyCommentView(comment: CommentView) {
   return {
     ...comment,
     subscribed: comment.subscribed === "Subscribed",
+  };
+}
+
+export function compatLemmyMentionView(personMention: PersonMentionView) {
+  return {
+    ...personMention,
+    subscribed: personMention.subscribed === "Subscribed",
+  };
+}
+
+export function compatLemmyReplyView(personMention: CommentReplyView) {
+  return {
+    ...personMention,
+    subscribed: personMention.subscribed === "Subscribed",
   };
 }

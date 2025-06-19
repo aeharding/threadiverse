@@ -1,7 +1,11 @@
+import { Community } from "./Community";
 import { CommunityFollowerView } from "./CommunityFollowerView";
 import { CommunityModeratorView } from "./CommunityModeratorView";
+import { Instance } from "./Instance";
+import { Person } from "./Person";
+import { SiteAggregates } from "./SiteAggregates";
 
-export interface SiteResponse {
+export interface GetSiteResponse {
   version: string;
   site_view: {
     site: {
@@ -12,13 +16,20 @@ export interface SiteResponse {
       actor_id: string;
       version?: string;
     };
+    counts?: SiteAggregates;
   };
   my_user?: {
-    // local_user_view: LocalUserView;
-    follows: Array<CommunityFollowerView>;
-    moderates: Array<CommunityModeratorView>;
-    // community_blocks: Array<Community>;
-    // instance_blocks: Array<Instance>;
-    // person_blocks: Array<Person>;
+    local_user_view: {
+      person: Person;
+      local_user: {
+        admin: boolean;
+        show_nsfw: boolean;
+      };
+    };
+    follows: CommunityFollowerView[];
+    moderates: CommunityModeratorView[];
+    community_blocks: Community[];
+    instance_blocks: Instance[];
+    person_blocks: Person[];
   };
 }
