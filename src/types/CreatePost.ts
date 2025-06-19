@@ -11,7 +11,7 @@ export interface CreatePost {
    */
   alt_text?: string;
   nsfw?: boolean;
-  language_id?: LanguageId;
+  language_id?: number;
   /**
    * Instead of fetching a thumbnail, use a custom one.
    */

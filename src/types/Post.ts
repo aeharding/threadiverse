@@ -9,8 +9,8 @@ export interface Post {
    * An optional post body, in markdown.
    */
   body?: string;
-  creator_id: PersonId;
-  community_id: CommunityId;
+  creator_id: number;
+  community_id: number;
   /**
    * Whether the post is removed.
    */

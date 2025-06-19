@@ -1,6 +1,6 @@
 import { CommentView } from "./CommentView";
 import { CommunityView } from "./CommunityView";
-import { Person } from "./Person";
+import { PersonView } from "./PersonView";
 import { PostView } from "./PostView";
 
 export interface ResolveObjectResponse {

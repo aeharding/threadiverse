@@ -9,13 +9,14 @@ import {
   compatPiefedCommunityView,
   compatPiefedGetCommunityResponse,
   compatPiefedPerson,
+  compatPiefedPersonView,
   compatPiefedPostSortType,
   compatPiefedPostView,
 } from "./compat";
 import { components, paths } from "./schema";
 
 export default class PiefedClient implements BaseClient {
-  name: "piefed" = "piefed";
+  name = "piefed" as const;
 
   private client: ReturnType<typeof createClient<paths>>;
 
@@ -40,6 +41,9 @@ export default class PiefedClient implements BaseClient {
 
     return {
       ...response.data,
+      person: response.data!.person
+        ? compatPiefedPersonView(response.data!.person)
+        : undefined,
       comment: response.data!.comment
         ? compatPiefedCommentView(response.data!.comment)
         : undefined,
