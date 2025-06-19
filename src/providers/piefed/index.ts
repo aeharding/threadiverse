@@ -1,6 +1,10 @@
 import createClient from "openapi-fetch";
 
-import { BaseClient, BaseClientOptions } from "../../BaseClient";
+import {
+  BaseClient,
+  BaseClientOptions,
+  RequestOptions,
+} from "../../BaseClient";
 import {
   compatPiefedCommentSortType,
   compatPiefedCommentView,
@@ -80,15 +84,23 @@ export default class PiefedClient implements BaseClient {
     };
   }
 
-  async login(payload: Parameters<BaseClient["login"]>[0]) {
+  async login(
+    payload: Parameters<BaseClient["login"]>[0],
+    options?: RequestOptions,
+  ) {
     const response = await this.client.POST("/user/login", {
+      ...options,
       body: { username: payload.username_or_email, password: payload.password },
     });
     return response.data!;
   }
 
-  async getCommunity(payload: Parameters<BaseClient["getCommunity"]>[0]) {
+  async getCommunity(
+    payload: Parameters<BaseClient["getCommunity"]>[0],
+    options?: RequestOptions,
+  ) {
     const response = await this.client.GET("/community", {
+      ...options,
       // @ts-expect-error TODO: fix this
       params: { query: payload },
     });
@@ -96,13 +108,17 @@ export default class PiefedClient implements BaseClient {
     return compatPiefedGetCommunityResponse(response.data!);
   }
 
-  async getPosts(payload: Parameters<BaseClient["getPosts"]>[0]) {
+  async getPosts(
+    payload: Parameters<BaseClient["getPosts"]>[0],
+    options?: RequestOptions,
+  ) {
     const query = {
       ...payload,
       sort: payload.sort ? compatPiefedPostSortType(payload.sort) : undefined,
     } satisfies components["schemas"]["GetPosts"];
 
     const response = await this.client.GET("/post/list", {
+      ...options,
       // @ts-expect-error TODO: fix this
       params: { query },
     });
@@ -112,7 +128,10 @@ export default class PiefedClient implements BaseClient {
     };
   }
 
-  async getComments(payload: Parameters<BaseClient["getComments"]>[0]) {
+  async getComments(
+    payload: Parameters<BaseClient["getComments"]>[0],
+    options?: RequestOptions,
+  ) {
     const query = {
       ...payload,
       sort: payload.sort
@@ -121,6 +140,7 @@ export default class PiefedClient implements BaseClient {
     } satisfies components["schemas"]["GetComments"];
 
     const response = await this.client.GET("/comment/list", {
+      ...options,
       // @ts-expect-error TODO: fix this
       params: { query },
     });
@@ -130,8 +150,12 @@ export default class PiefedClient implements BaseClient {
     };
   }
 
-  async createPost(payload: Parameters<BaseClient["createPost"]>[0]) {
+  async createPost(
+    payload: Parameters<BaseClient["createPost"]>[0],
+    options?: RequestOptions,
+  ) {
     const response = await this.client.POST("/post", {
+      ...options,
       body: {
         ...payload,
         title: payload.name,
@@ -143,8 +167,12 @@ export default class PiefedClient implements BaseClient {
     };
   }
 
-  async editPost(payload: Parameters<BaseClient["editPost"]>[0]) {
+  async editPost(
+    payload: Parameters<BaseClient["editPost"]>[0],
+    options?: RequestOptions,
+  ) {
     const response = await this.client.PUT("/post", {
+      ...options,
       body: {
         ...payload,
         title: payload.name,
@@ -156,10 +184,14 @@ export default class PiefedClient implements BaseClient {
     };
   }
 
-  async getPost(payload: Parameters<BaseClient["getPost"]>[0]) {
+  async getPost(
+    payload: Parameters<BaseClient["getPost"]>[0],
+    options?: RequestOptions,
+  ) {
     const query = payload satisfies components["schemas"]["GetPost"];
 
     const response = await this.client.GET("/post", {
+      ...options,
       // @ts-expect-error TODO: fix this
       params: { query },
     });
@@ -169,8 +201,12 @@ export default class PiefedClient implements BaseClient {
     };
   }
 
-  async createComment(payload: Parameters<BaseClient["createComment"]>[0]) {
+  async createComment(
+    payload: Parameters<BaseClient["createComment"]>[0],
+    options?: RequestOptions,
+  ) {
     const response = await this.client.POST("/comment", {
+      ...options,
       body: {
         ...payload,
         body: payload.content,
@@ -182,8 +218,12 @@ export default class PiefedClient implements BaseClient {
     };
   }
 
-  async editComment(payload: Parameters<BaseClient["editComment"]>[0]) {
+  async editComment(
+    payload: Parameters<BaseClient["editComment"]>[0],
+    options?: RequestOptions,
+  ) {
     const response = await this.client.PUT("/comment", {
+      ...options,
       body: {
         ...payload,
         body: payload.content,

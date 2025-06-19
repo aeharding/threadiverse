@@ -19,6 +19,8 @@ export interface ProviderInfo {
   version: string;
 }
 
+export type RequestOptions = Pick<RequestInit, "signal">;
+
 export interface BaseClientOptions {
   fetchFunction: typeof fetch;
   headers: Record<string, string>;
@@ -28,41 +30,61 @@ export interface BaseClientOptions {
 export abstract class BaseClient {
   public abstract name: "lemmy" | "piefed";
 
-  abstract resolveObject(payload: {
-    q: string;
-  }): Promise<ResolveObjectResponse>;
+  abstract resolveObject(
+    payload: {
+      q: string;
+    },
+    options?: RequestOptions,
+  ): Promise<ResolveObjectResponse>;
 
-  abstract getSite(): Promise<SiteResponse>;
+  abstract getSite(options?: RequestOptions): Promise<SiteResponse>;
 
   abstract getCommunity(
     payload: GetCommunity,
+    options?: RequestOptions,
   ): Promise<{ community_view: CommunityView }>;
 
   abstract getPosts(
     payload: GetPosts,
+    options?: RequestOptions,
   ): Promise<{ posts: PostView[]; next_page?: string }>;
 
   abstract getComments(
     payload: GetComments,
+    options?: RequestOptions,
   ): Promise<{ comments: CommentView[] }>;
 
-  abstract getPost(payload: GetPost): Promise<{ post_view: PostView }>;
+  abstract getPost(
+    payload: GetPost,
+    options?: RequestOptions,
+  ): Promise<{ post_view: PostView }>;
 
-  abstract createPost(payload: CreatePost): Promise<{ post_view: PostView }>;
+  abstract createPost(
+    payload: CreatePost,
+    options?: RequestOptions,
+  ): Promise<{ post_view: PostView }>;
 
-  abstract editPost(payload: EditPost): Promise<{ post_view: PostView }>;
+  abstract editPost(
+    payload: EditPost,
+    options?: RequestOptions,
+  ): Promise<{ post_view: PostView }>;
 
   abstract createComment(
     payload: CreateComment,
+    options?: RequestOptions,
   ): Promise<{ comment_view: CommentView }>;
 
   abstract editComment(
     payload: EditComment,
+    options?: RequestOptions,
   ): Promise<{ comment_view: CommentView }>;
 
-  abstract login(payload: {
-    username_or_email: string;
-    password: string;
-    totp_2fa_token?: string;
-  }): Promise<{ jwt?: string }>;
+  abstract login(
+    payload: {
+      username_or_email: string;
+      password: string;
+      totp_2fa_token?: string;
+    },
+    options?: RequestOptions,
+  ): Promise<{ jwt?: string }>;
 }

@@ -92,58 +92,58 @@ export default class ThreadiverseClient implements BaseClient {
     return this.delegateClient;
   }
 
-  async resolveObject(payload: Parameters<BaseClient["resolveObject"]>[0]) {
+  async resolveObject(...params: Parameters<BaseClient["resolveObject"]>) {
     const client = await this.ensureClient();
-    return client.resolveObject(payload);
+    return client.resolveObject(...params);
   }
 
-  async getSite() {
+  async getSite(...params: Parameters<BaseClient["getSite"]>) {
     const client = await this.ensureClient();
-    return client.getSite();
+    return client.getSite(...params);
   }
 
-  async getCommunity(payload: Parameters<BaseClient["getCommunity"]>[0]) {
+  async getCommunity(...params: Parameters<BaseClient["getCommunity"]>) {
     const client = await this.ensureClient();
-    return client.getCommunity(payload);
+    return client.getCommunity(...params);
   }
 
-  async getPosts(payload: Parameters<BaseClient["getPosts"]>[0]) {
+  async getPosts(...params: Parameters<BaseClient["getPosts"]>) {
     const client = await this.ensureClient();
-    return client.getPosts(payload);
+    return client.getPosts(...params);
   }
 
-  async getComments(payload: Parameters<BaseClient["getComments"]>[0]) {
+  async getComments(...params: Parameters<BaseClient["getComments"]>) {
     const client = await this.ensureClient();
-    return client.getComments(payload);
+    return client.getComments(...params);
   }
 
-  async getPost(payload: Parameters<BaseClient["getPost"]>[0]) {
+  async getPost(...params: Parameters<BaseClient["getPost"]>) {
     const client = await this.ensureClient();
-    return client.getPost(payload);
+    return client.getPost(...params);
   }
 
-  async createPost(payload: Parameters<BaseClient["createPost"]>[0]) {
+  async createPost(...params: Parameters<BaseClient["createPost"]>) {
     const client = await this.ensureClient();
-    return client.createPost(payload);
+    return client.createPost(...params);
   }
 
-  async editPost(payload: Parameters<BaseClient["editPost"]>[0]) {
+  async editPost(...params: Parameters<BaseClient["editPost"]>) {
     const client = await this.ensureClient();
-    return client.editPost(payload);
+    return client.editPost(...params);
   }
 
-  async createComment(payload: Parameters<BaseClient["createComment"]>[0]) {
+  async createComment(...params: Parameters<BaseClient["createComment"]>) {
     const client = await this.ensureClient();
-    return client.createComment(payload);
+    return client.createComment(...params);
   }
 
-  async editComment(payload: Parameters<BaseClient["editComment"]>[0]) {
+  async editComment(...params: Parameters<BaseClient["editComment"]>) {
     const client = await this.ensureClient();
-    return client.editComment(payload);
+    return client.editComment(...params);
   }
 
-  async login(payload: Parameters<BaseClient["login"]>[0]) {
+  async login(...params: Parameters<BaseClient["login"]>) {
     const client = await this.ensureClient();
-    return client.login(payload);
+    return client.login(...params);
   }
 }

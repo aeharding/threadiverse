@@ -31,24 +31,24 @@ export default class LemmyClient implements BaseClient {
     };
   }
 
-  async getSite() {
-    return this.client.getSite();
+  async getSite(...params: Parameters<BaseClient["getSite"]>) {
+    return this.client.getSite(...params);
   }
 
-  async login(payload: Parameters<BaseClient["login"]>[0]) {
-    return this.client.login(payload);
+  async login(...params: Parameters<BaseClient["login"]>) {
+    return this.client.login(...params);
   }
 
-  async getCommunity(payload: Parameters<BaseClient["getCommunity"]>[0]) {
-    const response = await this.client.getCommunity(payload);
+  async getCommunity(...params: Parameters<BaseClient["getCommunity"]>) {
+    const response = await this.client.getCommunity(...params);
 
     return {
       community_view: compatLemmyCommunityView(response.community_view),
     };
   }
 
-  async getPosts(payload: Parameters<BaseClient["getPosts"]>[0]) {
-    const response = await this.client.getPosts(payload);
+  async getPosts(...params: Parameters<BaseClient["getPosts"]>) {
+    const response = await this.client.getPosts(...params);
 
     return {
       ...response,
@@ -56,48 +56,48 @@ export default class LemmyClient implements BaseClient {
     };
   }
 
-  async getComments(payload: Parameters<BaseClient["getComments"]>[0]) {
-    const response = await this.client.getComments(payload);
+  async getComments(...params: Parameters<BaseClient["getComments"]>) {
+    const response = await this.client.getComments(...params);
 
     return {
       comments: response.comments.map(compatLemmyCommentView),
     };
   }
 
-  async createPost(payload: Parameters<BaseClient["createPost"]>[0]) {
-    const response = await this.client.createPost(payload);
+  async createPost(...params: Parameters<BaseClient["createPost"]>) {
+    const response = await this.client.createPost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
     };
   }
 
-  async editPost(payload: Parameters<BaseClient["editPost"]>[0]) {
-    const response = await this.client.editPost(payload);
+  async editPost(...params: Parameters<BaseClient["editPost"]>) {
+    const response = await this.client.editPost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
     };
   }
 
-  async getPost(payload: Parameters<BaseClient["getPost"]>[0]) {
-    const response = await this.client.getPost(payload);
+  async getPost(...params: Parameters<BaseClient["getPost"]>) {
+    const response = await this.client.getPost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
     };
   }
 
-  async createComment(payload: Parameters<BaseClient["createComment"]>[0]) {
-    const response = await this.client.createComment(payload);
+  async createComment(...params: Parameters<BaseClient["createComment"]>) {
+    const response = await this.client.createComment(...params);
 
     return {
       comment_view: compatLemmyCommentView(response.comment_view),
     };
   }
 
-  async editComment(payload: Parameters<BaseClient["editComment"]>[0]) {
-    const response = await this.client.editComment(payload);
+  async editComment(...params: Parameters<BaseClient["editComment"]>) {
+    const response = await this.client.editComment(...params);
 
     return {
       comment_view: compatLemmyCommentView(response.comment_view),
