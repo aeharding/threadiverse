@@ -5,6 +5,9 @@ export interface PostView {
   creator: Person;
   community: Community;
   creator_banned_from_community: boolean;
+  banned_from_community: boolean;
+  creator_is_moderator: boolean;
+  creator_is_admin: boolean;
   counts: PostAggregates;
   subscribed: boolean;
   saved: boolean;
@@ -12,6 +15,7 @@ export interface PostView {
   creator_blocked: boolean;
   my_vote?: number;
   unread_comments: number;
+  hidden: boolean;
 }
 
 export interface PostAggregates {
@@ -23,4 +27,5 @@ export interface PostAggregates {
    * The time of the newest comment in the post.
    */
   newest_comment_time: string;
+  published: string;
 }

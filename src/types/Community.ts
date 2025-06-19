@@ -1,3 +1,5 @@
+import { CommunityVisibility } from "./CommunityVisibility";
+
 export interface Community {
   id: number;
   name: string;
@@ -14,4 +16,5 @@ export interface Community {
   banner?: string;
   hidden: boolean;
   posting_restricted_to_mods: boolean;
+  visibility: CommunityVisibility;
 }

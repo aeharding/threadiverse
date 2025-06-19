@@ -2,20 +2,12 @@ import { CommentSortType, PostSortType } from "../../types";
 
 import { components } from "./schema";
 
-export function compatPiefedCommunity(
-  community: components["schemas"]["Community"],
-) {
-  return {
-    ...community,
-    posting_restricted_to_mods: community.restricted_to_mods,
-  };
-}
-
 export function compatPiefedPerson(person: components["schemas"]["Person"]) {
   return {
     ...person,
     name: person.user_name!,
     display_name: person.title,
+    bot_account: person.bot,
   };
 }
 
@@ -56,6 +48,17 @@ export function compatPiefedCommentView(
     community: compatPiefedCommunity(comment.community),
     creator: compatPiefedPerson(comment.creator),
     comment: compatPiefedComment(comment.comment),
+    post: compatPiefedPost(comment.post),
+  };
+}
+
+export function compatPiefedCommunity(
+  community: components["schemas"]["Community"],
+) {
+  return {
+    ...community,
+    posting_restricted_to_mods: community.restricted_to_mods,
+    visibility: "Public" as const,
   };
 }
 
