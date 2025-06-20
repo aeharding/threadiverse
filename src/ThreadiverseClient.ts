@@ -1,6 +1,6 @@
 import { resolveSoftware } from "./wellknown";
 
-import LemmyClient from "./providers/lemmy";
+import LemmyClient from "./providers/lemmyv0";
 import PiefedClient from "./providers/piefed";
 import { BaseClient, BaseClientOptions, ProviderInfo } from "./BaseClient";
 
