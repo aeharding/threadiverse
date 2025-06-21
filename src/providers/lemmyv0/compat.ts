@@ -11,11 +11,9 @@ import {
   CommunityModeratorView,
   CommunityFollowerView,
   GetModlogResponse as LemmyGetModlogResponse,
-  PostSortType as LemmyPostSortType,
 } from "lemmy-js-client";
 import { CommunityVisibility } from "../../types/CommunityVisibility";
-import { GetModlogResponse, PostSortType } from "../../types";
-import { UnsupportedError } from "../../errors";
+import { GetModlogResponse } from "../../types";
 
 export function compatLemmyCommunityView(communityView: CommunityView) {
   return {
@@ -108,19 +106,4 @@ export function compatLemmyModlogView(
   }
 
   return modlog;
-}
-
-export function compatLemmyPostSortType(sort: PostSortType): LemmyPostSortType {
-  if (
-    sort === "ControversialHour" ||
-    sort === "ControversialDay" ||
-    sort === "ControversialWeek" ||
-    sort === "ControversialMonth" ||
-    sort === "ControversialYear"
-  )
-    throw new UnsupportedError(`${sort} not supported by Lemmy v0`);
-
-  if (sort === "ControversialAll") return "Controversial";
-
-  return sort;
 }
