@@ -3,9 +3,8 @@ import type { ListingType } from "./ListingType";
 /**
  * Fetches a list of communities.
  */
-export type ListCommunities = {
+export type ListCommunities = CommunitySortType & {
   type_?: ListingType;
-  sort?: CommunitySortType;
   show_nsfw?: boolean;
   page?: number;
   limit?: number;

@@ -1,9 +1,8 @@
-import { ListingType } from "./ListingType";
 import { PostSortType } from "./PostSortType";
+import { ListingType } from "./ListingType";
 
-export interface GetPosts {
+export type GetPosts = PostSortType & {
   type_?: ListingType;
-  sort?: PostSortType;
   limit?: number;
   community_id?: number;
   community_name?: string;
@@ -21,4 +20,4 @@ export interface GetPosts {
   show_nsfw?: boolean;
 
   page_cursor?: string;
-}
+};

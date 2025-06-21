@@ -44,7 +44,7 @@ describe("ThreadiverseClient - Caching", () => {
       // Nodeinfo
       if (urlStr === "https://lemmy-cache-test.example.com/nodeinfo/2.1") {
         return new Response(
-          JSON.stringify({ software: { name: "lemmy", version: "0.19.0" } }),
+          JSON.stringify({ software: { name: "lemmy", version: "0.19.6" } }),
           {
             status: 200,
             statusText: "OK",

@@ -1,9 +1,8 @@
 import { CommentSortType } from "./CommentSortType";
 import { ListingType } from "./ListingType";
 
-export interface GetComments {
+export type GetComments = CommentSortType & {
   type_?: ListingType;
-  sort?: CommentSortType;
   max_depth?: number;
   page?: number;
   limit?: number;
@@ -14,4 +13,4 @@ export interface GetComments {
   saved_only?: boolean;
   liked_only?: boolean;
   disliked_only?: boolean;
-}
+};

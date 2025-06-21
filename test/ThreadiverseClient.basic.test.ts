@@ -20,12 +20,12 @@ describe("ThreadiverseClient - Basic", () => {
     expect(client).toBeInstanceOf(ThreadiverseClient);
   });
 
-  it("should throw error when accessing name before initialization", () => {
+  it("should throw error when accessing software before initialization", () => {
     const client = new ThreadiverseClient("example.com", mockOptions);
 
     expect(() => {
       // Accessing the name getter should throw before initialization
-      const name = client.name;
+      const name = client.software;
       return name;
     }).toThrow(
       "Client not initialized. Wait for getSoftware() or any other async method to resolve first",

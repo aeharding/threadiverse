@@ -12,7 +12,7 @@ describe("ThreadiverseClient - Providers", () => {
       const { client, mockFetch } = setupProviderTest({
         baseUrl: "https://lemmy.example.com",
         nodeinfoHref: "https://lemmy.example.com/nodeinfo/2.1",
-        nodeinfoSoftware: { name: "lemmy", version: "0.19.0" },
+        nodeinfoSoftware: { name: "lemmy", version: "0.19.6" },
       });
 
       // Call getPosts which should trigger the wellknown discovery

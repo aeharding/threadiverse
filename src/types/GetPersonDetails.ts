@@ -1,5 +1,3 @@
-import type { PostSortType } from "./PostSortType";
-
 /**
  * Gets a person's details.
  *
@@ -11,7 +9,6 @@ export type GetPersonDetails = {
    * Example: dessalines , or dessalines@xyz.tld
    */
   username?: string;
-  sort?: PostSortType;
   page?: number;
   limit?: number;
   community_id?: number;
