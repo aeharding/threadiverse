@@ -8,7 +8,8 @@
 Unified typescript client for threadiverse APIs (Lemmy, Piefed, Mbin etc)
 </p>
 
-> [!WARNING] > **Early Development Stage**: This project is under active development and may undergo significant API changes between versions. While v0, this project's design decisions will be guided by [Voyager](https://github.com/aeharding/voyager)'s usage.
+> [!WARNING]
+> **Early Development Stage**: This project is under active development and may undergo significant API changes between versions. While v0, this project's design decisions will be guided by [Voyager](https://github.com/aeharding/voyager)'s usage.
 
 ## Features
 
