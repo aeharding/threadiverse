@@ -1,6 +1,12 @@
-# threadiverse
+<p align="center">
+<img src="./logo.jpg" width="350">
+</p>
 
-Unified typescript client for threadiverse instances (Lemmy, Piefed, Mbin etc)
+<h1 align="center">threadiverse</h1>
+
+<p align="center">
+Unified typescript client for threadiverse APIs (Lemmy, Piefed, Mbin etc)
+</p>
 
 > [!WARNING] > **Early Development Stage**: This project is under active development and may undergo significant API changes between versions. While v0, this project's design decisions will be guided by [Voyager](https://github.com/aeharding/voyager)'s usage.
 

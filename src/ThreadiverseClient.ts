@@ -306,4 +306,122 @@ export default class ThreadiverseClient implements BaseClient {
     const client = await this.ensureClient();
     return client.getCaptcha(...params);
   }
+
+  async listReports(...params: Parameters<BaseClient["listReports"]>) {
+    const client = await this.ensureClient();
+    return client.listReports(...params);
+  }
+
+  async getModlog(...params: Parameters<BaseClient["getModlog"]>) {
+    const client = await this.ensureClient();
+    return client.getModlog(...params);
+  }
+
+  async getReplies(...params: Parameters<BaseClient["getReplies"]>) {
+    const client = await this.ensureClient();
+    return client.getReplies(...params);
+  }
+
+  async banFromCommunity(
+    ...params: Parameters<BaseClient["banFromCommunity"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.banFromCommunity(...params);
+  }
+
+  async saveComment(...params: Parameters<BaseClient["saveComment"]>) {
+    const client = await this.ensureClient();
+    return client.saveComment(...params);
+  }
+
+  async distinguishComment(
+    ...params: Parameters<BaseClient["distinguishComment"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.distinguishComment(...params);
+  }
+
+  async deleteComment(...params: Parameters<BaseClient["deleteComment"]>) {
+    const client = await this.ensureClient();
+    return client.deleteComment(...params);
+  }
+
+  async removeComment(...params: Parameters<BaseClient["removeComment"]>) {
+    const client = await this.ensureClient();
+    return client.removeComment(...params);
+  }
+
+  async followCommunity(...params: Parameters<BaseClient["followCommunity"]>) {
+    const client = await this.ensureClient();
+    return client.followCommunity(...params);
+  }
+
+  async blockCommunity(...params: Parameters<BaseClient["blockCommunity"]>) {
+    const client = await this.ensureClient();
+    return client.blockCommunity(...params);
+  }
+
+  async blockPerson(...params: Parameters<BaseClient["blockPerson"]>) {
+    const client = await this.ensureClient();
+    return client.blockPerson(...params);
+  }
+
+  async createPostReport(
+    ...params: Parameters<BaseClient["createPostReport"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.createPostReport(...params);
+  }
+
+  async createCommentReport(
+    ...params: Parameters<BaseClient["createCommentReport"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.createCommentReport(...params);
+  }
+
+  async createPrivateMessageReport(
+    ...params: Parameters<BaseClient["createPrivateMessageReport"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.createPrivateMessageReport(...params);
+  }
+
+  async getSiteMetadata(...params: Parameters<BaseClient["getSiteMetadata"]>) {
+    const client = await this.ensureClient();
+    return client.getSiteMetadata(...params);
+  }
+
+  async resolvePostReport(
+    ...params: Parameters<BaseClient["resolvePostReport"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.resolvePostReport(...params);
+  }
+
+  async resolveCommentReport(
+    ...params: Parameters<BaseClient["resolveCommentReport"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.resolveCommentReport(...params);
+  }
+
+  async getRandomCommunity(
+    ...params: Parameters<BaseClient["getRandomCommunity"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.getRandomCommunity(...params);
+  }
+
+  async listPostReports(...params: Parameters<BaseClient["listPostReports"]>) {
+    const client = await this.ensureClient();
+    return client.listPostReports(...params);
+  }
+
+  async listCommentReports(
+    ...params: Parameters<BaseClient["listCommentReports"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.listCommentReports(...params);
+  }
 }

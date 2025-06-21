@@ -40,3 +40,22 @@ export * from "./UploadImageResponse";
 export * from "./Register";
 export * from "./LoginResponse";
 export * from "./GetCaptchaResponse";
+export * from "./ListReports";
+export * from "./ListReportsResponse";
+export * from "./PostReport";
+export * from "./PostReportView";
+export * from "./CommentReport";
+export * from "./CommentReportView";
+export * from "./SiteAggregates";
+export * from "./RegistrationMode";
+export * from "./GetModlog";
+export * from "./GetModlogResponse";
+export * from "./GetReplies";
+export * from "./PersonView";
+export * from "./BanFromCommunity";
+export * from "./SubscribedType";
+export * from "./Instance";
+export * from "./GetSiteMetadataResponse";
+
+// TODO: unified error handling in threadiverse project
+export type { LemmyErrorType } from "lemmy-js-client";

@@ -6,14 +6,20 @@ import {
   RequestOptions,
 } from "../../BaseClient";
 import {
+  compatLemmyCommentReportView,
   compatLemmyCommentView,
   compatLemmyCommunityView,
   compatLemmyMentionView,
+  compatLemmyPostReportView,
   compatLemmyPostView,
   compatLemmyReplyView,
 } from "./compat";
 import { UnexpectedResponseError, UnsupportedError } from "../../errors";
-import { getInboxItemPublished } from "./helpers";
+import {
+  getInboxItemPublished,
+  getLogDate,
+  getPostCommentItemCreatedDate,
+} from "./helpers";
 
 export default class LemmyClient implements BaseClient {
   name = "lemmy" as const;
@@ -55,6 +61,7 @@ export default class LemmyClient implements BaseClient {
     const response = await this.client.getCommunity(...params);
 
     return {
+      ...response,
       community_view: compatLemmyCommunityView(response.community_view),
     };
   }
@@ -271,7 +278,7 @@ export default class LemmyClient implements BaseClient {
   async markPrivateMessageAsRead(
     ...params: Parameters<BaseClient["markPrivateMessageAsRead"]>
   ) {
-    await this.client.markPrivateMessageAsRead(...params);
+    return this.client.markPrivateMessageAsRead(...params);
   }
 
   async markCommentReplyAsRead(
@@ -337,5 +344,144 @@ export default class LemmyClient implements BaseClient {
 
   async getCaptcha(...params: Parameters<BaseClient["getCaptcha"]>) {
     return this.client.getCaptcha(...params);
+  }
+
+  async listReports(...params: Parameters<BaseClient["listReports"]>) {
+    const [{ comment_reports }, { post_reports }] = await Promise.all([
+      this.client.listCommentReports(...params),
+      this.client.listPostReports(...params),
+    ]);
+
+    return {
+      reports: [
+        ...comment_reports.map(compatLemmyCommentReportView),
+        ...post_reports.map(compatLemmyPostReportView),
+      ].sort(
+        (a, b) =>
+          getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a),
+      ),
+    };
+  }
+
+  async getModlog(...params: Parameters<BaseClient["getModlog"]>) {
+    const response = await this.client.getModlog(...params);
+
+    return {
+      modlog: Object.values(response)
+        .flat()
+        .sort((a, b) => Date.parse(getLogDate(b)) - Date.parse(getLogDate(a))),
+    };
+  }
+
+  async getReplies(...params: Parameters<BaseClient["getReplies"]>) {
+    const response = await this.client.getReplies(...params);
+
+    return {
+      replies: response.replies.map(compatLemmyReplyView),
+    };
+  }
+
+  async banFromCommunity(
+    ...params: Parameters<BaseClient["banFromCommunity"]>
+  ) {
+    await this.client.banFromCommunity(...params);
+  }
+
+  async saveComment(...params: Parameters<BaseClient["saveComment"]>) {
+    const response = await this.client.saveComment(...params);
+
+    return {
+      comment_view: compatLemmyCommentView(response.comment_view),
+    };
+  }
+
+  async distinguishComment(
+    ...params: Parameters<BaseClient["distinguishComment"]>
+  ) {
+    const response = await this.client.distinguishComment(...params);
+
+    return {
+      comment_view: compatLemmyCommentView(response.comment_view),
+    };
+  }
+
+  async deleteComment(...params: Parameters<BaseClient["deleteComment"]>) {
+    const response = await this.client.deleteComment(...params);
+
+    return {
+      comment_view: compatLemmyCommentView(response.comment_view),
+    };
+  }
+
+  async removeComment(...params: Parameters<BaseClient["removeComment"]>) {
+    const response = await this.client.removeComment(...params);
+
+    return {
+      comment_view: compatLemmyCommentView(response.comment_view),
+    };
+  }
+
+  async followCommunity(...params: Parameters<BaseClient["followCommunity"]>) {
+    return this.client.followCommunity(...params);
+  }
+
+  async blockCommunity(...params: Parameters<BaseClient["blockCommunity"]>) {
+    return this.client.blockCommunity(...params);
+  }
+
+  async blockPerson(...params: Parameters<BaseClient["blockPerson"]>) {
+    return this.client.blockPerson(...params);
+  }
+
+  async createPostReport(
+    ...params: Parameters<BaseClient["createPostReport"]>
+  ) {
+    await this.client.createPostReport(...params);
+  }
+
+  async createCommentReport(
+    ...params: Parameters<BaseClient["createCommentReport"]>
+  ) {
+    await this.client.createCommentReport(...params);
+  }
+
+  async createPrivateMessageReport(
+    ...params: Parameters<BaseClient["createPrivateMessageReport"]>
+  ) {
+    await this.client.createPrivateMessageReport(...params);
+  }
+
+  async getSiteMetadata(...params: Parameters<BaseClient["getSiteMetadata"]>) {
+    return this.client.getSiteMetadata(...params);
+  }
+
+  async resolvePostReport(
+    ...params: Parameters<BaseClient["resolvePostReport"]>
+  ) {
+    await this.client.resolvePostReport(...params);
+  }
+
+  async resolveCommentReport(
+    ...params: Parameters<BaseClient["resolveCommentReport"]>
+  ) {
+    await this.client.resolveCommentReport(...params);
+  }
+
+  async getRandomCommunity(
+    ..._params: Parameters<BaseClient["getRandomCommunity"]>
+  ): ReturnType<BaseClient["getRandomCommunity"]> {
+    throw new UnsupportedError(
+      "Get random community is not supported by Lemmy v0",
+    );
+  }
+
+  async listPostReports(...params: Parameters<BaseClient["listPostReports"]>) {
+    return this.client.listPostReports(...params);
+  }
+
+  async listCommentReports(
+    ...params: Parameters<BaseClient["listCommentReports"]>
+  ) {
+    return this.client.listCommentReports(...params);
   }
 }
