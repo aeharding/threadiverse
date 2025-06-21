@@ -33,15 +33,6 @@ export default class ThreadiverseClient implements BaseClient {
     this.options = options;
   }
 
-  get softwareName() {
-    if (!this.delegateClient)
-      throw new Error(
-        "Client not initialized. Wait for getSoftware() or any other async method to resolve first",
-      );
-
-    return getBaseClientConstructor(this.delegateClient).softwareName;
-  }
-
   get software(): ProviderInfo {
     if (
       !this.delegateClient ||

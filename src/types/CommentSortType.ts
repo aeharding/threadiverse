@@ -5,10 +5,11 @@ import { components } from "../providers/piefed/schema";
 export type CommentSortType =
   | ({
       mode: "lemmyv0";
-    } & Pick<LemmyV0GetComments, "sort">)
+    } & (Pick<LemmyV0GetComments, "sort"> | object))
   | ({
       mode: "lemmyv1";
-    } & Pick<LemmyV1GetComments, "sort" | "time_range_seconds">)
+    } & (Pick<LemmyV1GetComments, "sort" | "time_range_seconds"> | object))
   | ({
       mode: "piefed";
-    } & Pick<components["schemas"]["GetComments"], "sort">);
+    } & (Pick<components["schemas"]["GetComments"], "sort"> | object))
+  | { mode?: undefined };

@@ -5,10 +5,11 @@ import { components } from "../providers/piefed/schema";
 export type PostSortType =
   | ({
       mode: "lemmyv0";
-    } & Pick<LemmyV0GetPosts, "sort">)
+    } & (Pick<LemmyV0GetPosts, "sort"> | object))
   | ({
       mode: "lemmyv1";
-    } & Pick<LemmyV1GetPosts, "sort" | "time_range_seconds">)
+    } & (Pick<LemmyV1GetPosts, "sort" | "time_range_seconds"> | object))
   | ({
       mode: "piefed";
-    } & Pick<components["schemas"]["GetPosts"], "sort">);
+    } & (Pick<components["schemas"]["GetPosts"], "sort"> | object))
+  | { mode?: undefined };
