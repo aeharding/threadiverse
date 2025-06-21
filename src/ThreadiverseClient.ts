@@ -1,8 +1,10 @@
 import { resolveSoftware } from "./wellknown";
 
-import LemmyClient from "./providers/lemmyv0";
+import LemmyV0Client from "./providers/lemmyv0";
 import PiefedClient from "./providers/piefed";
 import { BaseClient, BaseClientOptions, ProviderInfo } from "./BaseClient";
+import { satisfies } from "compare-versions";
+import LemmyV1Client from "./providers/lemmyv1";
 
 // Global cache for software discovery promises by hostname
 // TODO: some way to reset this for server-side/testing usage
@@ -12,6 +14,11 @@ const discoveryCache = new Map<string, ReturnType<typeof resolveSoftware>>();
 export function clearCache(): void {
   discoveryCache.clear();
 }
+
+/**
+ * Important: First match wins.
+ */
+const CLIENTS = [LemmyV1Client, LemmyV0Client, PiefedClient];
 
 export default class ThreadiverseClient implements BaseClient {
   private hostname: string;
@@ -77,19 +84,26 @@ export default class ThreadiverseClient implements BaseClient {
       this.discoveredSoftware = await discoveryCache.get(this.hostname)!;
     }
 
-    // Create the appropriate client based on discovered software
-    switch (this.discoveredSoftware.name) {
-      case "lemmy":
-        this.delegateClient = new LemmyClient(this.hostname, this.options);
-        break;
-      case "piefed":
-        this.delegateClient = new PiefedClient(this.hostname, this.options);
-        break;
-      default:
-        throw new Error(`Unsupported software: ${this.discoveredSoftware}`);
-    }
+    const delegateClient = (() => {
+      for (const Client of CLIENTS) {
+        if (
+          Client.softwareName === this.discoveredSoftware.name &&
+          (Client.softwareVersionRange === "*" ||
+            satisfies(
+              this.discoveredSoftware.version,
+              Client.softwareVersionRange,
+            ))
+        ) {
+          return new Client(this.hostname, this.options);
+        }
+      }
 
-    return this.delegateClient;
+      throw new Error(`Unsupported software: ${this.discoveredSoftware}`);
+    })();
+
+    this.delegateClient = delegateClient;
+
+    return delegateClient;
   }
 
   async resolveObject(...params: Parameters<BaseClient["resolveObject"]>) {

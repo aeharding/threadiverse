@@ -16,8 +16,12 @@ import {
   Person as LemmyV1Person,
   PersonView as LemmyV1PersonView,
   Site as LemmyV1Site,
+  Comment as LemmyV1Comment,
+  CommentActions,
 } from "lemmy-js-client-v1";
 import {
+  Comment,
+  CommentAggregates,
   CommentReplyView,
   CommentReportView,
   CommentView,
@@ -145,19 +149,45 @@ function compatPerson(person: LemmyV1Person): Person {
 }
 
 export function compatLemmyCommentView(
-  comment: LemmyV1CommentView,
+  commentView: LemmyV1CommentView,
 ): CommentView {
   return {
+    ...commentView,
+    counts: compatCommentCounts(commentView.comment),
+    creator: compatPerson(commentView.creator),
+    comment: compatComment(commentView.comment),
+    banned_from_community: !!commentView.community_actions?.ban_expires_at,
+    subscribed: compatFollowState(commentView.community_actions?.follow_state),
+    community: compatCommunity(commentView.community),
+    post: compatPost(commentView.post),
+    ...compatCommentViewActions(commentView.comment_actions),
+  };
+}
+
+function compatCommentViewActions(
+  commentActions: CommentActions | undefined,
+): Pick<CommentView, "saved" | "my_vote"> {
+  return {
+    saved: !!commentActions?.saved_at,
+    my_vote: commentActions?.like_score,
+  };
+}
+
+function compatComment(comment: LemmyV1Comment): Comment {
+  return {
     ...comment,
-    counts: compatCommentCounts(comment),
-    creator: compatPerson(comment.creator),
-    comment: compatComment(comment.comment),
-    creator_banned_from_community: !!comment.community_actions?.ban_expires_at,
-    creator_is_moderator: !!comment.creator_is_moderator,
-    creator_blocked: !!comment.creator_blocked,
-    ...compatPostViewUserActions(comment.post_actions, comment.post.comments),
-    ...compatCommunityViewUserActions(comment.community_actions),
-    ...compatPersonViewUserActions(comment.person_actions),
+    published: comment.published_at,
+  };
+}
+
+function compatCommentCounts(comment: LemmyV1Comment): CommentAggregates {
+  return {
+    comment_id: comment.id,
+    score: comment.score,
+    upvotes: comment.upvotes,
+    downvotes: comment.downvotes,
+    child_count: comment.child_count,
+    published: comment.published_at,
   };
 }
 

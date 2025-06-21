@@ -25,7 +25,9 @@ import {
 } from "./helpers";
 
 export default class LemmyV1Client implements BaseClient {
-  name = "lemmy" as const;
+  static softwareName = "lemmy" as const;
+
+  static softwareVersionRange = ">=1.0.0-alpha.5";
 
   private client: LemmyHttp;
 

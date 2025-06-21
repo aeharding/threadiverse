@@ -22,22 +22,14 @@ import { components, paths } from "./schema";
 import { CommunityView, PostView } from "../../types";
 
 export default class PiefedClient implements BaseClient {
-  name = "piefed" as const;
+  static softwareName = "piefed" as const;
 
-  private v3CompatClient: ReturnType<typeof createClient>;
+  // Piefed is not versioned atm
+  static softwareVersionRange = "*";
+
   private client: ReturnType<typeof createClient<paths>>;
 
   constructor(url: string, options: BaseClientOptions) {
-    this.v3CompatClient = createClient({
-      baseUrl: `${url}/api/v3`,
-      // TODO: piefed doesn't allow CORS headers other than Authorization
-      headers: options.headers.Authorization
-        ? {
-            Authorization: options.headers.Authorization,
-          }
-        : undefined,
-      fetch: options.fetchFunction,
-    });
     this.client = createClient({
       baseUrl: `${url}/api/alpha`,
       // TODO: piefed doesn't allow CORS headers other than Authorization
@@ -77,15 +69,11 @@ export default class PiefedClient implements BaseClient {
   }
 
   async getSite(options?: RequestOptions) {
-    // @ts-expect-error https://codeberg.org/rimu/pyfedi/issues/890
-    const v3Site = await this.v3CompatClient.GET("/site", options);
-    const v3SiteData = await v3Site.data;
     const response = await this.client.GET("/site", options);
 
     return {
       ...response.data!,
-      // @ts-expect-error https://codeberg.org/rimu/pyfedi/issues/890
-      admins: v3SiteData.admins.map(compatPiefedPersonView),
+      admins: compatPiefedPersonView(response.data!.admins),
       site_view: {
         site: response.data!.site,
         local_site: {
@@ -300,8 +288,7 @@ export default class PiefedClient implements BaseClient {
   async getFederatedInstances(
     ..._params: Parameters<BaseClient["getFederatedInstances"]>
   ): ReturnType<BaseClient["getFederatedInstances"]> {
-    // @ts-expect-error TODO: https://codeberg.org/rimu/pyfedi/issues/891
-    const response = await this.v3CompatClient.GET("/federated_instances");
+    const response = await this.client.GET("/federated_instances");
 
     return response.data!;
   }

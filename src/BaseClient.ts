@@ -57,7 +57,11 @@ export interface BaseClientOptions {
 
 // Abstract base class that all providers should extend
 export abstract class BaseClient {
-  public abstract name: "lemmy" | "piefed";
+  static softwareName: "lemmy" | "piefed";
+  /**
+   * NPM semver range, e.g. ">=1.0.0 <2.0.0"
+   */
+  static softwareVersionRange: string;
 
   abstract resolveObject(
     payload: {

@@ -21,8 +21,10 @@ import {
   getPostCommentItemCreatedDate,
 } from "./helpers";
 
-export default class LemmyClient implements BaseClient {
-  name = "lemmy" as const;
+export default class LemmyV0Client implements BaseClient {
+  static softwareName = "lemmy" as const;
+
+  static softwareVersionRange = ">=0.19.5";
 
   private client: LemmyHttp;
 
