@@ -3158,6 +3158,8 @@ export interface components {
             site: components["schemas"]["Site"];
             /** GetSiteResponse.version */
             version: string;
+            /** GetSiteResponse.admins */
+            admins: components["schemas"]["PersonView"][];
         };
         /** BlockInstanceResponse */
         BlockInstanceResponse: {

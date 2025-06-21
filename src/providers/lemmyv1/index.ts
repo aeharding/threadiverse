@@ -1,4 +1,11 @@
-import { LemmyHttp } from "lemmy-js-client-v1";
+import {
+  CommentReportView as LemmyV1CommentReportView,
+  LemmyHttp as LemmyV1Http,
+  PersonCommentMentionView as LemmyV1PersonCommentMentionView,
+  PostReportView as LemmyV1PostReportView,
+  CommentReplyView as LemmyV1CommentReplyView,
+  PrivateMessageView as LemmyV1PrivateMessageView,
+} from "lemmy-js-client-v1";
 
 import {
   BaseClient,
@@ -10,29 +17,30 @@ import {
   compatLemmyCommentView,
   compatLemmyCommunityModeratorView,
   compatLemmyCommunityView,
-  compatLemmyMentionView,
   compatLemmyPersonView,
   compatLemmyPostReportView,
   compatLemmyPostView,
-  compatLemmyReplyView,
+  compatLemmyCommentReplyView,
   compatLemmySiteView,
+  compatLemmyReportView,
+  compatLemmyPrivateMessageView,
+  compatLemmyInboxCombinedView,
+  compatLemmyCommentMentionView,
+  compatLemmyModlogView,
+  compatLemmyFederatedInstances,
 } from "./compat";
-import { UnexpectedResponseError, UnsupportedError } from "../../errors";
-import {
-  getInboxItemPublished,
-  getLogDate,
-  getPostCommentItemCreatedDate,
-} from "./helpers";
+import { InvalidPayloadError, UnsupportedError } from "../../errors";
+import { isPostCommentReport } from "./helpers";
 
 export default class LemmyV1Client implements BaseClient {
   static softwareName = "lemmy" as const;
 
   static softwareVersionRange = ">=1.0.0-alpha.5";
 
-  private client: LemmyHttp;
+  private client: LemmyV1Http;
 
   constructor(hostname: string, options: BaseClientOptions) {
-    this.client = new LemmyHttp(hostname, options);
+    this.client = new LemmyV1Http(hostname, options);
   }
 
   async resolveObject(payload: Parameters<BaseClient["resolveObject"]>[0]) {
@@ -94,8 +102,16 @@ export default class LemmyV1Client implements BaseClient {
     };
   }
 
-  async getPosts(...params: Parameters<BaseClient["getPosts"]>) {
-    const response = await this.client.getPosts(...params);
+  async getPosts(
+    payload: Parameters<BaseClient["getPosts"]>[0],
+    options?: RequestOptions,
+  ) {
+    if (payload.mode && payload.mode !== "lemmyv1")
+      throw new InvalidPayloadError(
+        `Connected to lemmyv1, ${payload.mode} is not supported`,
+      );
+
+    const response = await this.client.getPosts(payload, options);
 
     return {
       ...response,
@@ -154,21 +170,40 @@ export default class LemmyV1Client implements BaseClient {
   async createPrivateMessage(
     ...params: Parameters<BaseClient["createPrivateMessage"]>
   ) {
-    return this.client.createPrivateMessage(...params);
+    const response = await this.client.createPrivateMessage(...params);
+
+    return {
+      private_message_view: compatLemmyPrivateMessageView(
+        response.private_message_view,
+      ),
+    };
   }
 
   async getUnreadCount(...params: Parameters<BaseClient["getUnreadCount"]>) {
-    return this.client.getUnreadCount(...params);
+    const response = await this.client.getUnreadCount(...params);
+
+    // TODO: Implement
+    return {
+      replies: response.count,
+      mentions: 0,
+      private_messages: 0,
+    };
   }
 
   async getFederatedInstances(
     ...params: Parameters<BaseClient["getFederatedInstances"]>
   ) {
-    return this.client.getFederatedInstances(...params);
+    const response = await this.client.getFederatedInstances(...params);
+
+    return {
+      federated_instances: response.federated_instances
+        ? compatLemmyFederatedInstances(response.federated_instances)
+        : undefined,
+    };
   }
 
   async markPostAsRead(...params: Parameters<BaseClient["markPostAsRead"]>) {
-    await this.client.markPostAsRead(...params);
+    await this.client.markManyPostAsRead(...params);
   }
 
   async likePost(...params: Parameters<BaseClient["likePost"]>) {
@@ -227,23 +262,57 @@ export default class LemmyV1Client implements BaseClient {
     };
   }
 
-  async listCommunities(...params: Parameters<BaseClient["listCommunities"]>) {
-    const response = await this.client.listCommunities(...params);
+  async listCommunities(
+    payload: Parameters<BaseClient["listCommunities"]>[0],
+    options?: RequestOptions,
+  ) {
+    if (payload.mode && payload.mode !== "lemmyv1")
+      throw new InvalidPayloadError(
+        `Connected to lemmyv1, ${payload.mode} is not supported`,
+      );
+
+    const response = await this.client.listCommunities(payload, options);
 
     return {
       communities: response.communities.map(compatLemmyCommunityView),
     };
   }
 
-  async search(...params: Parameters<BaseClient["search"]>) {
-    const response = await this.client.search(...params);
+  async search(
+    payload: Parameters<BaseClient["search"]>[0],
+    options?: RequestOptions,
+  ) {
+    if (payload.mode && payload.mode !== "lemmyv1")
+      throw new InvalidPayloadError(
+        `Connected to lemmyv1, ${payload.mode} is not supported`,
+      );
 
-    return {
-      ...response,
-      comments: response.comments.map(compatLemmyCommentView),
-      posts: response.posts.map(compatLemmyPostView),
-      communities: response.communities.map(compatLemmyCommunityView),
+    const response = await this.client.search(payload, options);
+
+    const compatResponse: Awaited<ReturnType<BaseClient["search"]>> = {
+      comments: [],
+      posts: [],
+      communities: [],
+      users: [],
     };
+
+    for (const result of response.results) {
+      switch (result.type_) {
+        case "Comment":
+          compatResponse.comments.push(compatLemmyCommentView(result));
+          break;
+        case "Post":
+          compatResponse.posts.push(compatLemmyPostView(result));
+          break;
+        case "Community":
+          compatResponse.communities.push(compatLemmyCommunityView(result));
+          break;
+        case "Person":
+          compatResponse.users.push(compatLemmyPersonView(result));
+      }
+    }
+
+    return compatResponse;
   }
 
   async getPersonDetails(
@@ -251,62 +320,66 @@ export default class LemmyV1Client implements BaseClient {
   ) {
     const response = await this.client.getPersonDetails(...params);
 
+    // TODO: listPersonContent
+
     return {
       ...response,
-      comments: response.comments.map(compatLemmyCommentView),
-      posts: response.posts.map(compatLemmyPostView),
+      person_view: compatLemmyPersonView(response.person_view),
+      moderates: response.moderates.map(compatLemmyCommunityModeratorView),
+      comments: [],
+      posts: [],
     };
   }
 
   async getNotifications(
     ...params: Parameters<BaseClient["getNotifications"]>
   ) {
-    if (params[0].sort !== "New")
-      throw new UnsupportedError(
-        "Lemmy v0 getNotifications only supports sorting by new",
-      );
-
-    const [replies, mentions, privateMessages] = await Promise.all([
-      this.client.getReplies(...params),
-      this.client.getPersonMentions(...params),
-      this.client.getPrivateMessages(...params),
-    ]);
-
-    const notifications = [
-      ...replies.replies.map(compatLemmyReplyView),
-      ...mentions.mentions.map(compatLemmyMentionView),
-      ...privateMessages.private_messages,
-    ].sort(
-      (a, b) =>
-        Date.parse(getInboxItemPublished(b)) -
-        Date.parse(getInboxItemPublished(a)),
-    );
+    const response = await this.client.listInbox(...params);
 
     return {
-      notifications,
+      notifications: response.inbox
+        .map(compatLemmyInboxCombinedView)
+        .filter((r) => !!r),
     };
   }
 
   async getPersonMentions(
-    ...params: Parameters<BaseClient["getPersonMentions"]>
+    payload: Parameters<BaseClient["getPersonMentions"]>[0],
+    options?: RequestOptions,
   ) {
-    const response = await this.client.getPersonMentions(...params);
+    const response = await this.client.listInbox(
+      {
+        ...payload,
+        type_: "CommentMention",
+      },
+      options,
+    );
 
     return {
-      mentions: response.mentions.map(compatLemmyMentionView),
+      // Type set to CommentMention in request, so safe to cast
+      mentions: (response.inbox as LemmyV1PersonCommentMentionView[]).map(
+        compatLemmyCommentMentionView,
+      ),
     };
   }
 
   async markPersonMentionAsRead(
-    ...params: Parameters<BaseClient["markPersonMentionAsRead"]>
+    payload: Parameters<BaseClient["markPersonMentionAsRead"]>[0],
+    options?: RequestOptions,
   ) {
-    await this.client.markPersonMentionAsRead(...params);
+    await this.client.markCommentMentionAsRead(
+      {
+        ...payload,
+        person_comment_mention_id: payload.person_mention_id,
+      },
+      options,
+    );
   }
 
   async markPrivateMessageAsRead(
     ...params: Parameters<BaseClient["markPrivateMessageAsRead"]>
   ) {
-    return this.client.markPrivateMessageAsRead(...params);
+    await this.client.markPrivateMessageAsRead(...params);
   }
 
   async markCommentReplyAsRead(
@@ -316,13 +389,27 @@ export default class LemmyV1Client implements BaseClient {
   }
 
   async markAllAsRead(...params: Parameters<BaseClient["markAllAsRead"]>) {
-    await this.client.markAllAsRead(...params);
+    await this.client.markAllNotificationsAsRead(...params);
   }
 
   async getPrivateMessages(
-    ...params: Parameters<BaseClient["getPrivateMessages"]>
+    payload: Parameters<BaseClient["getPrivateMessages"]>[0],
+    options?: RequestOptions,
   ) {
-    return this.client.getPrivateMessages(...params);
+    const response = await this.client.listInbox(
+      {
+        ...payload,
+        type_: "PrivateMessage",
+      },
+      options,
+    );
+
+    return {
+      // Type set to PrivateMessage in request, so safe to cast
+      private_messages: (response.inbox as LemmyV1PrivateMessageView[]).map(
+        compatLemmyPrivateMessageView,
+      ),
+    };
   }
 
   async saveUserSettings(
@@ -332,7 +419,7 @@ export default class LemmyV1Client implements BaseClient {
   }
 
   async blockInstance(...params: Parameters<BaseClient["blockInstance"]>) {
-    await this.client.blockInstance(...params);
+    await this.client.userBlockInstance(...params);
   }
 
   async uploadImage(
@@ -344,15 +431,9 @@ export default class LemmyV1Client implements BaseClient {
       options,
     );
 
-    const fileResponse = response.files?.[0];
-
-    if (!fileResponse) {
-      throw new UnexpectedResponseError("Failed to upload image");
-    }
-
     return {
-      url: fileResponse.file,
-      delete_token: fileResponse.delete_token,
+      url: response.image_url,
+      delete_token: "",
     };
   }
 
@@ -360,8 +441,8 @@ export default class LemmyV1Client implements BaseClient {
     payload: Parameters<BaseClient["deleteImage"]>[0],
     options?: RequestOptions,
   ) {
-    await this.client.deleteImage(
-      { filename: payload.url, token: payload.delete_token },
+    await this.client.deleteMedia(
+      { filename: payload.url }, // delete_token is not needed. Lemmy verifies account ownership
       options,
     );
   }
@@ -374,20 +455,16 @@ export default class LemmyV1Client implements BaseClient {
     return this.client.getCaptcha(...params);
   }
 
-  async listReports(...params: Parameters<BaseClient["listReports"]>) {
-    const [{ comment_reports }, { post_reports }] = await Promise.all([
-      this.client.listCommentReports(...params),
-      this.client.listPostReports(...params),
-    ]);
+  async listReports(
+    payload: Parameters<BaseClient["listReports"]>[0],
+    options?: RequestOptions,
+  ) {
+    const response = await this.client.listReports(payload, options);
 
     return {
-      reports: [
-        ...comment_reports.map(compatLemmyCommentReportView),
-        ...post_reports.map(compatLemmyPostReportView),
-      ].sort(
-        (a, b) =>
-          getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a),
-      ),
+      reports: response.reports
+        .filter(isPostCommentReport)
+        .map(compatLemmyReportView),
     };
   }
 
@@ -395,17 +472,26 @@ export default class LemmyV1Client implements BaseClient {
     const response = await this.client.getModlog(...params);
 
     return {
-      modlog: Object.values(response)
-        .flat()
-        .sort((a, b) => Date.parse(getLogDate(b)) - Date.parse(getLogDate(a))),
+      modlog: response.modlog.map(compatLemmyModlogView).filter((m) => !!m),
     };
   }
 
-  async getReplies(...params: Parameters<BaseClient["getReplies"]>) {
-    const response = await this.client.getReplies(...params);
+  async getReplies(
+    payload: Parameters<BaseClient["getReplies"]>[0],
+    options?: RequestOptions,
+  ) {
+    const response = await this.client.listInbox(
+      {
+        ...payload,
+        type_: "CommentReply",
+      },
+      options,
+    );
 
     return {
-      replies: response.replies.map(compatLemmyReplyView),
+      replies: (response.inbox as LemmyV1CommentReplyView[]).map(
+        compatLemmyCommentReplyView,
+      ),
     };
   }
 
@@ -450,15 +536,29 @@ export default class LemmyV1Client implements BaseClient {
   }
 
   async followCommunity(...params: Parameters<BaseClient["followCommunity"]>) {
-    return this.client.followCommunity(...params);
+    const response = await this.client.followCommunity(...params);
+
+    return {
+      community_view: compatLemmyCommunityView(response.community_view),
+    };
   }
 
   async blockCommunity(...params: Parameters<BaseClient["blockCommunity"]>) {
-    return this.client.blockCommunity(...params);
+    const response = await this.client.blockCommunity(...params);
+
+    return {
+      ...response,
+      community_view: compatLemmyCommunityView(response.community_view),
+    };
   }
 
   async blockPerson(...params: Parameters<BaseClient["blockPerson"]>) {
-    return this.client.blockPerson(...params);
+    const response = await this.client.blockPerson(...params);
+
+    return {
+      ...response,
+      person_view: compatLemmyPersonView(response.person_view),
+    };
   }
 
   async createPostReport(
@@ -503,13 +603,43 @@ export default class LemmyV1Client implements BaseClient {
     );
   }
 
-  async listPostReports(...params: Parameters<BaseClient["listPostReports"]>) {
-    return this.client.listPostReports(...params);
+  async listPostReports(
+    payload: Parameters<BaseClient["listPostReports"]>[0],
+    options?: RequestOptions,
+  ) {
+    const response = await this.client.listReports(
+      {
+        ...payload,
+        type_: "Posts",
+      },
+      options,
+    );
+
+    return {
+      // Type set to Posts in request, so safe to cast
+      post_reports: (response.reports as LemmyV1PostReportView[]).map(
+        compatLemmyPostReportView,
+      ),
+    };
   }
 
   async listCommentReports(
-    ...params: Parameters<BaseClient["listCommentReports"]>
+    payload: Parameters<BaseClient["listCommentReports"]>[0],
+    options?: RequestOptions,
   ) {
-    return this.client.listCommentReports(...params);
+    const response = await this.client.listReports(
+      {
+        ...payload,
+        type_: "Comments",
+      },
+      options,
+    );
+
+    return {
+      // Type set to Comments in request, so safe to cast
+      comment_reports: (response.reports as LemmyV1CommentReportView[]).map(
+        compatLemmyCommentReportView,
+      ),
+    };
   }
 }

@@ -21,6 +21,7 @@ import {
   ListingType,
   PostReportView,
   CommentReportView,
+  GetModlog,
 } from "./types";
 import { GetUnreadCountResponse } from "./types/GetUnreadCountResponse";
 import { FederatedInstances } from "./types/FederatedInstances";
@@ -31,7 +32,6 @@ import { GetPersonDetails } from "./types/GetPersonDetails";
 import { GetPersonDetailsResponse } from "./types/GetPersonDetailsResponse";
 import {
   GetCaptchaResponse,
-  GetModlog,
   GetPersonMentions,
   GetSiteMetadataResponse,
 } from "lemmy-js-client";
@@ -42,6 +42,7 @@ import { LoginResponse } from "./types/LoginResponse";
 import { GetModlogResponse } from "./types/GetModlogResponse";
 import { GetReplies } from "./types/GetReplies";
 import { BanFromCommunity } from "./types/BanFromCommunity";
+import { Notification } from "./types/Notification";
 
 export interface ProviderInfo {
   name: "lemmy" | "piefed";
@@ -204,11 +205,7 @@ export abstract class BaseClient {
     payload: GetPersonMentions,
     options?: RequestOptions,
   ): Promise<{
-    notifications: (
-      | CommentReplyView
-      | PersonMentionView
-      | PrivateMessageView
-    )[];
+    notifications: Notification[];
   }>;
 
   abstract getPersonMentions(
@@ -224,7 +221,7 @@ export abstract class BaseClient {
   abstract markPrivateMessageAsRead(
     payload: { private_message_id: number; read: boolean },
     options?: RequestOptions,
-  ): Promise<{ private_message_view: PrivateMessageView }>;
+  ): Promise<void>;
 
   abstract markCommentReplyAsRead(
     payload: { comment_reply_id: number; read: boolean },

@@ -61,10 +61,7 @@ export function compatPiefedCommunity(
 }
 
 export function compatPiefedComment(comment: components["schemas"]["Comment"]) {
-  return {
-    ...comment,
-    content: comment.body,
-  };
+  return comment;
 }
 
 export function compatPiefedCommunityView(

@@ -5,9 +5,8 @@ import {
   BaseClientOptions,
   RequestOptions,
 } from "../../BaseClient";
-import { UnsupportedError } from "../../errors";
+import { InvalidPayloadError, UnsupportedError } from "../../errors";
 import {
-  compatPiefedCommentSortType,
   compatPiefedCommentView,
   compatPiefedCommunity,
   compatPiefedCommunityModeratorView,
@@ -15,7 +14,6 @@ import {
   compatPiefedGetCommunityResponse,
   compatPiefedPerson,
   compatPiefedPersonView,
-  compatPiefedPostSortType,
   compatPiefedPostView,
 } from "./compat";
 import { components, paths } from "./schema";
@@ -73,7 +71,7 @@ export default class PiefedClient implements BaseClient {
 
     return {
       ...response.data!,
-      admins: compatPiefedPersonView(response.data!.admins),
+      admins: response.data!.admins.map(compatPiefedPersonView),
       site_view: {
         site: response.data!.site,
         local_site: {
@@ -148,10 +146,12 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["getPosts"]>[0],
     options?: RequestOptions,
   ) {
-    const query = {
-      ...payload,
-      sort: payload.sort ? compatPiefedPostSortType(payload.sort) : undefined,
-    } satisfies components["schemas"]["GetPosts"];
+    if (payload.mode && payload.mode !== "piefed")
+      throw new InvalidPayloadError(
+        `Connected to piefed, ${payload.mode} is not supported`,
+      );
+
+    const query = payload satisfies components["schemas"]["GetPosts"];
 
     const response = await this.client.GET("/post/list", {
       ...options,
@@ -168,12 +168,12 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["getComments"]>[0],
     options?: RequestOptions,
   ) {
-    const query = {
-      ...payload,
-      sort: payload.sort
-        ? compatPiefedCommentSortType(payload.sort)
-        : undefined,
-    } satisfies components["schemas"]["GetComments"];
+    if (payload.mode && payload.mode !== "piefed")
+      throw new InvalidPayloadError(
+        `Connected to piefed, ${payload.mode} is not supported`,
+      );
+
+    const query = payload satisfies components["schemas"]["GetComments"];
 
     const response = await this.client.GET("/comment/list", {
       ...options,

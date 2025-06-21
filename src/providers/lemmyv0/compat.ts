@@ -6,32 +6,121 @@ import {
   PersonMentionView,
   PostReportView,
   PostView,
+  Community,
+  CommunityVisibility as LemmyCommunityVisibility,
+  CommunityModeratorView,
+  CommunityFollowerView,
+  GetModlogResponse as LemmyGetModlogResponse,
+  PostSortType as LemmyPostSortType,
 } from "lemmy-js-client";
+import { CommunityVisibility } from "../../types/CommunityVisibility";
+import { GetModlogResponse, PostSortType } from "../../types";
+import { UnsupportedError } from "../../errors";
 
 export function compatLemmyCommunityView(communityView: CommunityView) {
-  return communityView;
+  return {
+    ...communityView,
+    community: compatCommunity(communityView.community),
+  };
+}
+
+export function compatCommunity(community: Community) {
+  return {
+    ...community,
+    visibility: compatCommunityVisibility(community.visibility),
+  };
+}
+
+function compatCommunityVisibility(
+  visibility: LemmyCommunityVisibility,
+): CommunityVisibility {
+  return visibility === "LocalOnly" ? "LocalOnlyPublic" : visibility;
 }
 
 export function compatLemmyPostView(post: PostView) {
-  return post;
+  return {
+    ...post,
+    community: compatCommunity(post.community),
+  };
 }
 
 export function compatLemmyCommentView(comment: CommentView) {
-  return comment;
+  return {
+    ...comment,
+    community: compatCommunity(comment.community),
+  };
 }
 
 export function compatLemmyMentionView(personMention: PersonMentionView) {
-  return personMention;
+  return {
+    ...personMention,
+    community: compatCommunity(personMention.community),
+  };
 }
 
 export function compatLemmyReplyView(personMention: CommentReplyView) {
-  return personMention;
+  return {
+    ...personMention,
+    community: compatCommunity(personMention.community),
+  };
 }
 
 export function compatLemmyCommentReportView(commentReport: CommentReportView) {
-  return commentReport;
+  return {
+    ...commentReport,
+    community: compatCommunity(commentReport.community),
+  };
 }
 
 export function compatLemmyPostReportView(postReport: PostReportView) {
-  return postReport;
+  return {
+    ...postReport,
+    community: compatCommunity(postReport.community),
+  };
+}
+
+export function compatLemmyCommunityModeratorView(
+  communityModerator: CommunityModeratorView,
+) {
+  return {
+    ...communityModerator,
+    community: compatCommunity(communityModerator.community),
+  };
+}
+
+export function compatLemmyCommunityFollowerView(
+  communityFollower: CommunityFollowerView,
+) {
+  return {
+    ...communityFollower,
+    community: compatCommunity(communityFollower.community),
+  };
+}
+
+export function compatLemmyModlogView(
+  modlog: LemmyGetModlogResponse[keyof LemmyGetModlogResponse][number],
+): GetModlogResponse["modlog"][number] {
+  if ("community" in modlog) {
+    return {
+      ...modlog,
+      community: compatCommunity(modlog.community),
+    };
+  }
+
+  return modlog;
+}
+
+export function compatLemmyPostSortType(sort: PostSortType): LemmyPostSortType {
+  if (
+    sort === "ControversialHour" ||
+    sort === "ControversialDay" ||
+    sort === "ControversialWeek" ||
+    sort === "ControversialMonth" ||
+    sort === "ControversialYear"
+  )
+    throw new UnsupportedError(`${sort} not supported by Lemmy v0`);
+
+  if (sort === "ControversialAll") return "Controversial";
+
+  return sort;
 }

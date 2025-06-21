@@ -6,7 +6,8 @@ export type GetModlog = {
   community_id?: number;
   page?: number;
   limit?: number;
-  type_?: ModlogActionType;
+  // TODO: Expose this when lemmy v0 is dropped?
+  // type_?: ModlogActionType;
   other_person_id?: number;
   post_id?: number;
   comment_id?: number;

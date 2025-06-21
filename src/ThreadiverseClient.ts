@@ -33,19 +33,19 @@ export default class ThreadiverseClient implements BaseClient {
     this.options = options;
   }
 
-  get name() {
+  get softwareName() {
     if (!this.delegateClient)
       throw new Error(
         "Client not initialized. Wait for getSoftware() or any other async method to resolve first",
       );
 
-    return this.delegateClient.name;
+    return getBaseClientConstructor(this.delegateClient).softwareName;
   }
 
   get software(): ProviderInfo {
     if (
       !this.delegateClient ||
-      !this.delegateClient.name ||
+      !getBaseClientConstructor(this.delegateClient).softwareName ||
       !this.discoveredSoftware
     )
       throw new Error(
@@ -53,7 +53,7 @@ export default class ThreadiverseClient implements BaseClient {
       );
 
     return {
-      name: this.delegateClient.name,
+      name: getBaseClientConstructor(this.delegateClient).softwareName,
       version: this.discoveredSoftware.version,
     };
   }
@@ -64,7 +64,7 @@ export default class ThreadiverseClient implements BaseClient {
     if (!this.discoveredSoftware) throw new Error("Internal error");
 
     return {
-      name: client.name,
+      name: getBaseClientConstructor(client).softwareName,
       version: this.discoveredSoftware.version,
     };
   }
@@ -438,4 +438,27 @@ export default class ThreadiverseClient implements BaseClient {
     const client = await this.ensureClient();
     return client.listCommentReports(...params);
   }
+
+  getQuirks(software: { name: string; version: string }): Quirk[] {
+    if (
+      software.name === "lemmy" &&
+      satisfies(software.version, ">=1.0.0-alpha.5")
+    ) {
+      return ["post-sort-controversial-only-supports-all"];
+    }
+
+    return [];
+  }
+}
+
+type Quirk = PostSortControversialOnlySupportsAll;
+/**
+ * Only Controversial sort ControversialAll is supported by this software.
+ * Time limiting ones are unsupported.
+ */
+type PostSortControversialOnlySupportsAll =
+  "post-sort-controversial-only-supports-all";
+
+function getBaseClientConstructor(client: BaseClient) {
+  return client.constructor as typeof BaseClient;
 }
