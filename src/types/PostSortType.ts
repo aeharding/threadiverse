@@ -5,6 +5,7 @@ export type PostSortType =
   | "Active"
   | "Hot"
   | "New"
+  | "Old"
   | "TopDay"
   | "TopWeek"
   | "TopMonth"

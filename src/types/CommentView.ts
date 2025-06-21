@@ -2,6 +2,7 @@ import { Comment } from "./Comment";
 import { Community } from "./Community";
 import { Person } from "./Person";
 import { Post } from "./Post";
+import { SubscribedType } from "./SubscribedType";
 
 export interface CommentView {
   comment: Comment;
@@ -13,7 +14,7 @@ export interface CommentView {
   banned_from_community: boolean;
   creator_is_moderator: boolean;
   creator_is_admin: boolean;
-  subscribed: boolean;
+  subscribed: SubscribedType;
   saved: boolean;
   my_vote?: number;
 }

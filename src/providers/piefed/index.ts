@@ -24,9 +24,20 @@ import { CommunityView, PostView } from "../../types";
 export default class PiefedClient implements BaseClient {
   name = "piefed" as const;
 
+  private v3CompatClient: ReturnType<typeof createClient>;
   private client: ReturnType<typeof createClient<paths>>;
 
   constructor(url: string, options: BaseClientOptions) {
+    this.v3CompatClient = createClient({
+      baseUrl: `${url}/api/v3`,
+      // TODO: piefed doesn't allow CORS headers other than Authorization
+      headers: options.headers.Authorization
+        ? {
+            Authorization: options.headers.Authorization,
+          }
+        : undefined,
+      fetch: options.fetchFunction,
+    });
     this.client = createClient({
       baseUrl: `${url}/api/alpha`,
       // TODO: piefed doesn't allow CORS headers other than Authorization
@@ -45,31 +56,43 @@ export default class PiefedClient implements BaseClient {
       params: { query: payload },
     });
 
+    // @ts-expect-error TODO: error handling
+    if (!response.data) throw new Error(response.error.error);
+
     return {
       ...response.data,
-      person: response.data!.person
+      person: response.data.person
         ? compatPiefedPersonView(response.data!.person)
         : undefined,
-      comment: response.data!.comment
-        ? compatPiefedCommentView(response.data!.comment)
+      comment: response.data.comment
+        ? compatPiefedCommentView(response.data.comment)
         : undefined,
-      post: response.data!.post
+      post: response.data.post
         ? compatPiefedPostView(response.data!.post)
         : undefined,
-      community: response.data!.community
-        ? compatPiefedCommunityView(response.data!.community)
+      community: response.data.community
+        ? compatPiefedCommunityView(response.data.community)
         : undefined,
     };
   }
 
   async getSite(options?: RequestOptions) {
+    // @ts-expect-error https://codeberg.org/rimu/pyfedi/issues/890
+    const v3Site = await this.v3CompatClient.GET("/site", options);
+    const v3SiteData = await v3Site.data;
     const response = await this.client.GET("/site", options);
 
     return {
       ...response.data!,
+      // @ts-expect-error https://codeberg.org/rimu/pyfedi/issues/890
+      admins: v3SiteData.admins.map(compatPiefedPersonView),
       site_view: {
         site: response.data!.site,
-        local_site: {},
+        local_site: {
+          require_email_verification: false,
+          captcha_enabled: false,
+          registration_mode: response.data!.site.registration_mode!,
+        },
       },
       my_user: response.data!.my_user
         ? {
@@ -277,9 +300,10 @@ export default class PiefedClient implements BaseClient {
   async getFederatedInstances(
     ..._params: Parameters<BaseClient["getFederatedInstances"]>
   ): ReturnType<BaseClient["getFederatedInstances"]> {
-    throw new UnsupportedError(
-      "Get federated instances is not supported by piefed",
-    );
+    // @ts-expect-error TODO: https://codeberg.org/rimu/pyfedi/issues/891
+    const response = await this.v3CompatClient.GET("/federated_instances");
+
+    return response.data!;
   }
 
   async markPostAsRead(..._params: Parameters<BaseClient["markPostAsRead"]>) {
@@ -535,5 +559,191 @@ export default class PiefedClient implements BaseClient {
     ..._params: Parameters<BaseClient["getCaptcha"]>
   ): ReturnType<BaseClient["getCaptcha"]> {
     throw new UnsupportedError("Get captcha is not supported by piefed");
+  }
+
+  async listReports(
+    ..._params: Parameters<BaseClient["listReports"]>
+  ): ReturnType<BaseClient["listReports"]> {
+    throw new UnsupportedError("List reports is not supported by piefed");
+  }
+
+  async getModlog(
+    ..._params: Parameters<BaseClient["getModlog"]>
+  ): ReturnType<BaseClient["getModlog"]> {
+    throw new UnsupportedError("Get modlog is not supported by piefed");
+  }
+
+  async getReplies(
+    ..._params: Parameters<BaseClient["getReplies"]>
+  ): ReturnType<BaseClient["getReplies"]> {
+    throw new UnsupportedError("Get replies is not supported by piefed");
+  }
+
+  async banFromCommunity(
+    payload: Parameters<BaseClient["banFromCommunity"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["banFromCommunity"]> {
+    await this.client.POST("/community/moderate/ban", {
+      ...options,
+      // @ts-expect-error TODO: fix this
+      body: payload,
+    });
+  }
+
+  async saveComment(
+    ..._params: Parameters<BaseClient["saveComment"]>
+  ): ReturnType<BaseClient["saveComment"]> {
+    throw new UnsupportedError("Save comment is not supported by piefed");
+  }
+
+  async distinguishComment(
+    ..._params: Parameters<BaseClient["distinguishComment"]>
+  ): ReturnType<BaseClient["distinguishComment"]> {
+    throw new UnsupportedError(
+      "Distinguish comment is not supported by piefed",
+    );
+  }
+
+  async deleteComment(
+    payload: Parameters<BaseClient["deleteComment"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["deleteComment"]> {
+    const response = await this.client.POST("/comment/delete", {
+      ...options,
+      body: { ...payload },
+    });
+
+    return {
+      comment_view: compatPiefedCommentView(response.data!.comment_view),
+    };
+  }
+
+  async removeComment(
+    payload: Parameters<BaseClient["removeComment"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["removeComment"]> {
+    const response = await this.client.POST("/comment/remove", {
+      ...options,
+      body: { ...payload },
+    });
+
+    return {
+      comment_view: compatPiefedCommentView(response.data!.comment_view),
+    };
+  }
+
+  async followCommunity(
+    payload: Parameters<BaseClient["followCommunity"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["followCommunity"]> {
+    const response = await this.client.POST("/community/follow", {
+      ...options,
+      body: { ...payload },
+    });
+
+    return {
+      community_view: compatPiefedCommunityView(response.data!.community_view),
+    };
+  }
+
+  async blockCommunity(
+    payload: Parameters<BaseClient["blockCommunity"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["blockCommunity"]> {
+    const response = await this.client.POST("/community/block", {
+      ...options,
+      body: { ...payload },
+    });
+
+    return {
+      community_view: compatPiefedCommunityView(response.data!.community_view),
+    };
+  }
+
+  async blockPerson(
+    payload: Parameters<BaseClient["blockPerson"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["blockPerson"]> {
+    const response = await this.client.POST("/user/block", {
+      ...options,
+      body: { ...payload },
+    });
+
+    return {
+      ...response.data!,
+      person_view: compatPiefedPersonView(response.data!.person_view),
+    };
+  }
+
+  async createPostReport(
+    payload: Parameters<BaseClient["createPostReport"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["createPostReport"]> {
+    await this.client.POST("/post/report", {
+      ...options,
+      body: { ...payload },
+    });
+  }
+
+  async createCommentReport(
+    payload: Parameters<BaseClient["createCommentReport"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["createCommentReport"]> {
+    await this.client.POST("/comment/report", {
+      ...options,
+      body: { ...payload },
+    });
+  }
+
+  async createPrivateMessageReport(
+    ..._params: Parameters<BaseClient["createPrivateMessageReport"]>
+  ): ReturnType<BaseClient["createPrivateMessageReport"]> {
+    throw new UnsupportedError(
+      "Create private message report is not supported by piefed",
+    );
+  }
+
+  async getSiteMetadata(
+    ..._params: Parameters<BaseClient["getSiteMetadata"]>
+  ): ReturnType<BaseClient["getSiteMetadata"]> {
+    throw new UnsupportedError("Get site metadata is not supported by piefed");
+  }
+
+  async resolvePostReport(
+    ..._params: Parameters<BaseClient["resolvePostReport"]>
+  ): ReturnType<BaseClient["resolvePostReport"]> {
+    throw new UnsupportedError(
+      "Resolve post report is not supported by piefed",
+    );
+  }
+
+  async resolveCommentReport(
+    ..._params: Parameters<BaseClient["resolveCommentReport"]>
+  ): ReturnType<BaseClient["resolveCommentReport"]> {
+    throw new UnsupportedError(
+      "Resolve comment report is not supported by piefed",
+    );
+  }
+
+  async getRandomCommunity(
+    ..._params: Parameters<BaseClient["getRandomCommunity"]>
+  ): ReturnType<BaseClient["getRandomCommunity"]> {
+    throw new UnsupportedError(
+      "Get random community is not supported by piefed",
+    );
+  }
+
+  async listPostReports(
+    ..._params: Parameters<BaseClient["listPostReports"]>
+  ): ReturnType<BaseClient["listPostReports"]> {
+    throw new UnsupportedError("List post reports is not supported by piefed");
+  }
+
+  async listCommentReports(
+    ..._params: Parameters<BaseClient["listCommentReports"]>
+  ): ReturnType<BaseClient["listCommentReports"]> {
+    throw new UnsupportedError(
+      "List comment reports is not supported by piefed",
+    );
   }
 }

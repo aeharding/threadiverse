@@ -32,7 +32,6 @@ export function compatPiefedPost(post: components["schemas"]["Post"]) {
 export function compatPiefedPostView(post: components["schemas"]["PostView"]) {
   return {
     ...post,
-    subscribed: post.subscribed === "Subscribed",
     community: compatPiefedCommunity(post.community),
     post: compatPiefedPost(post.post),
     creator: compatPiefedPerson(post.creator),
@@ -44,7 +43,6 @@ export function compatPiefedCommentView(
 ) {
   return {
     ...comment,
-    subscribed: comment.subscribed === "Subscribed",
     community: compatPiefedCommunity(comment.community),
     creator: compatPiefedPerson(comment.creator),
     comment: compatPiefedComment(comment.comment),
@@ -74,7 +72,6 @@ export function compatPiefedCommunityView(
 ) {
   return {
     ...community,
-    subscribed: community.subscribed === "Subscribed",
     community: compatPiefedCommunity(community.community),
     counts: {
       subscribers: community.counts.subscriptions_count,

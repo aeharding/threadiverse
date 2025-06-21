@@ -1,4 +1,5 @@
 import { Community, Person, Post } from ".";
+import { SubscribedType } from "./SubscribedType";
 
 export interface PostView {
   post: Post;
@@ -9,7 +10,7 @@ export interface PostView {
   creator_is_moderator: boolean;
   creator_is_admin: boolean;
   counts: PostAggregates;
-  subscribed: boolean;
+  subscribed: SubscribedType;
   saved: boolean;
   read: boolean;
   creator_blocked: boolean;

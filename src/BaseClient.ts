@@ -15,6 +15,12 @@ import {
   PrivateMessageView,
   ResolveObjectResponse,
   GetSiteResponse,
+  ListReports,
+  ListReportsResponse,
+  GetCommunityResponse,
+  ListingType,
+  PostReportView,
+  CommentReportView,
 } from "./types";
 import { GetUnreadCountResponse } from "./types/GetUnreadCountResponse";
 import { FederatedInstances } from "./types/FederatedInstances";
@@ -23,11 +29,19 @@ import { Search } from "./types/Search";
 import { PersonView } from "./types/PersonView";
 import { GetPersonDetails } from "./types/GetPersonDetails";
 import { GetPersonDetailsResponse } from "./types/GetPersonDetailsResponse";
-import { GetCaptchaResponse, GetPersonMentions } from "lemmy-js-client";
+import {
+  GetCaptchaResponse,
+  GetModlog,
+  GetPersonMentions,
+  GetSiteMetadataResponse,
+} from "lemmy-js-client";
 import { GetPrivateMessages } from "./types/GetPrivateMessages";
 import { UploadImageResponse } from "./types/UploadImageResponse";
 import { Register } from "./types/Register";
 import { LoginResponse } from "./types/LoginResponse";
+import { GetModlogResponse } from "./types/GetModlogResponse";
+import { GetReplies } from "./types/GetReplies";
+import { BanFromCommunity } from "./types/BanFromCommunity";
 
 export interface ProviderInfo {
   name: "lemmy" | "piefed";
@@ -57,7 +71,7 @@ export abstract class BaseClient {
   abstract getCommunity(
     payload: GetCommunity,
     options?: RequestOptions,
-  ): Promise<{ community_view: CommunityView }>;
+  ): Promise<GetCommunityResponse>;
 
   abstract getPosts(
     payload: GetPosts,
@@ -206,7 +220,7 @@ export abstract class BaseClient {
   abstract markPrivateMessageAsRead(
     payload: { private_message_id: number; read: boolean },
     options?: RequestOptions,
-  ): Promise<void>;
+  ): Promise<{ private_message_view: PrivateMessageView }>;
 
   abstract markCommentReplyAsRead(
     payload: { comment_reply_id: number; read: boolean },
@@ -246,4 +260,104 @@ export abstract class BaseClient {
   ): Promise<LoginResponse>;
 
   abstract getCaptcha(options?: RequestOptions): Promise<GetCaptchaResponse>;
+
+  abstract listReports(
+    payload: ListReports,
+    options?: RequestOptions,
+  ): Promise<ListReportsResponse>;
+
+  abstract getModlog(
+    payload: GetModlog,
+    options?: RequestOptions,
+  ): Promise<GetModlogResponse>;
+
+  abstract getReplies(
+    payload: GetReplies,
+    options?: RequestOptions,
+  ): Promise<{ replies: CommentReplyView[] }>;
+
+  abstract banFromCommunity(
+    payload: BanFromCommunity,
+    options?: RequestOptions,
+  ): Promise<void>;
+
+  abstract saveComment(
+    payload: { comment_id: number; save: boolean },
+    options?: RequestOptions,
+  ): Promise<{ comment_view: CommentView }>;
+
+  abstract distinguishComment(
+    payload: { comment_id: number; distinguished: boolean },
+    options?: RequestOptions,
+  ): Promise<{ comment_view: CommentView }>;
+
+  abstract deleteComment(
+    payload: { comment_id: number; deleted: boolean },
+    options?: RequestOptions,
+  ): Promise<{ comment_view: CommentView }>;
+
+  abstract removeComment(
+    payload: { comment_id: number; removed: boolean; reason?: string },
+    options?: RequestOptions,
+  ): Promise<{ comment_view: CommentView }>;
+
+  abstract followCommunity(
+    payload: { community_id: number; follow: boolean },
+    options?: RequestOptions,
+  ): Promise<{ community_view: CommunityView }>;
+
+  abstract blockCommunity(
+    payload: { community_id: number; block: boolean },
+    options?: RequestOptions,
+  ): Promise<{ community_view: CommunityView }>;
+
+  abstract blockPerson(
+    payload: { person_id: number; block: boolean },
+    options?: RequestOptions,
+  ): Promise<{ person_view: PersonView }>;
+
+  abstract createPostReport(
+    payload: { post_id: number; reason: string },
+    options?: RequestOptions,
+  ): Promise<void>;
+
+  abstract createCommentReport(
+    payload: { comment_id: number; reason: string },
+    options?: RequestOptions,
+  ): Promise<void>;
+
+  abstract createPrivateMessageReport(
+    payload: { private_message_id: number; reason: string },
+    options?: RequestOptions,
+  ): Promise<void>;
+
+  abstract getSiteMetadata(
+    payload: { url: string },
+    options?: RequestOptions,
+  ): Promise<GetSiteMetadataResponse>;
+
+  abstract resolvePostReport(
+    payload: { report_id: number; resolved: boolean },
+    options?: RequestOptions,
+  ): Promise<void>;
+
+  abstract resolveCommentReport(
+    payload: { report_id: number; resolved: boolean },
+    options?: RequestOptions,
+  ): Promise<void>;
+
+  abstract getRandomCommunity(
+    payload: { type_: ListingType },
+    options?: RequestOptions,
+  ): Promise<{ community_view: CommunityView }>;
+
+  abstract listPostReports(
+    payload: { page: number; limit: number; unresolved_only?: boolean },
+    options?: RequestOptions,
+  ): Promise<{ post_reports: PostReportView[] }>;
+
+  abstract listCommentReports(
+    payload: { page: number; limit: number; unresolved_only?: boolean },
+    options?: RequestOptions,
+  ): Promise<{ comment_reports: CommentReportView[] }>;
 }

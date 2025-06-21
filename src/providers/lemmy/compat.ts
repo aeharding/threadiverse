@@ -1,42 +1,37 @@
 import {
   CommentReplyView,
+  CommentReportView,
   CommentView,
   CommunityView,
   PersonMentionView,
+  PostReportView,
   PostView,
 } from "lemmy-js-client";
 
 export function compatLemmyCommunityView(communityView: CommunityView) {
-  return {
-    ...communityView,
-    subscribed: communityView.subscribed === "Subscribed",
-  };
+  return communityView;
 }
 
 export function compatLemmyPostView(post: PostView) {
-  return {
-    ...post,
-    subscribed: post.subscribed === "Subscribed",
-  };
+  return post;
 }
 
 export function compatLemmyCommentView(comment: CommentView) {
-  return {
-    ...comment,
-    subscribed: comment.subscribed === "Subscribed",
-  };
+  return comment;
 }
 
 export function compatLemmyMentionView(personMention: PersonMentionView) {
-  return {
-    ...personMention,
-    subscribed: personMention.subscribed === "Subscribed",
-  };
+  return personMention;
 }
 
 export function compatLemmyReplyView(personMention: CommentReplyView) {
-  return {
-    ...personMention,
-    subscribed: personMention.subscribed === "Subscribed",
-  };
+  return personMention;
+}
+
+export function compatLemmyCommentReportView(commentReport: CommentReportView) {
+  return commentReport;
+}
+
+export function compatLemmyPostReportView(postReport: PostReportView) {
+  return postReport;
 }

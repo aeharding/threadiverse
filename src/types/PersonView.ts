@@ -6,7 +6,7 @@ export interface PersonView {
   is_admin: boolean;
 }
 
-interface PersonAggregates {
+export interface PersonAggregates {
   post_count: number;
   comment_count: number;
 }
