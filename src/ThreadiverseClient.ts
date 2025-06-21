@@ -438,26 +438,7 @@ export default class ThreadiverseClient implements BaseClient {
     const client = await this.ensureClient();
     return client.listCommentReports(...params);
   }
-
-  getQuirks(software: { name: string; version: string }): Quirk[] {
-    if (
-      software.name === "lemmy" &&
-      satisfies(software.version, ">=1.0.0-alpha.5")
-    ) {
-      return ["post-sort-controversial-only-supports-all"];
-    }
-
-    return [];
-  }
 }
-
-type Quirk = PostSortControversialOnlySupportsAll;
-/**
- * Only Controversial sort ControversialAll is supported by this software.
- * Time limiting ones are unsupported.
- */
-type PostSortControversialOnlySupportsAll =
-  "post-sort-controversial-only-supports-all";
 
 function getBaseClientConstructor(client: BaseClient) {
   return client.constructor as typeof BaseClient;
