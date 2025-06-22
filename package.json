@@ -1,6 +1,6 @@
 {
   "name": "threadiverse",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Unified typescript client for threadiverse instances (Lemmy, Piefed, Mbin etc)",
   "license": "AGPL-3.0-only",
   "author": "Alexander Harding <noreply@harding.dev>",
