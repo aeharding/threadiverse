@@ -5,13 +5,13 @@ import { components } from "../providers/piefed/schema";
 export type PostSortTypeByMode = {
   piefed: {
     mode: "piefed";
-  } & (Pick<components["schemas"]["GetPosts"], "sort"> | object);
+  } & Pick<components["schemas"]["GetPosts"], "sort">;
   lemmyv0: {
     mode: "lemmyv0";
-  } & (Pick<LemmyV0GetPosts, "sort"> | object);
+  } & Pick<LemmyV0GetPosts, "sort">;
   lemmyv1: {
     mode: "lemmyv1";
-  } & (Pick<LemmyV1GetPosts, "sort" | "time_range_seconds"> | object);
+  } & Pick<LemmyV1GetPosts, "sort" | "time_range_seconds">;
 };
 
 export type PostSortType =

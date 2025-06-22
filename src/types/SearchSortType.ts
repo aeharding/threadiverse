@@ -5,13 +5,13 @@ import { components } from "../providers/piefed/schema";
 export type SearchSortTypeByMode = {
   piefed: {
     mode: "piefed";
-  } & (Pick<components["schemas"]["Search"], "sort"> | object);
+  } & Pick<components["schemas"]["Search"], "sort">;
   lemmyv0: {
     mode: "lemmyv0";
-  } & (Pick<LemmyV0Search, "sort"> | object);
+  } & Pick<LemmyV0Search, "sort">;
   lemmyv1: {
     mode: "lemmyv1";
-  } & (Pick<LemmyV1Search, "sort" | "time_range_seconds"> | object);
+  } & Pick<LemmyV1Search, "sort" | "time_range_seconds">;
 };
 
 export type SearchSortType =

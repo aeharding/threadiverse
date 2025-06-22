@@ -5,13 +5,13 @@ import { components } from "../providers/piefed/schema";
 export type CommunitySortTypeByMode = {
   piefed: {
     mode: "piefed";
-  } & (Pick<components["schemas"]["ListCommunities"], "sort"> | object);
+  } & Pick<components["schemas"]["ListCommunities"], "sort">;
   lemmyv0: {
     mode: "lemmyv0";
-  } & (Pick<LemmyV0ListCommunities, "sort"> | object);
+  } & Pick<LemmyV0ListCommunities, "sort">;
   lemmyv1: {
     mode: "lemmyv1";
-  } & (Pick<LemmyV1ListCommunities, "sort" | "time_range_seconds"> | object);
+  } & Pick<LemmyV1ListCommunities, "sort" | "time_range_seconds">;
 };
 
 export type CommunitySortType =
