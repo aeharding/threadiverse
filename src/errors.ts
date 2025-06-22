@@ -25,3 +25,10 @@ export class InvalidPayloadError extends FediverseError {
     this.name = "InvalidPayloadError";
   }
 }
+
+export class UnsupportedSoftwareError extends UnsupportedError {
+  constructor(message: string) {
+    super(message);
+    this.name = "UnsupportedSoftwareError";
+  }
+}

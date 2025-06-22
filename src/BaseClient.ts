@@ -56,8 +56,12 @@ export interface BaseClientOptions {
   headers: Record<string, string>;
 }
 
+export type ThreadiverseMode = "lemmyv0" | "lemmyv1" | "piefed";
+
 // Abstract base class that all providers should extend
 export abstract class BaseClient {
+  static mode: ThreadiverseMode;
+
   static softwareName: "lemmy" | "piefed";
   /**
    * NPM semver range, e.g. ">=1.0.0 <2.0.0"

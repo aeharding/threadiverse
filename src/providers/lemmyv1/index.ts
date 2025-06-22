@@ -31,8 +31,11 @@ import {
 } from "./compat";
 import { InvalidPayloadError, UnsupportedError } from "../../errors";
 import { isPostCommentReport } from "./helpers";
+import { cleanThreadiverseParams } from "../../helpers";
 
 export default class LemmyV1Client implements BaseClient {
+  static mode = "lemmyv1" as const;
+
   static softwareName = "lemmy" as const;
 
   static softwareVersionRange = ">=1.0.0-alpha.5";
@@ -111,7 +114,10 @@ export default class LemmyV1Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const response = await this.client.getPosts(payload, options);
+    const response = await this.client.getPosts(
+      cleanThreadiverseParams(payload),
+      options,
+    );
 
     return {
       ...response,
@@ -271,7 +277,10 @@ export default class LemmyV1Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const response = await this.client.listCommunities(payload, options);
+    const response = await this.client.listCommunities(
+      cleanThreadiverseParams(payload),
+      options,
+    );
 
     return {
       communities: response.communities.map(compatLemmyCommunityView),
@@ -287,7 +296,10 @@ export default class LemmyV1Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const response = await this.client.search(payload, options);
+    const response = await this.client.search(
+      cleanThreadiverseParams(payload),
+      options,
+    );
 
     const compatResponse: Awaited<ReturnType<BaseClient["search"]>> = {
       comments: [],

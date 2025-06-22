@@ -1,10 +1,12 @@
-import { resolveSoftware } from "./wellknown";
+import { satisfies } from "compare-versions";
+
+import { Nodeinfo21Payload, resolveSoftware } from "./wellknown";
+import { BaseClient, BaseClientOptions, ProviderInfo } from "./BaseClient";
 
 import LemmyV0Client from "./providers/lemmyv0";
 import PiefedClient from "./providers/piefed";
-import { BaseClient, BaseClientOptions, ProviderInfo } from "./BaseClient";
-import { satisfies } from "compare-versions";
 import LemmyV1Client from "./providers/lemmyv1";
+import { UnsupportedSoftwareError } from "./errors";
 
 // Global cache for software discovery promises by hostname
 // TODO: some way to reset this for server-side/testing usage
@@ -15,11 +17,6 @@ export function clearCache(): void {
   discoveryCache.clear();
 }
 
-/**
- * Important: First match wins.
- */
-const CLIENTS = [LemmyV1Client, LemmyV0Client, PiefedClient];
-
 export default class ThreadiverseClient implements BaseClient {
   private hostname: string;
   private options: BaseClientOptions;
@@ -27,6 +24,25 @@ export default class ThreadiverseClient implements BaseClient {
     | Awaited<ReturnType<typeof resolveSoftware>>
     | undefined;
   private delegateClient: BaseClient | undefined;
+
+  /**
+   * Important: First match wins.
+   */
+  static get supportedSoftware() {
+    return [LemmyV1Client, LemmyV0Client, PiefedClient] as const;
+  }
+
+  static resolveClient(software: Nodeinfo21Payload["software"]) {
+    for (const Client of ThreadiverseClient.supportedSoftware) {
+      if (
+        Client.softwareName === software.name &&
+        (Client.softwareVersionRange === "*" ||
+          satisfies(software.version, Client.softwareVersionRange))
+      ) {
+        return Client;
+      }
+    }
+  }
 
   constructor(hostname: string, options: BaseClientOptions) {
     this.hostname = hostname;
@@ -76,20 +92,15 @@ export default class ThreadiverseClient implements BaseClient {
     }
 
     const delegateClient = (() => {
-      for (const Client of CLIENTS) {
-        if (
-          Client.softwareName === this.discoveredSoftware.name &&
-          (Client.softwareVersionRange === "*" ||
-            satisfies(
-              this.discoveredSoftware.version,
-              Client.softwareVersionRange,
-            ))
-        ) {
-          return new Client(this.hostname, this.options);
-        }
+      const Client = ThreadiverseClient.resolveClient(this.discoveredSoftware);
+
+      if (!Client) {
+        throw new UnsupportedSoftwareError(
+          `${this.discoveredSoftware.name} v${this.discoveredSoftware.version} is not supported`,
+        );
       }
 
-      throw new Error(`Unsupported software: ${this.discoveredSoftware}`);
+      return new Client(this.hostname, this.options);
     })();
 
     this.delegateClient = delegateClient;
@@ -431,6 +442,6 @@ export default class ThreadiverseClient implements BaseClient {
   }
 }
 
-function getBaseClientConstructor(client: BaseClient) {
+export function getBaseClientConstructor(client: BaseClient) {
   return client.constructor as typeof BaseClient;
 }

@@ -18,8 +18,11 @@ import {
 } from "./compat";
 import { components, paths } from "./schema";
 import { CommunityView, PostView } from "../../types";
+import { cleanThreadiverseParams } from "../../helpers";
 
 export default class PiefedClient implements BaseClient {
+  static mode = "piefed" as const;
+
   static softwareName = "piefed" as const;
 
   // Piefed is not versioned atm
@@ -151,7 +154,9 @@ export default class PiefedClient implements BaseClient {
         `Connected to piefed, ${payload.mode} is not supported`,
       );
 
-    const query = payload satisfies components["schemas"]["GetPosts"];
+    const query = cleanThreadiverseParams(
+      payload,
+    ) satisfies components["schemas"]["GetPosts"];
 
     const response = await this.client.GET("/post/list", {
       ...options,
@@ -173,7 +178,9 @@ export default class PiefedClient implements BaseClient {
         `Connected to piefed, ${payload.mode} is not supported`,
       );
 
-    const query = payload satisfies components["schemas"]["GetComments"];
+    const query = cleanThreadiverseParams(
+      payload,
+    ) satisfies components["schemas"]["GetComments"];
 
     const response = await this.client.GET("/comment/list", {
       ...options,
@@ -330,10 +337,17 @@ export default class PiefedClient implements BaseClient {
   }
 
   async savePost(
-    _payload: Parameters<BaseClient["savePost"]>[0],
-    _options?: RequestOptions,
+    payload: Parameters<BaseClient["savePost"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["savePost"]> {
-    throw new UnsupportedError("Save post is not supported by piefed");
+    const response = await this.client.PUT("/post/save", {
+      ...options,
+      body: { ...payload },
+    });
+
+    return {
+      post_view: compatPiefedPostView(response.data!.post_view),
+    };
   }
 
   async deletePost(

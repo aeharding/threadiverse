@@ -56,6 +56,8 @@ export * from "./BanFromCommunity";
 export * from "./SubscribedType";
 export * from "./Instance";
 export * from "./GetSiteMetadataResponse";
+export * from "./SearchSortType";
+export * from "./CommunitySortType";
 
 // TODO: unified error handling in threadiverse project
 export type { LemmyErrorType } from "lemmy-js-client";

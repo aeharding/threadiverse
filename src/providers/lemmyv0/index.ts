@@ -28,8 +28,11 @@ import {
   getLogDate,
   getPostCommentItemCreatedDate,
 } from "./helpers";
+import { cleanThreadiverseParams } from "../../helpers";
 
 export default class LemmyV0Client implements BaseClient {
+  static mode = "lemmyv0" as const;
+
   static softwareName = "lemmy" as const;
 
   static softwareVersionRange = ">=0.19.5";
@@ -108,9 +111,7 @@ export default class LemmyV0Client implements BaseClient {
       );
 
     const response = await this.client.getPosts(
-      {
-        ...payload,
-      },
+      cleanThreadiverseParams(payload),
       options,
     );
 
@@ -129,7 +130,10 @@ export default class LemmyV0Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const response = await this.client.getComments(payload, options);
+    const response = await this.client.getComments(
+      cleanThreadiverseParams(payload),
+      options,
+    );
 
     return {
       comments: response.comments.map(compatLemmyCommentView),
@@ -261,7 +265,10 @@ export default class LemmyV0Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const response = await this.client.listCommunities(payload, options);
+    const response = await this.client.listCommunities(
+      cleanThreadiverseParams(payload),
+      options,
+    );
 
     return {
       communities: response.communities.map(compatLemmyCommunityView),
@@ -277,7 +284,10 @@ export default class LemmyV0Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const response = await this.client.search(payload, options);
+    const response = await this.client.search(
+      cleanThreadiverseParams(payload),
+      options,
+    );
 
     return {
       ...response,
