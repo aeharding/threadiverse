@@ -443,12 +443,12 @@ export default class LemmyV0Client implements BaseClient {
 
     const fileResponse = response.files?.[0];
 
-    if (!fileResponse) {
+    if (!fileResponse || !response.url) {
       throw new UnexpectedResponseError("Failed to upload image");
     }
 
     return {
-      url: fileResponse.file,
+      url: response.url,
       delete_token: fileResponse.delete_token,
     };
   }
