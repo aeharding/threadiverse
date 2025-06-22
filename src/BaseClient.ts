@@ -211,6 +211,18 @@ export abstract class BaseClient {
     options?: RequestOptions,
   ): Promise<ListPersonContentResponse>;
 
+  abstract listPersonSaved(
+    payload: {
+      /**
+       * Needed for lemmyv0
+       */
+      username: string;
+      page?: number;
+      limit: number;
+    },
+    options?: RequestOptions,
+  ): Promise<{ content: (PostView | CommentView)[]; next_page?: string }>;
+
   abstract getNotifications(
     payload: GetPersonMentions,
     options?: RequestOptions,

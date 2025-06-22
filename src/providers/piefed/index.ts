@@ -497,6 +497,12 @@ export default class PiefedClient implements BaseClient {
     };
   }
 
+  async listPersonSaved(
+    ..._params: Parameters<BaseClient["listPersonSaved"]>
+  ): ReturnType<BaseClient["listPersonSaved"]> {
+    throw new UnsupportedError("List person saved is not supported by piefed");
+  }
+
   async getNotifications(
     ..._params: Parameters<BaseClient["getNotifications"]>
   ): ReturnType<BaseClient["getNotifications"]> {

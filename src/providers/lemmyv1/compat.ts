@@ -1,6 +1,6 @@
 import {
-  CommunityActions,
-  CommunityFollowerState,
+  CommunityActions as LemmyV1CommunityActions,
+  CommunityFollowerState as LemmyV1CommunityFollowerState,
   CommunityModeratorView as LemmyV1CommunityModeratorView,
   CommentReplyView as LemmyV1CommentReplyView,
   CommentReportView as LemmyV1CommentReportView,
@@ -12,12 +12,12 @@ import {
   PostView as LemmyV1PostView,
   Post as LemmyV1Post,
   SiteView as LemmyV1SiteView,
-  PostActions,
+  PostActions as LemmyV1PostActions,
   Person as LemmyV1Person,
   PersonView as LemmyV1PersonView,
   Site as LemmyV1Site,
   Comment as LemmyV1Comment,
-  CommentActions,
+  CommentActions as LemmyV1CommentActions,
   InboxCombinedView as LemmyV1InboxCombinedView,
   PrivateMessageView as LemmyV1PrivateMessageView,
   ModlogCombinedView as LemmyV1ModlogCombinedView,
@@ -116,7 +116,7 @@ export function compatLemmyPostView(postView: LemmyV1PostView): PostView {
 }
 
 function compatPostViewUserActions(
-  postActions: PostActions | undefined,
+  postActions: LemmyV1PostActions | undefined,
   totalComments: number,
 ): Pick<PostView, "saved" | "read" | "unread_comments" | "hidden"> {
   return {
@@ -189,7 +189,7 @@ export function compatLemmyCommentView(
 }
 
 function compatCommentViewActions(
-  commentActions: CommentActions | undefined,
+  commentActions: LemmyV1CommentActions | undefined,
 ): Pick<CommentView, "saved" | "my_vote"> {
   return {
     saved: !!commentActions?.saved_at,
@@ -327,7 +327,7 @@ export function compatLemmyPostReportView(
 }
 
 function compatCommunityViewUserActions(
-  userActions: CommunityActions | undefined,
+  userActions: LemmyV1CommunityActions | undefined,
 ): Pick<CommunityView, "blocked" | "subscribed"> {
   return {
     blocked: !!userActions?.blocked_at,
@@ -336,7 +336,7 @@ function compatCommunityViewUserActions(
 }
 
 function compatFollowState(
-  followState: CommunityFollowerState | undefined,
+  followState: LemmyV1CommunityFollowerState | undefined,
 ): SubscribedType {
   switch (followState) {
     case undefined:

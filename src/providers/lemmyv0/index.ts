@@ -332,6 +332,20 @@ export default class LemmyV0Client implements BaseClient {
     };
   }
 
+  async listPersonSaved(
+    payload: Parameters<BaseClient["listPersonSaved"]>[0],
+    options?: RequestOptions,
+  ) {
+    return this.listPersonContent(
+      {
+        ...payload,
+        // @ts-expect-error Dogfood the api
+        saved_only: true,
+      },
+      options,
+    );
+  }
+
   async getNotifications(
     ...params: Parameters<BaseClient["getNotifications"]>
   ) {

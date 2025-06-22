@@ -341,6 +341,21 @@ export default class LemmyV1Client implements BaseClient {
     };
   }
 
+  async listPersonSaved(
+    payload: Parameters<BaseClient["listPersonSaved"]>[0],
+    options?: RequestOptions,
+  ) {
+    const response = await this.client.listPersonSaved(payload, options);
+
+    return {
+      ...response,
+      content: response.saved.map((item) => {
+        if (item.type_ === "Comment") return compatLemmyCommentView(item);
+        return compatLemmyPostView(item);
+      }),
+    };
+  }
+
   async listPersonContent(
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions,
