@@ -3,7 +3,7 @@ import { CommunityFollowerView } from "./CommunityFollowerView";
 import { CommunityModeratorView } from "./CommunityModeratorView";
 import { Instance } from "./Instance";
 import { Person } from "./Person";
-import { PersonView } from "./PersonView";
+import { PersonAggregates, PersonView } from "./PersonView";
 import { RegistrationMode } from "./RegistrationMode";
 import { SiteAggregates } from "./SiteAggregates";
 
@@ -14,6 +14,7 @@ export interface GetSiteResponse {
   my_user?: {
     local_user_view: {
       person: Person;
+      counts: PersonAggregates;
       local_user: {
         admin: boolean;
         show_nsfw: boolean;

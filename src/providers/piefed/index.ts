@@ -17,8 +17,14 @@ import {
   compatPiefedPostView,
 } from "./compat";
 import { components, paths } from "./schema";
-import { CommunityView, PostView } from "../../types";
+import {
+  CommunityView,
+  ListPersonContent,
+  ListPersonContentResponse,
+  PostView,
+} from "../../types";
 import { cleanThreadiverseParams } from "../../helpers";
+import { getPostCommentItemCreatedDate } from "../lemmyv0/helpers";
 
 export default class PiefedClient implements BaseClient {
   static mode = "piefed" as const;
@@ -87,6 +93,7 @@ export default class PiefedClient implements BaseClient {
         ? {
             ...response.data!.my_user,
             local_user_view: {
+              ...response.data!.my_user.local_user_view,
               person: compatPiefedPerson(
                 response.data!.my_user.local_user_view.person,
               ),
@@ -456,10 +463,36 @@ export default class PiefedClient implements BaseClient {
     return {
       ...response.data!,
       person_view: compatPiefedPersonView(response.data!.person_view),
-      comments: response.data!.comments.map(compatPiefedCommentView),
-      posts: response.data!.posts.map(compatPiefedPostView),
       moderates: response.data!.moderates.map(
         compatPiefedCommunityModeratorView,
+      ),
+    };
+  }
+
+  async listPersonContent(
+    payload: ListPersonContent,
+    options?: RequestOptions,
+  ): Promise<ListPersonContentResponse> {
+    const [postsResponse, commentsResponse] = await Promise.all([
+      this.client.GET("/post/list", {
+        ...options,
+        // @ts-expect-error TODO: fix this
+        params: { query: payload },
+      }),
+      this.client.GET("/comment/list", {
+        ...options,
+        // @ts-expect-error TODO: fix this
+        params: { query: payload },
+      }),
+    ]);
+
+    return {
+      content: [
+        ...postsResponse.data!.posts.map(compatPiefedPostView),
+        ...commentsResponse.data!.comments.map(compatPiefedCommentView),
+      ].sort(
+        (a, b) =>
+          getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a),
       ),
     };
   }

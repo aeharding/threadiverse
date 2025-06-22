@@ -298,15 +298,37 @@ export default class LemmyV0Client implements BaseClient {
   }
 
   async getPersonDetails(
-    ...params: Parameters<BaseClient["getPersonDetails"]>
+    payload: Parameters<BaseClient["getPersonDetails"]>[0],
+    options?: RequestOptions,
   ) {
-    const response = await this.client.getPersonDetails(...params);
+    const response = await this.client.getPersonDetails(
+      {
+        ...payload,
+        limit: 1, // Lemmy melts down if limit is 0
+      },
+      options,
+    );
 
     return {
       ...response,
-      comments: response.comments.map(compatLemmyCommentView),
-      posts: response.posts.map(compatLemmyPostView),
       moderates: response.moderates.map(compatLemmyCommunityModeratorView),
+    };
+  }
+
+  async listPersonContent(
+    payload: Parameters<BaseClient["listPersonContent"]>[0],
+    options?: RequestOptions,
+  ) {
+    const response = await this.client.getPersonDetails(payload, options);
+
+    return {
+      content: [
+        ...response.posts.map(compatLemmyPostView),
+        ...response.comments.map(compatLemmyCommentView),
+      ].sort(
+        (a, b) =>
+          getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a),
+      ),
     };
   }
 

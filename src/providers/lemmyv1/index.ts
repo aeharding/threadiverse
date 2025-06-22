@@ -332,14 +332,26 @@ export default class LemmyV1Client implements BaseClient {
   ) {
     const response = await this.client.getPersonDetails(...params);
 
-    // TODO: listPersonContent
-
     return {
       ...response,
       person_view: compatLemmyPersonView(response.person_view),
       moderates: response.moderates.map(compatLemmyCommunityModeratorView),
       comments: [],
       posts: [],
+    };
+  }
+
+  async listPersonContent(
+    payload: Parameters<BaseClient["listPersonContent"]>[0],
+    options?: RequestOptions,
+  ) {
+    const response = await this.client.listPersonContent(payload, options);
+
+    return {
+      content: response.content.map((item) => {
+        if (item.type_ === "Comment") return compatLemmyCommentView(item);
+        return compatLemmyPostView(item);
+      }),
     };
   }
 

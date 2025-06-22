@@ -1,4 +1,4 @@
-import { PostReportView } from "../../types";
+import { CommentView, PostReportView, PostView } from "../../types";
 import { CommentReplyView } from "../../types/CommentReplyView";
 import { CommentReportView } from "../../types/CommentReportView";
 import { GetModlogResponse } from "../../types/GetModlogResponse";
@@ -20,7 +20,7 @@ export function getInboxItemPublished(
 }
 
 export function getPostCommentItemCreatedDate(
-  item: PostReportView | CommentReportView,
+  item: PostReportView | CommentReportView | PostView | CommentView,
 ): number {
   if ("comment" in item) return Date.parse(item.comment.published);
   return Date.parse(item.post.published);

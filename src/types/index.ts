@@ -32,7 +32,6 @@ export * from "./GetUnreadCountResponse";
 export * from "./FederatedInstances";
 export * from "./InstanceWithFederationState";
 export * from "./ReadableFederationState";
-export * from "./GetPersonDetails";
 export * from "./GetPersonDetailsResponse";
 export * from "./ListCommunities";
 export * from "./Search";
@@ -58,6 +57,8 @@ export * from "./Instance";
 export * from "./GetSiteMetadataResponse";
 export * from "./SearchSortType";
 export * from "./CommunitySortType";
+export * from "./ListPersonContent";
+export * from "./ListPersonContentResponse";
 
 // TODO: unified error handling in threadiverse project
 export type { LemmyErrorType } from "lemmy-js-client";

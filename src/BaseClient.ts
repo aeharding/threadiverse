@@ -28,7 +28,6 @@ import { FederatedInstances } from "./types/FederatedInstances";
 import { ListCommunities } from "./types/ListCommunities";
 import { Search } from "./types/Search";
 import { PersonView } from "./types/PersonView";
-import { GetPersonDetails } from "./types/GetPersonDetails";
 import { GetPersonDetailsResponse } from "./types/GetPersonDetailsResponse";
 import {
   GetCaptchaResponse,
@@ -43,6 +42,8 @@ import { GetModlogResponse } from "./types/GetModlogResponse";
 import { GetReplies } from "./types/GetReplies";
 import { BanFromCommunity } from "./types/BanFromCommunity";
 import { Notification } from "./types/Notification";
+import { ListPersonContent } from "./types/ListPersonContent";
+import { ListPersonContentResponse } from "./types/ListPersonContentResponse";
 
 export interface ProviderInfo {
   name: "lemmy" | "piefed";
@@ -201,9 +202,14 @@ export abstract class BaseClient {
   }>;
 
   abstract getPersonDetails(
-    payload: GetPersonDetails,
+    payload: { person_id: number } | { username: string },
     options?: RequestOptions,
   ): Promise<GetPersonDetailsResponse>;
+
+  abstract listPersonContent(
+    payload: ListPersonContent,
+    options?: RequestOptions,
+  ): Promise<ListPersonContentResponse>;
 
   abstract getNotifications(
     payload: GetPersonMentions,
