@@ -6,7 +6,7 @@ import {
   RequestOptions,
 } from "../../BaseClient";
 import {
-  compatCommunity,
+  compatBlocks,
   compatLemmyCommentReportView,
   compatLemmyCommentView,
   compatLemmyCommunityFollowerView,
@@ -70,8 +70,7 @@ export default class LemmyV0Client implements BaseClient {
             moderates: site.my_user.moderates.map(
               compatLemmyCommunityModeratorView,
             ),
-            community_blocks:
-              site.my_user.community_blocks.map(compatCommunity),
+            ...compatBlocks(site.my_user),
           }
         : undefined,
     };

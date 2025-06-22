@@ -11,21 +11,23 @@ export interface GetSiteResponse {
   version: string;
   admins: PersonView[];
   site_view: SiteView;
-  my_user?: {
-    local_user_view: {
-      person: Person;
-      counts: PersonAggregates;
-      local_user: {
-        admin: boolean;
-        show_nsfw: boolean;
-      };
+  my_user?: MyUserInfo;
+}
+
+export interface MyUserInfo {
+  local_user_view: {
+    person: Person;
+    counts: PersonAggregates;
+    local_user: {
+      admin: boolean;
+      show_nsfw: boolean;
     };
-    follows: CommunityFollowerView[];
-    moderates: CommunityModeratorView[];
-    community_blocks: Community[];
-    instance_blocks: Instance[];
-    person_blocks: Person[];
   };
+  follows: CommunityFollowerView[];
+  moderates: CommunityModeratorView[];
+  community_blocks: Community[];
+  instance_blocks: Instance[];
+  person_blocks: Person[];
 }
 
 export interface SiteView {
