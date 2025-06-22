@@ -108,6 +108,11 @@ export default class ThreadiverseClient implements BaseClient {
     return delegateClient;
   }
 
+  async getMode() {
+    const client = await this.ensureClient();
+    return getBaseClientConstructor(client).mode;
+  }
+
   async resolveObject(...params: Parameters<BaseClient["resolveObject"]>) {
     const client = await this.ensureClient();
     return client.resolveObject(...params);
