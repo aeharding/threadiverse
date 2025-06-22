@@ -473,28 +473,52 @@ export default class PiefedClient implements BaseClient {
     payload: ListPersonContent,
     options?: RequestOptions,
   ): Promise<ListPersonContentResponse> {
-    const [postsResponse, commentsResponse] = await Promise.all([
-      this.client.GET("/post/list", {
-        ...options,
-        // @ts-expect-error TODO: fix this
-        params: { query: payload },
-      }),
-      this.client.GET("/comment/list", {
-        ...options,
-        // @ts-expect-error TODO: fix this
-        params: { query: payload },
-      }),
-    ]);
+    switch (payload.type) {
+      case "All":
+      case undefined:
+        return {
+          content: await Promise.all([
+            this.listPersonPosts(payload, options),
+            this.listPersonComments(payload, options),
+          ]).then(([posts, comments]) =>
+            [...posts, ...comments].sort(
+              (a, b) =>
+                getPostCommentItemCreatedDate(b) -
+                getPostCommentItemCreatedDate(a),
+            ),
+          ),
+        };
+      case "Comments":
+        return { content: await this.listPersonComments(payload, options) };
+      case "Posts":
+        return { content: await this.listPersonPosts(payload, options) };
+    }
+  }
 
-    return {
-      content: [
-        ...postsResponse.data!.posts.map(compatPiefedPostView),
-        ...commentsResponse.data!.comments.map(compatPiefedCommentView),
-      ].sort(
-        (a, b) =>
-          getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a),
-      ),
-    };
+  private async listPersonPosts(
+    payload: Parameters<BaseClient["listPersonContent"]>[0],
+    options?: RequestOptions,
+  ) {
+    const response = await this.client.GET("/post/list", {
+      ...options,
+      // @ts-expect-error TODO: fix this
+      params: { query: payload },
+    });
+
+    return response.data!.posts.map(compatPiefedPostView);
+  }
+
+  private async listPersonComments(
+    payload: Parameters<BaseClient["listPersonContent"]>[0],
+    options?: RequestOptions,
+  ) {
+    const response = await this.client.GET("/comment/list", {
+      ...options,
+      // @ts-expect-error TODO: fix this
+      params: { query: payload },
+    });
+
+    return response.data!.comments.map(compatPiefedCommentView);
   }
 
   async listPersonSaved(

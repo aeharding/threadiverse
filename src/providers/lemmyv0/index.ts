@@ -321,15 +321,24 @@ export default class LemmyV0Client implements BaseClient {
   ) {
     const response = await this.client.getPersonDetails(payload, options);
 
-    return {
-      content: [
-        ...response.posts.map(compatLemmyPostView),
-        ...response.comments.map(compatLemmyCommentView),
-      ].sort(
-        (a, b) =>
-          getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a),
-      ),
-    };
+    switch (payload.type) {
+      case "All":
+      case undefined:
+        return {
+          content: [
+            ...response.posts.map(compatLemmyPostView),
+            ...response.comments.map(compatLemmyCommentView),
+          ].sort(
+            (a, b) =>
+              getPostCommentItemCreatedDate(b) -
+              getPostCommentItemCreatedDate(a),
+          ),
+        };
+      case "Comments":
+        return { content: response.comments.map(compatLemmyCommentView) };
+      case "Posts":
+        return { content: response.posts.map(compatLemmyPostView) };
+    }
   }
 
   async listPersonSaved(
