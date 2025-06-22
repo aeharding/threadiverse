@@ -1,5 +1,3 @@
-import { CommentSortType, PostSortType } from "../../types";
-
 import { components } from "./schema";
 
 export function compatPiefedPerson(person: components["schemas"]["Person"]) {
@@ -61,10 +59,7 @@ export function compatPiefedCommunity(
 }
 
 export function compatPiefedComment(comment: components["schemas"]["Comment"]) {
-  return {
-    ...comment,
-    content: comment.body,
-  };
+  return comment;
 }
 
 export function compatPiefedCommunityView(
@@ -98,32 +93,4 @@ export function compatPiefedCommunityModeratorView(
     community: compatPiefedCommunity(view.community),
     moderator: compatPiefedPerson(view.moderator),
   };
-}
-
-export function compatPiefedPostSortType(sort: PostSortType) {
-  if (
-    [
-      "Active",
-      "Hot",
-      "New",
-      "TopHour",
-      "TopSixHour",
-      "TopTwelveHour",
-      "TopDay",
-      "TopWeek",
-      "TopMonth",
-      "Scaled",
-    ].includes(sort)
-  ) {
-    return sort as components["schemas"]["SortType"];
-  }
-
-  throw new Error(`Unsupported sort type: ${sort}`);
-}
-
-export function compatPiefedCommentSortType(sort: CommentSortType) {
-  if (sort === "Controversial")
-    throw new Error("Controversial is not supported");
-
-  return sort;
 }

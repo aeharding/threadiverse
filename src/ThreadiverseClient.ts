@@ -1,8 +1,12 @@
-import { resolveSoftware } from "./wellknown";
+import { satisfies } from "compare-versions";
 
-import LemmyClient from "./providers/lemmy";
-import PiefedClient from "./providers/piefed";
+import { Nodeinfo21Payload, resolveSoftware } from "./wellknown";
 import { BaseClient, BaseClientOptions, ProviderInfo } from "./BaseClient";
+
+import LemmyV0Client from "./providers/lemmyv0";
+import PiefedClient from "./providers/piefed";
+import LemmyV1Client from "./providers/lemmyv1";
+import { UnsupportedSoftwareError } from "./errors";
 
 // Global cache for software discovery promises by hostname
 // TODO: some way to reset this for server-side/testing usage
@@ -21,24 +25,34 @@ export default class ThreadiverseClient implements BaseClient {
     | undefined;
   private delegateClient: BaseClient | undefined;
 
+  /**
+   * Important: First match wins.
+   */
+  static get supportedSoftware() {
+    return [LemmyV1Client, LemmyV0Client, PiefedClient] as const;
+  }
+
+  static resolveClient(software: Nodeinfo21Payload["software"]) {
+    for (const Client of ThreadiverseClient.supportedSoftware) {
+      if (
+        Client.softwareName === software.name &&
+        (Client.softwareVersionRange === "*" ||
+          satisfies(software.version, Client.softwareVersionRange))
+      ) {
+        return Client;
+      }
+    }
+  }
+
   constructor(hostname: string, options: BaseClientOptions) {
     this.hostname = hostname;
     this.options = options;
   }
 
-  get name() {
-    if (!this.delegateClient)
-      throw new Error(
-        "Client not initialized. Wait for getSoftware() or any other async method to resolve first",
-      );
-
-    return this.delegateClient.name;
-  }
-
   get software(): ProviderInfo {
     if (
       !this.delegateClient ||
-      !this.delegateClient.name ||
+      !getBaseClientConstructor(this.delegateClient).softwareName ||
       !this.discoveredSoftware
     )
       throw new Error(
@@ -46,7 +60,7 @@ export default class ThreadiverseClient implements BaseClient {
       );
 
     return {
-      name: this.delegateClient.name,
+      name: getBaseClientConstructor(this.delegateClient).softwareName,
       version: this.discoveredSoftware.version,
     };
   }
@@ -57,7 +71,7 @@ export default class ThreadiverseClient implements BaseClient {
     if (!this.discoveredSoftware) throw new Error("Internal error");
 
     return {
-      name: client.name,
+      name: getBaseClientConstructor(client).softwareName,
       version: this.discoveredSoftware.version,
     };
   }
@@ -77,19 +91,21 @@ export default class ThreadiverseClient implements BaseClient {
       this.discoveredSoftware = await discoveryCache.get(this.hostname)!;
     }
 
-    // Create the appropriate client based on discovered software
-    switch (this.discoveredSoftware.name) {
-      case "lemmy":
-        this.delegateClient = new LemmyClient(this.hostname, this.options);
-        break;
-      case "piefed":
-        this.delegateClient = new PiefedClient(this.hostname, this.options);
-        break;
-      default:
-        throw new Error(`Unsupported software: ${this.discoveredSoftware}`);
-    }
+    const delegateClient = (() => {
+      const Client = ThreadiverseClient.resolveClient(this.discoveredSoftware);
 
-    return this.delegateClient;
+      if (!Client) {
+        throw new UnsupportedSoftwareError(
+          `${this.discoveredSoftware.name} v${this.discoveredSoftware.version} is not supported`,
+        );
+      }
+
+      return new Client(this.hostname, this.options);
+    })();
+
+    this.delegateClient = delegateClient;
+
+    return delegateClient;
   }
 
   async resolveObject(...params: Parameters<BaseClient["resolveObject"]>) {
@@ -226,6 +242,13 @@ export default class ThreadiverseClient implements BaseClient {
   ) {
     const client = await this.ensureClient();
     return client.getPersonDetails(...params);
+  }
+
+  async listPersonContent(
+    ...params: Parameters<BaseClient["listPersonContent"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.listPersonContent(...params);
   }
 
   async getNotifications(
@@ -424,4 +447,13 @@ export default class ThreadiverseClient implements BaseClient {
     const client = await this.ensureClient();
     return client.listCommentReports(...params);
   }
+
+  async listPersonSaved(...params: Parameters<BaseClient["listPersonSaved"]>) {
+    const client = await this.ensureClient();
+    return client.listPersonSaved(...params);
+  }
+}
+
+export function getBaseClientConstructor(client: BaseClient) {
+  return client.constructor as typeof BaseClient;
 }

@@ -18,3 +18,17 @@ export class UnexpectedResponseError extends FediverseError {
     this.name = "UnexpectedResponseError";
   }
 }
+
+export class InvalidPayloadError extends FediverseError {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidPayloadError";
+  }
+}
+
+export class UnsupportedSoftwareError extends UnsupportedError {
+  constructor(message: string) {
+    super(message);
+    this.name = "UnsupportedSoftwareError";
+  }
+}

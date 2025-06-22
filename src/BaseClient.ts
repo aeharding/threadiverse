@@ -21,17 +21,16 @@ import {
   ListingType,
   PostReportView,
   CommentReportView,
+  GetModlog,
 } from "./types";
 import { GetUnreadCountResponse } from "./types/GetUnreadCountResponse";
 import { FederatedInstances } from "./types/FederatedInstances";
 import { ListCommunities } from "./types/ListCommunities";
 import { Search } from "./types/Search";
 import { PersonView } from "./types/PersonView";
-import { GetPersonDetails } from "./types/GetPersonDetails";
 import { GetPersonDetailsResponse } from "./types/GetPersonDetailsResponse";
 import {
   GetCaptchaResponse,
-  GetModlog,
   GetPersonMentions,
   GetSiteMetadataResponse,
 } from "lemmy-js-client";
@@ -42,6 +41,9 @@ import { LoginResponse } from "./types/LoginResponse";
 import { GetModlogResponse } from "./types/GetModlogResponse";
 import { GetReplies } from "./types/GetReplies";
 import { BanFromCommunity } from "./types/BanFromCommunity";
+import { Notification } from "./types/Notification";
+import { ListPersonContent } from "./types/ListPersonContent";
+import { ListPersonContentResponse } from "./types/ListPersonContentResponse";
 
 export interface ProviderInfo {
   name: "lemmy" | "piefed";
@@ -55,9 +57,17 @@ export interface BaseClientOptions {
   headers: Record<string, string>;
 }
 
+export type ThreadiverseMode = "lemmyv0" | "lemmyv1" | "piefed";
+
 // Abstract base class that all providers should extend
 export abstract class BaseClient {
-  public abstract name: "lemmy" | "piefed";
+  static mode: ThreadiverseMode;
+
+  static softwareName: "lemmy" | "piefed";
+  /**
+   * NPM semver range, e.g. ">=1.0.0 <2.0.0"
+   */
+  static softwareVersionRange: string;
 
   abstract resolveObject(
     payload: {
@@ -192,19 +202,32 @@ export abstract class BaseClient {
   }>;
 
   abstract getPersonDetails(
-    payload: GetPersonDetails,
+    payload: { person_id: number } | { username: string },
     options?: RequestOptions,
   ): Promise<GetPersonDetailsResponse>;
+
+  abstract listPersonContent(
+    payload: ListPersonContent,
+    options?: RequestOptions,
+  ): Promise<ListPersonContentResponse>;
+
+  abstract listPersonSaved(
+    payload: {
+      /**
+       * Needed for lemmyv0
+       */
+      username: string;
+      page?: number;
+      limit: number;
+    },
+    options?: RequestOptions,
+  ): Promise<{ content: (PostView | CommentView)[]; next_page?: string }>;
 
   abstract getNotifications(
     payload: GetPersonMentions,
     options?: RequestOptions,
   ): Promise<{
-    notifications: (
-      | CommentReplyView
-      | PersonMentionView
-      | PrivateMessageView
-    )[];
+    notifications: Notification[];
   }>;
 
   abstract getPersonMentions(
@@ -220,7 +243,7 @@ export abstract class BaseClient {
   abstract markPrivateMessageAsRead(
     payload: { private_message_id: number; read: boolean },
     options?: RequestOptions,
-  ): Promise<{ private_message_view: PrivateMessageView }>;
+  ): Promise<void>;
 
   abstract markCommentReplyAsRead(
     payload: { comment_reply_id: number; read: boolean },

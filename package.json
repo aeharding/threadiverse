@@ -43,7 +43,9 @@
     "release": "pnpm test && pnpm publish"
   },
   "dependencies": {
+    "compare-versions": "^6.1.1",
     "lemmy-js-client": "0.20.0-alpha.18",
+    "lemmy-js-client-v1": "npm:lemmy-js-client@1.0.0-dont-return-actions.1",
     "openapi-fetch": "^0.14.0"
   },
   "devDependencies": {

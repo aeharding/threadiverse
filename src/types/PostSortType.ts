@@ -1,23 +1,21 @@
-/**
- * The post sort types. See here for descriptions: https://join-lemmy.org/docs/en/users/03-votes-and-ranking.html
- */
+import { GetPosts as LemmyV0GetPosts } from "lemmy-js-client";
+import { GetPosts as LemmyV1GetPosts } from "lemmy-js-client-v1";
+import { components } from "../providers/piefed/schema";
+
+export type PostSortTypeByMode = {
+  piefed: {
+    mode: "piefed";
+  } & Pick<components["schemas"]["GetPosts"], "sort">;
+  lemmyv0: {
+    mode: "lemmyv0";
+  } & Pick<LemmyV0GetPosts, "sort">;
+  lemmyv1: {
+    mode: "lemmyv1";
+  } & Pick<LemmyV1GetPosts, "sort" | "time_range_seconds">;
+};
+
 export type PostSortType =
-  | "Active"
-  | "Hot"
-  | "New"
-  | "Old"
-  | "TopDay"
-  | "TopWeek"
-  | "TopMonth"
-  | "TopYear"
-  | "TopAll"
-  | "MostComments"
-  | "NewComments"
-  | "TopHour"
-  | "TopSixHour"
-  | "TopTwelveHour"
-  | "TopThreeMonths"
-  | "TopSixMonths"
-  | "TopNineMonths"
-  | "Controversial"
-  | "Scaled";
+  | PostSortTypeByMode[keyof PostSortTypeByMode]
+  | {
+      mode?: undefined;
+    };
