@@ -15,7 +15,6 @@ export interface PersonMentionView {
   creator: Person;
   post: Post;
   community: Community;
-  recipient: Person;
   counts: CommentAggregates;
   creator_banned_from_community: boolean;
   banned_from_community: boolean;

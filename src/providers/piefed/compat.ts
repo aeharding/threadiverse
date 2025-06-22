@@ -1,3 +1,4 @@
+import { Notification } from "../../types/Notification";
 import { components } from "./schema";
 
 export function compatPiefedPerson(person: components["schemas"]["Person"]) {
@@ -93,4 +94,284 @@ export function compatPiefedCommunityModeratorView(
     community: compatPiefedCommunity(view.community),
     moderator: compatPiefedPerson(view.moderator),
   };
+}
+
+export function compatPiefedNotification(
+  view:
+    | components["schemas"]["NotificationsItemUserView"]
+    | components["schemas"]["NotificationsItemCommunityView"]
+    | components["schemas"]["NotificationsItemTopicView"]
+    | components["schemas"]["NotificationsItemPostView"]
+    | components["schemas"]["NotificationsItemReplyView"]
+    | components["schemas"]["NotificationsItemFeedView"]
+    | components["schemas"]["NotificationsItemPostMentionView"]
+    | components["schemas"]["NotificationsItemCommentMentionView"],
+): Notification | undefined {
+  switch (view.notif_type) {
+    // case 0:
+    //   // NotificationsItemUserView - new post from followed user
+    //   return {
+    //     ...view,
+    //     creator: view.creator ? compatPiefedPerson(view.creator) : undefined,
+    //     post: (view as components["schemas"]["NotificationsItemUserView"]).post
+    //       ? compatPiefedPostView(
+    //           (view as components["schemas"]["NotificationsItemUserView"])
+    //             .post!,
+    //         )
+    //       : undefined,
+    //   };
+
+    // case 1: {
+    //   // NotificationsItemCommunityView - new post in followed community
+    //   const communityView =
+    //     view as components["schemas"]["NotificationsItemCommunityView"];
+    //   return {
+    //     ...view,
+    //     author: view.author ? compatPiefedPerson(view.author) : undefined,
+    //     post: communityView.post
+    //       ? compatPiefedPostView(communityView.post)
+    //       : undefined,
+    //     community: communityView.community
+    //       ? compatPiefedCommunityView(communityView.community)
+    //       : undefined,
+    //   };
+    // }
+
+    // case 2:
+    //   // NotificationsItemTopicView - new post in followed topic
+    //   return {
+    //     ...view,
+    //     author: view.author ? compatPiefedPerson(view.author) : undefined,
+    //     post: (view as components["schemas"]["NotificationsItemTopicView"]).post
+    //       ? compatPiefedPostView(
+    //           (view as components["schemas"]["NotificationsItemTopicView"])
+    //             .post!,
+    //         )
+    //       : undefined,
+    //   };
+
+    case 3: {
+      // NotificationsItemPostView - top level comment on followed post
+      const postView =
+        view as components["schemas"]["NotificationsItemPostView"];
+      if (
+        !postView.post ||
+        !postView.comment ||
+        !view.author ||
+        !view.notif_id
+      ) {
+        return undefined;
+      }
+
+      // This maps to a PersonMentionView since it's a comment notification
+      return {
+        person_mention: {
+          id: view.notif_id,
+          recipient_id: 0, // TODO don't expose this in threadiverse
+          comment_id: postView.comment.id,
+          read: false,
+          published: postView.comment.published,
+        },
+        comment: compatPiefedComment(postView.comment),
+        creator: compatPiefedPerson(view.author),
+        post: compatPiefedPost(postView.post.post),
+        community: compatPiefedCommunity(postView.post.community),
+        counts: {
+          comment_id: postView.comment.id,
+          score: 0,
+          upvotes: 0,
+          downvotes: 0,
+          published: postView.comment.published,
+          child_count: 0,
+        },
+        creator_banned_from_community: false,
+        banned_from_community: false,
+        creator_is_moderator: false,
+        creator_is_admin: false,
+        subscribed: "NotSubscribed" as const,
+        saved: false,
+        creator_blocked: false,
+      };
+    }
+
+    case 4: {
+      // NotificationsItemReplyView - new reply on followed comment
+      const notif = view as components["schemas"]["NotificationsItemReplyView"];
+      if (!notif.post || !notif.comment || !view.author || !view.notif_id) {
+        return undefined;
+      }
+
+      // This maps to a CommentReplyView
+      return {
+        comment_reply: {
+          id: view.notif_id,
+          recipient_id: 0, // TODO don't expose this in threadiverse
+          comment_id: notif.comment.id,
+          read: false,
+          published: notif.comment.published,
+        },
+        comment: compatPiefedComment(notif.comment),
+        creator: compatPiefedPerson(view.author),
+        post: compatPiefedPost(notif.post.post),
+        community: compatPiefedCommunity(notif.post.community),
+        counts: {
+          comment_id: notif.comment.id,
+          score: 0,
+          upvotes: 0,
+          downvotes: 0,
+          published: notif.comment.published,
+          child_count: 0,
+        },
+        creator_banned_from_community: notif.post.creator_banned_from_community,
+        banned_from_community: notif.post.banned_from_community,
+        creator_is_moderator: notif.post.creator_is_moderator,
+        creator_is_admin: notif.post.creator_is_admin,
+        subscribed: notif.post.subscribed,
+        saved: false, // Whether the comment is saved is not exposed
+        creator_blocked: notif.post.creator_blocked,
+      };
+    }
+
+    // case 5:
+    //   // NotificationsItemFeedView - new post in followed feed
+    //   return {
+    //     ...view,
+    //     author: view.author ? compatPiefedPerson(view.author) : undefined,
+    //     post: (view as components["schemas"]["NotificationsItemFeedView"]).post
+    //       ? compatPiefedPostView(
+    //           (view as components["schemas"]["NotificationsItemFeedView"])
+    //             .post!,
+    //         )
+    //       : undefined,
+    //   };
+
+    case 6:
+      // NotificationsItemPostMentionView or NotificationsItemCommentMentionView
+      // Check notif_subtype to distinguish between post_mention and comment_mention
+      if (view.notif_subtype === "comment_mention") {
+        // NotificationsItemCommentMentionView
+        const commentMentionView =
+          view as components["schemas"]["NotificationsItemCommentMentionView"];
+        if (!commentMentionView.comment || !view.author) {
+          return undefined;
+        }
+
+        // This maps to a PersonMentionView
+        return {
+          person_mention: {
+            id: 0, // PieFed doesn't have person_mention concept
+            recipient_id: 0,
+            comment_id: commentMentionView.comment_id || 0,
+            read: false,
+            published: commentMentionView.comment.published,
+          },
+          comment: compatPiefedComment(commentMentionView.comment),
+          creator: compatPiefedPerson(view.author),
+          post: {
+            id: 0,
+            name: "",
+            creator_id: 0,
+            community_id: 0,
+            removed: false,
+            locked: false,
+            published: commentMentionView.comment.published,
+            deleted: false,
+            nsfw: false,
+            ap_id: "",
+            local: false,
+            language_id: 0,
+            featured_community: false,
+            featured_local: false,
+          },
+          community: {
+            id: 0,
+            name: "",
+            title: "",
+            description: "",
+            removed: false,
+            published: commentMentionView.comment.published,
+            deleted: false,
+            nsfw: false,
+            actor_id: "",
+            local: false,
+            icon: "",
+            banner: "",
+            hidden: false,
+            posting_restricted_to_mods: false,
+            visibility: "Public" as const,
+          },
+          recipient: compatPiefedPerson(view.author),
+          counts: {
+            comment_id: commentMentionView.comment_id || 0,
+            score: 0,
+            upvotes: 0,
+            downvotes: 0,
+            published: commentMentionView.comment.published,
+            child_count: 0,
+          },
+          creator_banned_from_community: false,
+          banned_from_community: false,
+          creator_is_moderator: false,
+          creator_is_admin: false,
+          subscribed: "NotSubscribed" as const,
+          saved: false,
+          creator_blocked: false,
+        };
+      } else {
+        // NotificationsItemPostMentionView
+        const postMentionView =
+          view as components["schemas"]["NotificationsItemPostMentionView"];
+        if (!postMentionView.post || !view.author) {
+          return undefined;
+        }
+
+        // This maps to a PersonMentionView for post mentions
+        return {
+          person_mention: {
+            id: 0, // PieFed doesn't have person_mention concept
+            recipient_id: 0,
+            comment_id: 0,
+            read: false,
+            published: postMentionView.post.post.published,
+          },
+          comment: {
+            id: 0,
+            creator_id: 0,
+            post_id: 0,
+            content: "",
+            removed: false,
+            published: postMentionView.post.post.published,
+            deleted: false,
+            ap_id: "",
+            local: false,
+            path: "",
+            distinguished: false,
+            language_id: 0,
+          },
+          creator: compatPiefedPerson(view.author),
+          post: compatPiefedPost(postMentionView.post.post),
+          community: compatPiefedCommunity(postMentionView.post.community),
+          recipient: compatPiefedPerson(view.author),
+          counts: {
+            comment_id: 0,
+            score: 0,
+            upvotes: 0,
+            downvotes: 0,
+            published: postMentionView.post.post.published,
+            child_count: 0,
+          },
+          creator_banned_from_community: false,
+          banned_from_community: false,
+          creator_is_moderator: false,
+          creator_is_admin: false,
+          subscribed: "NotSubscribed" as const,
+          saved: false,
+          creator_blocked: false,
+        };
+      }
+
+    default:
+      // Unknown notification type, return undefined
+      return undefined;
+  }
 }

@@ -12,6 +12,7 @@ import {
   compatPiefedCommunityModeratorView,
   compatPiefedCommunityView,
   compatPiefedGetCommunityResponse,
+  compatPiefedNotification,
   compatPiefedPerson,
   compatPiefedPersonView,
   compatPiefedPostView,
@@ -498,11 +499,25 @@ export default class PiefedClient implements BaseClient {
   }
 
   async getNotifications(
-    ..._params: Parameters<BaseClient["getNotifications"]>
+    payload: Parameters<BaseClient["getNotifications"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getNotifications"]> {
-    throw new UnsupportedError(
-      "Get notifications is not supported by threadiverse library",
-    );
+    const response = await this.client.GET("/user/notifications", {
+      ...options,
+      params: {
+        query: {
+          // @ts-expect-error TODO: fix this
+          status: payload.unread_only ? "New" : "All",
+          page: payload.page,
+        },
+      },
+    });
+
+    return {
+      notifications: response
+        .data!.items.map(compatPiefedNotification)
+        .filter((n) => n !== undefined),
+    };
   }
 
   async getPersonMentions(
