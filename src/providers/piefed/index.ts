@@ -556,11 +556,13 @@ export default class PiefedClient implements BaseClient {
   }
 
   async blockInstance(
-    ..._params: Parameters<BaseClient["blockInstance"]>
+    payload: Parameters<BaseClient["blockInstance"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["blockInstance"]> {
-    throw new UnsupportedError(
-      "Block instance is not supported by threadiverse library",
-    );
+    await this.client.POST("/site/block", {
+      ...options,
+      body: { ...payload },
+    });
   }
 
   async uploadImage(
