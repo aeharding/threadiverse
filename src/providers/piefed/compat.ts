@@ -59,7 +59,11 @@ export function compatPiefedCommunity(
 }
 
 export function compatPiefedComment(comment: components["schemas"]["Comment"]) {
-  return comment;
+  return {
+    ...comment,
+    // @ts-expect-error TODO: fix this
+    content: comment.body,
+  };
 }
 
 export function compatPiefedCommunityView(
