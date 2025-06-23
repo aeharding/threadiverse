@@ -83,10 +83,14 @@ export default class ThreadiverseClient implements BaseClient {
 
     if (!this.discoveredSoftware) {
       if (!discoveryCache.has(this.hostname)) {
-        discoveryCache.set(
-          this.hostname,
-          resolveSoftware(this.hostname, this.options),
-        );
+        const resolver = resolveSoftware(this.hostname, this.options);
+
+        discoveryCache.set(this.hostname, resolver);
+
+        resolver.catch((e) => {
+          discoveryCache.delete(this.hostname);
+          throw e;
+        });
       }
       this.discoveredSoftware = await discoveryCache.get(this.hostname)!;
     }
