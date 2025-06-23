@@ -599,9 +599,13 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["uploadImage"]>[0],
     options?: RequestOptions,
   ) {
+    const formData = new FormData();
+    formData.append("file", payload.file);
+
     const response = await this.client.POST("/upload/image", {
       ...options,
-      body: { file: payload.file as unknown as string },
+      // @ts-expect-error TODO: fix this
+      body: formData,
     });
 
     return {
