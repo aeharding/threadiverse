@@ -1,6 +1,4 @@
-import type { ListingType } from "./ListingType";
-import { SearchSortType } from "./SearchSortType";
-import type { SearchType } from "./SearchType";
+import type { ListingType, SearchSortType, SearchType } from "../types";
 
 /**
  * Searches the site, given a query string, and some optional filters.

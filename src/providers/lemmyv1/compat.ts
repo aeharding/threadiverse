@@ -63,8 +63,8 @@ import {
   GetModlogResponse,
   FederatedInstances,
   InstanceWithFederationState,
+  Notification,
 } from "../../types";
-import { Notification } from "../../types/Notification";
 
 export function compatLemmyCommunityView(
   communityView: LemmyV1CommunityView,

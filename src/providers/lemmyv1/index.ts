@@ -32,8 +32,9 @@ import {
 import { InvalidPayloadError, UnsupportedError } from "../../errors";
 import { isPostCommentReport } from "./helpers";
 import { cleanThreadiverseParams } from "../../helpers";
+import buildSafeClient from "../../SafeClient";
 
-export default class LemmyV1Client implements BaseClient {
+export class UnsafeLemmyV1Client implements BaseClient {
   static mode = "lemmyv1" as const;
 
   static softwareName = "lemmy" as const;
@@ -682,3 +683,6 @@ export default class LemmyV1Client implements BaseClient {
     };
   }
 }
+
+// @ts-expect-error TODO: fix this
+export default buildSafeClient(UnsafeLemmyV1Client);

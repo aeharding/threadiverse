@@ -1,49 +1,4 @@
-import {
-  CommentReplyView,
-  CommentView,
-  CommunityView,
-  CreateComment,
-  CreatePost,
-  EditComment,
-  EditPost,
-  GetComments,
-  GetCommunity,
-  GetPost,
-  GetPosts,
-  PersonMentionView,
-  PostView,
-  PrivateMessageView,
-  ResolveObjectResponse,
-  GetSiteResponse,
-  ListReports,
-  ListReportsResponse,
-  GetCommunityResponse,
-  ListingType,
-  PostReportView,
-  CommentReportView,
-  GetModlog,
-} from "./types";
-import { GetUnreadCountResponse } from "./types/GetUnreadCountResponse";
-import { FederatedInstances } from "./types/FederatedInstances";
-import { ListCommunities } from "./types/ListCommunities";
-import { Search } from "./types/Search";
-import { PersonView } from "./types/PersonView";
-import { GetPersonDetailsResponse } from "./types/GetPersonDetailsResponse";
-import {
-  GetCaptchaResponse,
-  GetPersonMentions,
-  GetSiteMetadataResponse,
-} from "lemmy-js-client";
-import { GetPrivateMessages } from "./types/GetPrivateMessages";
-import { UploadImageResponse } from "./types/UploadImageResponse";
-import { Register } from "./types/Register";
-import { LoginResponse } from "./types/LoginResponse";
-import { GetModlogResponse } from "./types/GetModlogResponse";
-import { GetReplies } from "./types/GetReplies";
-import { BanFromCommunity } from "./types/BanFromCommunity";
-import { Notification } from "./types/Notification";
-import { ListPersonContent } from "./types/ListPersonContent";
-import { ListPersonContentResponse } from "./types/ListPersonContentResponse";
+import * as types from "./types";
 
 export interface ProviderInfo {
   name: "lemmy" | "piefed";
@@ -74,54 +29,54 @@ export abstract class BaseClient {
       q: string;
     },
     options?: RequestOptions,
-  ): Promise<ResolveObjectResponse>;
+  ): Promise<types.ResolveObjectResponse>;
 
-  abstract getSite(options?: RequestOptions): Promise<GetSiteResponse>;
+  abstract getSite(options?: RequestOptions): Promise<types.GetSiteResponse>;
 
   abstract getCommunity(
-    payload: GetCommunity,
+    payload: types.GetCommunity,
     options?: RequestOptions,
-  ): Promise<GetCommunityResponse>;
+  ): Promise<types.GetCommunityResponse>;
 
   abstract getPosts(
-    payload: GetPosts,
+    payload: types.GetPosts,
     options?: RequestOptions,
-  ): Promise<{ posts: PostView[]; next_page?: string }>;
+  ): Promise<{ posts: types.PostView[]; next_page?: string }>;
 
   abstract getComments(
-    payload: GetComments,
+    payload: types.GetComments,
     options?: RequestOptions,
-  ): Promise<{ comments: CommentView[] }>;
+  ): Promise<{ comments: types.CommentView[] }>;
 
   abstract getPost(
-    payload: GetPost,
+    payload: types.GetPost,
     options?: RequestOptions,
-  ): Promise<{ post_view: PostView }>;
+  ): Promise<{ post_view: types.PostView }>;
 
   abstract createPost(
-    payload: CreatePost,
+    payload: types.CreatePost,
     options?: RequestOptions,
-  ): Promise<{ post_view: PostView }>;
+  ): Promise<{ post_view: types.PostView }>;
 
   abstract editPost(
-    payload: EditPost,
+    payload: types.EditPost,
     options?: RequestOptions,
-  ): Promise<{ post_view: PostView }>;
+  ): Promise<{ post_view: types.PostView }>;
 
   abstract createComment(
-    payload: CreateComment,
+    payload: types.CreateComment,
     options?: RequestOptions,
-  ): Promise<{ comment_view: CommentView }>;
+  ): Promise<{ comment_view: types.CommentView }>;
 
   abstract editComment(
-    payload: EditComment,
+    payload: types.EditComment,
     options?: RequestOptions,
-  ): Promise<{ comment_view: CommentView }>;
+  ): Promise<{ comment_view: types.CommentView }>;
 
   abstract createPrivateMessage(
     payload: { content: string; recipient_id: number },
     options?: RequestOptions,
-  ): Promise<{ private_message_view: PrivateMessageView }>;
+  ): Promise<{ private_message_view: types.PrivateMessageView }>;
 
   abstract login(
     payload: {
@@ -136,10 +91,10 @@ export abstract class BaseClient {
 
   abstract getUnreadCount(
     options?: RequestOptions,
-  ): Promise<GetUnreadCountResponse>;
+  ): Promise<types.GetUnreadCountResponse>;
 
   abstract getFederatedInstances(options?: RequestOptions): Promise<{
-    federated_instances?: FederatedInstances;
+    federated_instances?: types.FederatedInstances;
   }>;
 
   abstract markPostAsRead(
@@ -150,32 +105,32 @@ export abstract class BaseClient {
   abstract likePost(
     payload: { post_id: number; score: number },
     options?: RequestOptions,
-  ): Promise<{ post_view: PostView }>;
+  ): Promise<{ post_view: types.PostView }>;
 
   abstract likeComment(
     payload: { comment_id: number; score: number },
     options?: RequestOptions,
-  ): Promise<{ comment_view: CommentView }>;
+  ): Promise<{ comment_view: types.CommentView }>;
 
   abstract savePost(
     payload: { post_id: number; save: boolean },
     options?: RequestOptions,
-  ): Promise<{ post_view: PostView }>;
+  ): Promise<{ post_view: types.PostView }>;
 
   abstract deletePost(
     payload: { post_id: number; deleted: boolean },
     options?: RequestOptions,
-  ): Promise<{ post_view: PostView }>;
+  ): Promise<{ post_view: types.PostView }>;
 
   abstract removePost(
     payload: { post_id: number; removed: boolean; reason?: string },
     options?: RequestOptions,
-  ): Promise<{ post_view: PostView }>;
+  ): Promise<{ post_view: types.PostView }>;
 
   abstract lockPost(
     payload: { post_id: number; locked: boolean },
     options?: RequestOptions,
-  ): Promise<{ post_view: PostView }>;
+  ): Promise<{ post_view: types.PostView }>;
 
   abstract featurePost(
     payload: {
@@ -184,32 +139,32 @@ export abstract class BaseClient {
       feature_type: "Community" | "Local";
     },
     options?: RequestOptions,
-  ): Promise<{ post_view: PostView }>;
+  ): Promise<{ post_view: types.PostView }>;
 
   abstract listCommunities(
-    payload: ListCommunities,
+    payload: types.ListCommunities,
     options?: RequestOptions,
-  ): Promise<{ communities: CommunityView[] }>;
+  ): Promise<{ communities: types.CommunityView[] }>;
 
   abstract search(
-    payload: Search,
+    payload: types.Search,
     options?: RequestOptions,
   ): Promise<{
-    comments: CommentView[];
-    posts: PostView[];
-    communities: CommunityView[];
-    users: PersonView[];
+    comments: types.CommentView[];
+    posts: types.PostView[];
+    communities: types.CommunityView[];
+    users: types.PersonView[];
   }>;
 
   abstract getPersonDetails(
     payload: { person_id: number } | { username: string },
     options?: RequestOptions,
-  ): Promise<GetPersonDetailsResponse>;
+  ): Promise<types.GetPersonDetailsResponse>;
 
   abstract listPersonContent(
-    payload: ListPersonContent,
+    payload: types.ListPersonContent,
     options?: RequestOptions,
-  ): Promise<ListPersonContentResponse>;
+  ): Promise<types.ListPersonContentResponse>;
 
   abstract listPersonSaved(
     payload: {
@@ -221,19 +176,22 @@ export abstract class BaseClient {
       limit: number;
     },
     options?: RequestOptions,
-  ): Promise<{ content: (PostView | CommentView)[]; next_page?: string }>;
+  ): Promise<{
+    content: (types.PostView | types.CommentView)[];
+    next_page?: string;
+  }>;
 
   abstract getNotifications(
-    payload: GetPersonMentions,
+    payload: types.GetPersonMentions,
     options?: RequestOptions,
   ): Promise<{
-    notifications: Notification[];
+    notifications: types.Notification[];
   }>;
 
   abstract getPersonMentions(
-    payload: GetPersonMentions,
+    payload: types.GetPersonMentions,
     options?: RequestOptions,
-  ): Promise<{ mentions: PersonMentionView[] }>;
+  ): Promise<{ mentions: types.PersonMentionView[] }>;
 
   abstract markPersonMentionAsRead(
     payload: { person_mention_id: number; read: boolean },
@@ -253,9 +211,9 @@ export abstract class BaseClient {
   abstract markAllAsRead(options?: RequestOptions): Promise<void>;
 
   abstract getPrivateMessages(
-    payload: GetPrivateMessages,
+    payload: types.GetPrivateMessages,
     options?: RequestOptions,
-  ): Promise<{ private_messages: PrivateMessageView[] }>;
+  ): Promise<{ private_messages: types.PrivateMessageView[] }>;
 
   abstract saveUserSettings(
     payload: { show_nsfw: boolean },
@@ -270,7 +228,7 @@ export abstract class BaseClient {
   abstract uploadImage(
     payload: { file: File },
     options?: RequestOptions,
-  ): Promise<UploadImageResponse>;
+  ): Promise<types.UploadImageResponse>;
 
   abstract deleteImage(
     payload: { url: string; delete_token: string },
@@ -278,66 +236,68 @@ export abstract class BaseClient {
   ): Promise<void>;
 
   abstract register(
-    payload: Register,
+    payload: types.Register,
     options?: RequestOptions,
-  ): Promise<LoginResponse>;
+  ): Promise<types.LoginResponse>;
 
-  abstract getCaptcha(options?: RequestOptions): Promise<GetCaptchaResponse>;
+  abstract getCaptcha(
+    options?: RequestOptions,
+  ): Promise<types.GetCaptchaResponse>;
 
   abstract listReports(
-    payload: ListReports,
+    payload: types.ListReports,
     options?: RequestOptions,
-  ): Promise<ListReportsResponse>;
+  ): Promise<types.ListReportsResponse>;
 
   abstract getModlog(
-    payload: GetModlog,
+    payload: types.GetModlog,
     options?: RequestOptions,
-  ): Promise<GetModlogResponse>;
+  ): Promise<types.GetModlogResponse>;
 
   abstract getReplies(
-    payload: GetReplies,
+    payload: types.GetReplies,
     options?: RequestOptions,
-  ): Promise<{ replies: CommentReplyView[] }>;
+  ): Promise<{ replies: types.CommentReplyView[] }>;
 
   abstract banFromCommunity(
-    payload: BanFromCommunity,
+    payload: types.BanFromCommunity,
     options?: RequestOptions,
   ): Promise<void>;
 
   abstract saveComment(
     payload: { comment_id: number; save: boolean },
     options?: RequestOptions,
-  ): Promise<{ comment_view: CommentView }>;
+  ): Promise<{ comment_view: types.CommentView }>;
 
   abstract distinguishComment(
     payload: { comment_id: number; distinguished: boolean },
     options?: RequestOptions,
-  ): Promise<{ comment_view: CommentView }>;
+  ): Promise<{ comment_view: types.CommentView }>;
 
   abstract deleteComment(
     payload: { comment_id: number; deleted: boolean },
     options?: RequestOptions,
-  ): Promise<{ comment_view: CommentView }>;
+  ): Promise<{ comment_view: types.CommentView }>;
 
   abstract removeComment(
     payload: { comment_id: number; removed: boolean; reason?: string },
     options?: RequestOptions,
-  ): Promise<{ comment_view: CommentView }>;
+  ): Promise<{ comment_view: types.CommentView }>;
 
   abstract followCommunity(
     payload: { community_id: number; follow: boolean },
     options?: RequestOptions,
-  ): Promise<{ community_view: CommunityView }>;
+  ): Promise<{ community_view: types.CommunityView }>;
 
   abstract blockCommunity(
     payload: { community_id: number; block: boolean },
     options?: RequestOptions,
-  ): Promise<{ community_view: CommunityView }>;
+  ): Promise<{ community_view: types.CommunityView }>;
 
   abstract blockPerson(
     payload: { person_id: number; block: boolean },
     options?: RequestOptions,
-  ): Promise<{ person_view: PersonView }>;
+  ): Promise<{ person_view: types.PersonView }>;
 
   abstract createPostReport(
     payload: { post_id: number; reason: string },
@@ -357,7 +317,7 @@ export abstract class BaseClient {
   abstract getSiteMetadata(
     payload: { url: string },
     options?: RequestOptions,
-  ): Promise<GetSiteMetadataResponse>;
+  ): Promise<types.GetSiteMetadataResponse>;
 
   abstract resolvePostReport(
     payload: { report_id: number; resolved: boolean },
@@ -370,17 +330,17 @@ export abstract class BaseClient {
   ): Promise<void>;
 
   abstract getRandomCommunity(
-    payload: { type_: ListingType },
+    payload: { type_: types.ListingType },
     options?: RequestOptions,
-  ): Promise<{ community_view: CommunityView }>;
+  ): Promise<{ community_view: types.CommunityView }>;
 
   abstract listPostReports(
     payload: { page: number; limit: number; unresolved_only?: boolean },
     options?: RequestOptions,
-  ): Promise<{ post_reports: PostReportView[] }>;
+  ): Promise<{ post_reports: types.PostReportView[] }>;
 
   abstract listCommentReports(
     payload: { page: number; limit: number; unresolved_only?: boolean },
     options?: RequestOptions,
-  ): Promise<{ comment_reports: CommentReportView[] }>;
+  ): Promise<{ comment_reports: types.CommentReportView[] }>;
 }

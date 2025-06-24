@@ -1,5 +1,5 @@
 import { PostSortType } from "./PostSortType";
-import { ListingType } from "./ListingType";
+import { ListingType } from ".";
 
 export type GetPosts = PostSortType & {
   type_?: ListingType;

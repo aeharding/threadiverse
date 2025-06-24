@@ -29,8 +29,9 @@ import {
   getPostCommentItemCreatedDate,
 } from "./helpers";
 import { cleanThreadiverseParams } from "../../helpers";
+import buildSafeClient from "../../SafeClient";
 
-export default class LemmyV0Client implements BaseClient {
+export class UnsafeLemmyV0Client implements BaseClient {
   static mode = "lemmyv0" as const;
 
   static softwareName = "lemmy" as const;
@@ -103,7 +104,7 @@ export default class LemmyV0Client implements BaseClient {
   async getPosts(
     payload: Parameters<BaseClient["getPosts"]>[0],
     options?: RequestOptions,
-  ) {
+  ): ReturnType<BaseClient["getPosts"]> {
     if (payload.mode && payload.mode !== "lemmyv0")
       throw new InvalidPayloadError(
         `Connected to lemmyv1, ${payload.mode} is not supported`,
@@ -357,11 +358,6 @@ export default class LemmyV0Client implements BaseClient {
   async getNotifications(
     ...params: Parameters<BaseClient["getNotifications"]>
   ) {
-    if (params[0].sort !== "New")
-      throw new UnsupportedError(
-        "Lemmy v0 getNotifications only supports sorting by new",
-      );
-
     const [replies, mentions, privateMessages] = await Promise.all([
       this.client.getReplies(...params),
       this.client.getPersonMentions(...params),
@@ -630,3 +626,6 @@ export default class LemmyV0Client implements BaseClient {
     };
   }
 }
+
+// @ts-expect-error TODO: fix this
+export default buildSafeClient(UnsafeLemmyV0Client);

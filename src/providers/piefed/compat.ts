@@ -1,10 +1,12 @@
+import { PostView } from "../../types";
 import { components } from "./schema";
 
 export function compatPiefedPerson(person: components["schemas"]["Person"]) {
   return {
     ...person,
+    avatar: person.avatar ?? undefined, // TODO piefed types are wrong, this is returned as null if not set
     name: person.user_name!,
-    display_name: person.title,
+    display_name: person.title ?? undefined, // TODO piefed types are wrong, this is returned as null if not set
     bot_account: person.bot,
   };
 }
@@ -24,12 +26,17 @@ export function compatPiefedPost(post: components["schemas"]["Post"]) {
     name: post.title,
     featured_community: post.sticky,
     featured_local: false,
+    // @ts-expect-error TODO piefed types are wrong, this isn't being returned rn
+    creator_id: post.creator_id ?? post.user_id,
   };
 }
 
-export function compatPiefedPostView(post: components["schemas"]["PostView"]) {
+export function compatPiefedPostView(
+  post: components["schemas"]["PostView"],
+): PostView {
   return {
     ...post,
+    creator_blocked: post.creator_blocked ?? false, // TODO piefed types are wrong, this isn't being returned rn
     community: compatPiefedCommunity(post.community),
     post: compatPiefedPost(post.post),
     creator: compatPiefedPerson(post.creator),
@@ -43,7 +50,7 @@ export function compatPiefedCommentView(
     ...comment,
     community: compatPiefedCommunity(comment.community),
     creator: compatPiefedPerson(comment.creator),
-    comment: compatPiefedComment(comment.comment),
+    comment: compatPiefedComment(comment.comment, comment.creator.id),
     post: compatPiefedPost(comment.post),
   };
 }
@@ -58,11 +65,15 @@ export function compatPiefedCommunity(
   };
 }
 
-export function compatPiefedComment(comment: components["schemas"]["Comment"]) {
+export function compatPiefedComment(
+  comment: components["schemas"]["Comment"],
+  creator_id: number, // TODO piefed types are wrong, this isn't being returned rn
+) {
   return {
     ...comment,
     // @ts-expect-error TODO: fix this
     content: comment.body,
+    creator_id,
   };
 }
 

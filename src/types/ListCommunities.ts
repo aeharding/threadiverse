@@ -1,5 +1,5 @@
 import type { CommunitySortType } from "./CommunitySortType";
-import type { ListingType } from "./ListingType";
+import type { ListingType } from ".";
 /**
  * Fetches a list of communities.
  */

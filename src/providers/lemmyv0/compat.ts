@@ -15,8 +15,11 @@ import {
   Person,
   Instance,
 } from "lemmy-js-client";
-import { CommunityVisibility } from "../../types/CommunityVisibility";
-import { GetModlogResponse, MyUserInfo } from "../../types";
+import {
+  CommunityVisibility,
+  GetModlogResponse,
+  MyUserInfo,
+} from "../../types";
 
 export function compatLemmyCommunityView(communityView: CommunityView) {
   return {
