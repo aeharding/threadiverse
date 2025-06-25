@@ -7,6 +7,7 @@ import {
 } from "../../BaseClient";
 import { InvalidPayloadError, UnsupportedError } from "../../errors";
 import {
+  compatPiefedCommentReplyView,
   compatPiefedCommentView,
   compatPiefedCommunity,
   compatPiefedCommunityModeratorView,
@@ -15,18 +16,23 @@ import {
   compatPiefedPerson,
   compatPiefedPersonView,
   compatPiefedPostView,
+  compatPiefedPrivateMessageView,
 } from "./compat";
 import { components, paths } from "./schema";
 import {
   CommunityView,
   ListPersonContent,
   ListPersonContentResponse,
-  PostView,
 } from "../../types";
+import { PostView } from "../../types";
 import { cleanThreadiverseParams } from "../../helpers";
-import { getPostCommentItemCreatedDate } from "../lemmyv0/helpers";
+import {
+  getInboxItemPublished,
+  getPostCommentItemCreatedDate,
+} from "../lemmyv0/helpers";
+import buildSafeClient from "../../SafeClient";
 
-export default class PiefedClient implements BaseClient {
+export class UnsafePiefedClient implements BaseClient {
   static mode = "piefed" as const;
 
   static softwareName = "piefed" as const;
@@ -34,10 +40,10 @@ export default class PiefedClient implements BaseClient {
   // Piefed is not versioned atm
   static softwareVersionRange = "*";
 
-  private client: ReturnType<typeof createClient<paths>>;
+  #client: ReturnType<typeof createClient<paths>>;
 
   constructor(url: string, options: BaseClientOptions) {
-    this.client = createClient({
+    this.#client = createClient({
       baseUrl: `${url}/api/alpha`,
       // TODO: piefed doesn't allow CORS headers other than Authorization
       headers: options.headers.Authorization
@@ -49,8 +55,12 @@ export default class PiefedClient implements BaseClient {
     });
   }
 
-  async resolveObject(payload: Parameters<BaseClient["resolveObject"]>[0]) {
-    const response = await this.client.GET("/resolve_object", {
+  async resolveObject(
+    payload: Parameters<BaseClient["resolveObject"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["resolveObject"]> {
+    const response = await this.#client.GET("/resolve_object", {
+      ...options,
       // @ts-expect-error TODO: fix this
       params: { query: payload },
     });
@@ -75,8 +85,8 @@ export default class PiefedClient implements BaseClient {
     };
   }
 
-  async getSite(options?: RequestOptions) {
-    const response = await this.client.GET("/site", options);
+  async getSite(options?: RequestOptions): ReturnType<BaseClient["getSite"]> {
+    const response = await this.#client.GET("/site", options);
 
     return {
       ...response.data!,
@@ -128,7 +138,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["login"]>[0],
     options?: RequestOptions,
   ) {
-    const response = await this.client.POST("/user/login", {
+    const response = await this.#client.POST("/user/login", {
       ...options,
       body: { username: payload.username_or_email, password: payload.password },
     });
@@ -142,8 +152,8 @@ export default class PiefedClient implements BaseClient {
   async getCommunity(
     payload: Parameters<BaseClient["getCommunity"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.GET("/community", {
+  ): ReturnType<BaseClient["getCommunity"]> {
+    const response = await this.#client.GET("/community", {
       ...options,
       // @ts-expect-error TODO: fix this
       params: { query: payload },
@@ -165,7 +175,7 @@ export default class PiefedClient implements BaseClient {
       payload,
     ) satisfies components["schemas"]["GetPosts"];
 
-    const response = await this.client.GET("/post/list", {
+    const response = await this.#client.GET("/post/list", {
       ...options,
       // @ts-expect-error TODO: fix this
       params: { query },
@@ -179,7 +189,7 @@ export default class PiefedClient implements BaseClient {
   async getComments(
     payload: Parameters<BaseClient["getComments"]>[0],
     options?: RequestOptions,
-  ) {
+  ): ReturnType<BaseClient["getComments"]> {
     if (payload.mode && payload.mode !== "piefed")
       throw new InvalidPayloadError(
         `Connected to piefed, ${payload.mode} is not supported`,
@@ -189,7 +199,7 @@ export default class PiefedClient implements BaseClient {
       payload,
     ) satisfies components["schemas"]["GetComments"];
 
-    const response = await this.client.GET("/comment/list", {
+    const response = await this.#client.GET("/comment/list", {
       ...options,
       // @ts-expect-error TODO: fix this
       params: { query },
@@ -204,7 +214,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["createPost"]>[0],
     options?: RequestOptions,
   ) {
-    const response = await this.client.POST("/post", {
+    const response = await this.#client.POST("/post", {
       ...options,
       body: {
         ...payload,
@@ -221,7 +231,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["editPost"]>[0],
     options?: RequestOptions,
   ) {
-    const response = await this.client.PUT("/post", {
+    const response = await this.#client.PUT("/post", {
       ...options,
       body: {
         ...payload,
@@ -240,7 +250,7 @@ export default class PiefedClient implements BaseClient {
   ) {
     const query = payload satisfies components["schemas"]["GetPost"];
 
-    const response = await this.client.GET("/post", {
+    const response = await this.#client.GET("/post", {
       ...options,
       // @ts-expect-error TODO: fix this
       params: { query },
@@ -254,8 +264,8 @@ export default class PiefedClient implements BaseClient {
   async createComment(
     payload: Parameters<BaseClient["createComment"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.POST("/comment", {
+  ): ReturnType<BaseClient["createComment"]> {
+    const response = await this.#client.POST("/comment", {
       ...options,
       body: {
         ...payload,
@@ -271,8 +281,8 @@ export default class PiefedClient implements BaseClient {
   async editComment(
     payload: Parameters<BaseClient["editComment"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.PUT("/comment", {
+  ): ReturnType<BaseClient["editComment"]> {
+    const response = await this.#client.PUT("/comment", {
       ...options,
       body: {
         ...payload,
@@ -288,11 +298,13 @@ export default class PiefedClient implements BaseClient {
   async createPrivateMessage(
     ..._params: Parameters<BaseClient["createPrivateMessage"]>
   ): ReturnType<BaseClient["createPrivateMessage"]> {
-    throw new UnsupportedError("Private messaging is not supported by piefed");
+    throw new UnsupportedError(
+      "Create private message is not supported by piefed",
+    );
   }
 
   async getUnreadCount(options?: RequestOptions) {
-    const response = await this.client.GET("/user/unread_count", {
+    const response = await this.#client.GET("/user/unread_count", {
       ...options,
     });
 
@@ -302,7 +314,7 @@ export default class PiefedClient implements BaseClient {
   async getFederatedInstances(
     ..._params: Parameters<BaseClient["getFederatedInstances"]>
   ): ReturnType<BaseClient["getFederatedInstances"]> {
-    const response = await this.client.GET("/federated_instances");
+    const response = await this.#client.GET("/federated_instances");
 
     return response.data!;
   }
@@ -315,7 +327,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["likePost"]>[0],
     options?: RequestOptions,
   ) {
-    const response = await this.client.POST("/post/like", {
+    const response = await this.#client.POST("/post/like", {
       ...options,
       body: {
         ...payload,
@@ -330,8 +342,8 @@ export default class PiefedClient implements BaseClient {
   async likeComment(
     payload: Parameters<BaseClient["likeComment"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.POST("/comment/like", {
+  ): ReturnType<BaseClient["likeComment"]> {
+    const response = await this.#client.POST("/comment/like", {
       ...options,
       body: {
         ...payload,
@@ -347,7 +359,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["savePost"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["savePost"]> {
-    const response = await this.client.PUT("/post/save", {
+    const response = await this.#client.PUT("/post/save", {
       ...options,
       body: { ...payload },
     });
@@ -361,7 +373,7 @@ export default class PiefedClient implements BaseClient {
     payload: { post_id: number; deleted: boolean },
     options?: RequestOptions,
   ): Promise<{ post_view: PostView }> {
-    const response = await this.client.POST("/post/delete", {
+    const response = await this.#client.POST("/post/delete", {
       ...options,
       body: { ...payload },
     });
@@ -375,7 +387,7 @@ export default class PiefedClient implements BaseClient {
     payload: { post_id: number; removed: boolean },
     options?: RequestOptions,
   ): Promise<{ post_view: PostView }> {
-    const response = await this.client.POST("/post/remove", {
+    const response = await this.#client.POST("/post/remove", {
       ...options,
       body: { ...payload },
     });
@@ -389,7 +401,7 @@ export default class PiefedClient implements BaseClient {
     payload: { post_id: number; locked: boolean },
     options?: RequestOptions,
   ): Promise<{ post_view: PostView }> {
-    const response = await this.client.POST("/post/lock", {
+    const response = await this.#client.POST("/post/lock", {
       ...options,
       body: { ...payload },
     });
@@ -403,7 +415,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["featurePost"]>[0],
     options?: RequestOptions,
   ): Promise<{ post_view: PostView }> {
-    const response = await this.client.POST("/post/feature", {
+    const response = await this.#client.POST("/post/feature", {
       ...options,
       body: { ...payload },
     });
@@ -417,7 +429,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["listCommunities"]>[0],
     options?: RequestOptions,
   ): Promise<{ communities: CommunityView[] }> {
-    const response = await this.client.GET("/community/list", {
+    const response = await this.#client.GET("/community/list", {
       ...options,
       // @ts-expect-error TODO: fix this
       params: { query: payload },
@@ -431,12 +443,12 @@ export default class PiefedClient implements BaseClient {
   async search(
     payload: Parameters<BaseClient["search"]>[0],
     options?: RequestOptions,
-  ) {
+  ): ReturnType<BaseClient["search"]> {
     if (payload.type_ === "Comments") {
       throw new UnsupportedError("Comment search is not supported by piefed");
     }
 
-    const response = await this.client.GET("/search", {
+    const response = await this.#client.GET("/search", {
       ...options,
       // @ts-expect-error TODO: fix this
       params: { query: payload },
@@ -453,8 +465,8 @@ export default class PiefedClient implements BaseClient {
   async getPersonDetails(
     payload: Parameters<BaseClient["getPersonDetails"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.GET("/user", {
+  ): ReturnType<BaseClient["getPersonDetails"]> {
+    const response = await this.#client.GET("/user", {
       ...options,
       // @ts-expect-error TODO: fix this
       params: { query: payload },
@@ -478,8 +490,8 @@ export default class PiefedClient implements BaseClient {
       case undefined:
         return {
           content: await Promise.all([
-            this.listPersonPosts(payload, options),
-            this.listPersonComments(payload, options),
+            this.#listPersonPosts(payload, options),
+            this.#listPersonComments(payload, options),
           ]).then(([posts, comments]) =>
             [...posts, ...comments].sort(
               (a, b) =>
@@ -489,17 +501,17 @@ export default class PiefedClient implements BaseClient {
           ),
         };
       case "Comments":
-        return { content: await this.listPersonComments(payload, options) };
+        return { content: await this.#listPersonComments(payload, options) };
       case "Posts":
-        return { content: await this.listPersonPosts(payload, options) };
+        return { content: await this.#listPersonPosts(payload, options) };
     }
   }
 
-  private async listPersonPosts(
+  async #listPersonPosts(
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions,
   ) {
-    const response = await this.client.GET("/post/list", {
+    const response = await this.#client.GET("/post/list", {
       ...options,
       // @ts-expect-error TODO: fix this
       params: { query: payload },
@@ -508,11 +520,11 @@ export default class PiefedClient implements BaseClient {
     return response.data!.posts.map(compatPiefedPostView);
   }
 
-  private async listPersonComments(
+  async #listPersonComments(
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions,
   ) {
-    const response = await this.client.GET("/comment/list", {
+    const response = await this.#client.GET("/comment/list", {
       ...options,
       // @ts-expect-error TODO: fix this
       params: { query: payload },
@@ -528,55 +540,88 @@ export default class PiefedClient implements BaseClient {
   }
 
   async getNotifications(
-    ..._params: Parameters<BaseClient["getNotifications"]>
+    ...params: Parameters<BaseClient["getNotifications"]>
   ): ReturnType<BaseClient["getNotifications"]> {
-    throw new UnsupportedError(
-      "Get notifications is not supported by threadiverse library",
+    const [replies, mentions, privateMessages] = await Promise.all([
+      this.getReplies(...params),
+      this.getPersonMentions(...params),
+      this.getPrivateMessages(...params),
+    ]);
+
+    const notifications = [
+      ...replies.replies,
+      ...mentions.mentions,
+      ...privateMessages.private_messages,
+    ].sort(
+      (a, b) =>
+        Date.parse(getInboxItemPublished(b)) -
+        Date.parse(getInboxItemPublished(a)),
     );
+
+    return {
+      notifications,
+    };
   }
 
   async getPersonMentions(
-    ..._params: Parameters<BaseClient["getPersonMentions"]>
+    _payload: Parameters<BaseClient["getPersonMentions"]>[0],
+    _options?: RequestOptions,
   ): ReturnType<BaseClient["getPersonMentions"]> {
-    throw new UnsupportedError(
-      "Get person mentions is not supported by threadiverse library",
-    );
+    return { mentions: [] }; // TODO: implement this
   }
 
   async markPersonMentionAsRead(
-    ..._params: Parameters<BaseClient["markPersonMentionAsRead"]>
+    payload: Parameters<BaseClient["markPersonMentionAsRead"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["markPersonMentionAsRead"]> {
-    throw new UnsupportedError(
-      "Mark person mention as read is not supported by threadiverse library",
-    );
+    // @ts-expect-error TODO fix piefed api docs
+    await this.#client.POST("/mention/mark_as_read", {
+      ...options,
+      body: payload,
+    });
   }
 
   async markPrivateMessageAsRead(
-    ..._params: Parameters<BaseClient["markPrivateMessageAsRead"]>
+    payload: Parameters<BaseClient["markPrivateMessageAsRead"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["markPrivateMessageAsRead"]> {
-    throw new UnsupportedError(
-      "Mark private message as read is not supported by threadiverse library",
-    );
+    // @ts-expect-error TODO fix piefed api docs
+    await this.#client.POST("/private_message/mark_as_read", {
+      ...options,
+      body: payload,
+    });
   }
 
   async markCommentReplyAsRead(
-    ..._params: Parameters<BaseClient["markCommentReplyAsRead"]>
+    payload: Parameters<BaseClient["markCommentReplyAsRead"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["markCommentReplyAsRead"]> {
-    throw new UnsupportedError(
-      "Mark comment reply as read is not supported by threadiverse library",
-    );
+    // @ts-expect-error TODO fix piefed api docs
+    await this.#client.POST("/comment/mark_as_read", {
+      ...options,
+      body: payload,
+    });
   }
 
   async markAllAsRead(options: Parameters<BaseClient["markAllAsRead"]>[0]) {
-    await this.client.POST("/user/mark_all_as_read", options);
+    await this.#client.POST("/user/mark_all_as_read", options);
   }
 
   async getPrivateMessages(
-    ..._params: Parameters<BaseClient["getPrivateMessages"]>
+    payload: Parameters<BaseClient["getPrivateMessages"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getPrivateMessages"]> {
-    throw new UnsupportedError(
-      "Get private messages is not supported by piefed",
-    );
+    const response = await this.#client.GET("/private_message/list", {
+      ...options,
+      // @ts-expect-error TODO: fix this
+      params: { query: payload },
+    });
+
+    return {
+      private_messages: response.data!.private_messages.map(
+        compatPiefedPrivateMessageView,
+      ),
+    };
   }
 
   async saveUserSettings(
@@ -589,7 +634,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["blockInstance"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["blockInstance"]> {
-    await this.client.POST("/site/block", {
+    await this.#client.POST("/site/block", {
       ...options,
       body: { ...payload },
     });
@@ -602,7 +647,7 @@ export default class PiefedClient implements BaseClient {
     const formData = new FormData();
     formData.append("file", payload.file);
 
-    const response = await this.client.POST("/upload/image", {
+    const response = await this.#client.POST("/upload/image", {
       ...options,
       // @ts-expect-error TODO: fix this
       body: formData,
@@ -644,16 +689,25 @@ export default class PiefedClient implements BaseClient {
   }
 
   async getReplies(
-    ..._params: Parameters<BaseClient["getReplies"]>
+    payload: Parameters<BaseClient["getReplies"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getReplies"]> {
-    throw new UnsupportedError("Get replies is not supported by piefed");
+    const response = await this.#client.GET("/user/replies", {
+      ...options,
+      // @ts-expect-error TODO: fix this
+      params: { query: payload },
+    });
+
+    return {
+      replies: response.data!.replies.map(compatPiefedCommentReplyView),
+    };
   }
 
   async banFromCommunity(
     payload: Parameters<BaseClient["banFromCommunity"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["banFromCommunity"]> {
-    await this.client.POST("/community/moderate/ban", {
+    await this.#client.POST("/community/moderate/ban", {
       ...options,
       // @ts-expect-error TODO: fix this
       body: payload,
@@ -678,7 +732,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["deleteComment"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["deleteComment"]> {
-    const response = await this.client.POST("/comment/delete", {
+    const response = await this.#client.POST("/comment/delete", {
       ...options,
       body: { ...payload },
     });
@@ -692,7 +746,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["removeComment"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["removeComment"]> {
-    const response = await this.client.POST("/comment/remove", {
+    const response = await this.#client.POST("/comment/remove", {
       ...options,
       body: { ...payload },
     });
@@ -706,7 +760,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["followCommunity"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["followCommunity"]> {
-    const response = await this.client.POST("/community/follow", {
+    const response = await this.#client.POST("/community/follow", {
       ...options,
       body: { ...payload },
     });
@@ -720,7 +774,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["blockCommunity"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["blockCommunity"]> {
-    const response = await this.client.POST("/community/block", {
+    const response = await this.#client.POST("/community/block", {
       ...options,
       body: { ...payload },
     });
@@ -734,7 +788,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["blockPerson"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["blockPerson"]> {
-    const response = await this.client.POST("/user/block", {
+    const response = await this.#client.POST("/user/block", {
       ...options,
       body: { ...payload },
     });
@@ -749,7 +803,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["createPostReport"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["createPostReport"]> {
-    await this.client.POST("/post/report", {
+    await this.#client.POST("/post/report", {
       ...options,
       body: { ...payload },
     });
@@ -759,7 +813,7 @@ export default class PiefedClient implements BaseClient {
     payload: Parameters<BaseClient["createCommentReport"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["createCommentReport"]> {
-    await this.client.POST("/comment/report", {
+    await this.#client.POST("/comment/report", {
       ...options,
       body: { ...payload },
     });
@@ -817,3 +871,5 @@ export default class PiefedClient implements BaseClient {
     );
   }
 }
+
+export default buildSafeClient(UnsafePiefedClient);

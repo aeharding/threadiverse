@@ -1,5 +1,5 @@
 import { CommentSortType } from "./CommentSortType";
-import { ListingType } from "./ListingType";
+import { ListingType } from ".";
 
 export type GetComments = CommentSortType & {
   type_?: ListingType;

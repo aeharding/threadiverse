@@ -1,9 +1,13 @@
-import { CommentView, PostReportView, PostView } from "../../types";
-import { CommentReplyView } from "../../types/CommentReplyView";
-import { CommentReportView } from "../../types/CommentReportView";
-import { GetModlogResponse } from "../../types/GetModlogResponse";
-import { PersonMentionView } from "../../types/PersonMentionView";
-import { PrivateMessageView } from "../../types/PrivateMessageView";
+import {
+  CommentReplyView,
+  CommentReportView,
+  CommentView,
+  GetModlogResponse,
+  PersonMentionView,
+  PostReportView,
+  PostView,
+  PrivateMessageView,
+} from "../../types";
 
 export function getInboxItemPublished(
   item: PersonMentionView | CommentReplyView | PrivateMessageView,
