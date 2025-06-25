@@ -7,11 +7,6 @@ settings:
 overrides:
   threadiverse: link:.
 
-patchedDependencies:
-  openapi-fetch:
-    hash: 8a89bcc59bfa03e0e6a22b2ef455be592450945d7a80aa45c60d994e6db57a67
-    path: patches/openapi-fetch.patch
-
 importers:
 
   .:
@@ -27,7 +22,7 @@ importers:
         version: lemmy-js-client@1.0.0-dont-return-actions.1
       openapi-fetch:
         specifier: ^0.14.0
-        version: 0.14.0(patch_hash=8a89bcc59bfa03e0e6a22b2ef455be592450945d7a80aa45c60d994e6db57a67)
+        version: 0.14.0
       zod:
         specifier: ^3.25.67
         version: 3.25.67
@@ -4072,7 +4067,7 @@ snapshots:
     dependencies:
       ee-first: 1.1.1
 
-  openapi-fetch@0.14.0(patch_hash=8a89bcc59bfa03e0e6a22b2ef455be592450945d7a80aa45c60d994e6db57a67):
+  openapi-fetch@0.14.0:
     dependencies:
       openapi-typescript-helpers: 0.0.15
 
