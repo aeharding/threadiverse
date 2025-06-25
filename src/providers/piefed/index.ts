@@ -7,6 +7,7 @@ import {
 } from "../../BaseClient";
 import { InvalidPayloadError, UnsupportedError } from "../../errors";
 import {
+  compatPiefedCommentReplyView,
   compatPiefedCommentView,
   compatPiefedCommunity,
   compatPiefedCommunityModeratorView,
@@ -15,6 +16,7 @@ import {
   compatPiefedPerson,
   compatPiefedPersonView,
   compatPiefedPostView,
+  compatPiefedPrivateMessageView,
 } from "./compat";
 import { components, paths } from "./schema";
 import {
@@ -24,7 +26,10 @@ import {
 } from "../../types";
 import { PostView } from "../../types";
 import { cleanThreadiverseParams } from "../../helpers";
-import { getPostCommentItemCreatedDate } from "../lemmyv0/helpers";
+import {
+  getInboxItemPublished,
+  getPostCommentItemCreatedDate,
+} from "../lemmyv0/helpers";
 import buildSafeClient from "../../SafeClient";
 
 export class UnsafePiefedClient implements BaseClient {
@@ -293,7 +298,9 @@ export class UnsafePiefedClient implements BaseClient {
   async createPrivateMessage(
     ..._params: Parameters<BaseClient["createPrivateMessage"]>
   ): ReturnType<BaseClient["createPrivateMessage"]> {
-    throw new UnsupportedError("Private messaging is not supported by piefed");
+    throw new UnsupportedError(
+      "Create private message is not supported by piefed",
+    );
   }
 
   async getUnreadCount(options?: RequestOptions) {
@@ -533,43 +540,67 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async getNotifications(
-    ..._params: Parameters<BaseClient["getNotifications"]>
+    ...params: Parameters<BaseClient["getNotifications"]>
   ): ReturnType<BaseClient["getNotifications"]> {
-    throw new UnsupportedError(
-      "Get notifications is not supported by threadiverse library",
+    const [replies, mentions, privateMessages] = await Promise.all([
+      this.getReplies(...params),
+      this.getPersonMentions(...params),
+      this.getPrivateMessages(...params),
+    ]);
+
+    const notifications = [
+      ...replies.replies,
+      ...mentions.mentions,
+      ...privateMessages.private_messages,
+    ].sort(
+      (a, b) =>
+        Date.parse(getInboxItemPublished(b)) -
+        Date.parse(getInboxItemPublished(a)),
     );
+
+    return {
+      notifications,
+    };
   }
 
   async getPersonMentions(
-    ..._params: Parameters<BaseClient["getPersonMentions"]>
+    _payload: Parameters<BaseClient["getPersonMentions"]>[0],
+    _options?: RequestOptions,
   ): ReturnType<BaseClient["getPersonMentions"]> {
-    throw new UnsupportedError(
-      "Get person mentions is not supported by threadiverse library",
-    );
+    return { mentions: [] }; // TODO: implement this
   }
 
   async markPersonMentionAsRead(
-    ..._params: Parameters<BaseClient["markPersonMentionAsRead"]>
+    payload: Parameters<BaseClient["markPersonMentionAsRead"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["markPersonMentionAsRead"]> {
-    throw new UnsupportedError(
-      "Mark person mention as read is not supported by threadiverse library",
-    );
+    // @ts-expect-error TODO fix piefed api docs
+    await this.#client.POST("/mention/mark_as_read", {
+      ...options,
+      body: payload,
+    });
   }
 
   async markPrivateMessageAsRead(
-    ..._params: Parameters<BaseClient["markPrivateMessageAsRead"]>
+    payload: Parameters<BaseClient["markPrivateMessageAsRead"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["markPrivateMessageAsRead"]> {
-    throw new UnsupportedError(
-      "Mark private message as read is not supported by threadiverse library",
-    );
+    // @ts-expect-error TODO fix piefed api docs
+    await this.#client.POST("/private_message/mark_as_read", {
+      ...options,
+      body: payload,
+    });
   }
 
   async markCommentReplyAsRead(
-    ..._params: Parameters<BaseClient["markCommentReplyAsRead"]>
+    payload: Parameters<BaseClient["markCommentReplyAsRead"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["markCommentReplyAsRead"]> {
-    throw new UnsupportedError(
-      "Mark comment reply as read is not supported by threadiverse library",
-    );
+    // @ts-expect-error TODO fix piefed api docs
+    await this.#client.POST("/comment/mark_as_read", {
+      ...options,
+      body: payload,
+    });
   }
 
   async markAllAsRead(options: Parameters<BaseClient["markAllAsRead"]>[0]) {
@@ -577,11 +608,20 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async getPrivateMessages(
-    ..._params: Parameters<BaseClient["getPrivateMessages"]>
+    payload: Parameters<BaseClient["getPrivateMessages"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getPrivateMessages"]> {
-    throw new UnsupportedError(
-      "Get private messages is not supported by piefed",
-    );
+    const response = await this.#client.GET("/private_message/list", {
+      ...options,
+      // @ts-expect-error TODO: fix this
+      params: { query: payload },
+    });
+
+    return {
+      private_messages: response.data!.private_messages.map(
+        compatPiefedPrivateMessageView,
+      ),
+    };
   }
 
   async saveUserSettings(
@@ -649,9 +689,18 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async getReplies(
-    ..._params: Parameters<BaseClient["getReplies"]>
+    payload: Parameters<BaseClient["getReplies"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getReplies"]> {
-    throw new UnsupportedError("Get replies is not supported by piefed");
+    const response = await this.#client.GET("/user/replies", {
+      ...options,
+      // @ts-expect-error TODO: fix this
+      params: { query: payload },
+    });
+
+    return {
+      replies: response.data!.replies.map(compatPiefedCommentReplyView),
+    };
   }
 
   async banFromCommunity(

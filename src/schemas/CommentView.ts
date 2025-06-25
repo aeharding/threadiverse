@@ -4,6 +4,7 @@ import { Person } from "./Person";
 import { Post } from "./Post";
 import { SubscribedType } from "./SubscribedType";
 import { z } from "zod/v4-mini";
+import { Vote } from "./Vote";
 
 export const CommentAggregates = z.object({
   comment_id: z.number(),
@@ -29,5 +30,5 @@ export const CommentView = z.object({
   creator_is_admin: z.boolean(),
   subscribed: SubscribedType,
   saved: z.boolean(),
-  my_vote: z.optional(z.number()),
+  my_vote: z.optional(Vote),
 });

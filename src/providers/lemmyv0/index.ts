@@ -359,14 +359,14 @@ export class UnsafeLemmyV0Client implements BaseClient {
     ...params: Parameters<BaseClient["getNotifications"]>
   ) {
     const [replies, mentions, privateMessages] = await Promise.all([
-      this.client.getReplies(...params),
-      this.client.getPersonMentions(...params),
-      this.client.getPrivateMessages(...params),
+      this.getReplies(...params),
+      this.getPersonMentions(...params),
+      this.getPrivateMessages(...params),
     ]);
 
     const notifications = [
-      ...replies.replies.map(compatLemmyReplyView),
-      ...mentions.mentions.map(compatLemmyMentionView),
+      ...replies.replies,
+      ...mentions.mentions,
       ...privateMessages.private_messages,
     ].sort(
       (a, b) =>

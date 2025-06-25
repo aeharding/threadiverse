@@ -6,6 +6,7 @@ import { Person } from "./Person";
 import { Post } from "./Post";
 import { SubscribedType } from "./SubscribedType";
 import { z } from "zod/v4-mini";
+import { Vote } from "./Vote";
 /**
  * A comment report view.
  */
@@ -23,6 +24,6 @@ export const CommentReportView = z.object({
   creator_blocked: z.boolean(),
   subscribed: SubscribedType,
   saved: z.boolean(),
-  my_vote: z.optional(z.number()),
+  my_vote: z.optional(Vote),
   resolver: z.optional(Person),
 });

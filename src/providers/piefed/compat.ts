@@ -109,3 +109,27 @@ export function compatPiefedCommunityModeratorView(
     moderator: compatPiefedPerson(view.moderator),
   };
 }
+
+export function compatPiefedCommentReplyView(
+  reply: components["schemas"]["CommentReplyView"],
+) {
+  return {
+    ...reply,
+    banned_from_community: reply.banned_from_community ?? false, // TODO piefed types are wrong, this isn't being returned rn
+    comment: compatPiefedComment(reply.comment, reply.creator.id),
+    creator: compatPiefedPerson(reply.creator),
+    post: compatPiefedPost(reply.post),
+    community: compatPiefedCommunity(reply.community),
+    recipient: compatPiefedPerson(reply.recipient),
+  };
+}
+
+export function compatPiefedPrivateMessageView(
+  message: components["schemas"]["PrivateMessageView"],
+) {
+  return {
+    ...message,
+    creator: compatPiefedPerson(message.creator),
+    recipient: compatPiefedPerson(message.recipient),
+  };
+}

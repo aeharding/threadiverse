@@ -6,6 +6,7 @@ import { PersonMention } from "./PersonMention";
 import { Post } from "./Post";
 import { SubscribedType } from "./SubscribedType";
 import { z } from "zod/v4-mini";
+import { Vote } from "./Vote";
 
 /**
  * A person mention view.
@@ -25,5 +26,5 @@ export const PersonMentionView = z.object({
   subscribed: SubscribedType,
   saved: z.boolean(),
   creator_blocked: z.boolean(),
-  my_vote: z.optional(z.number()),
+  my_vote: z.optional(Vote),
 });
