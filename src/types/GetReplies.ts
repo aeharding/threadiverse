@@ -2,7 +2,7 @@
  * Get comment replies.
  */
 export type GetReplies = {
-  page?: number;
   limit?: number;
+  page?: number;
   unread_only?: boolean;
 };

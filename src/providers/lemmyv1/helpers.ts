@@ -1,4 +1,5 @@
 import { ReportCombinedView as LemmyReportCombinedView } from "lemmy-js-client-v1";
+
 import { LemmyV1PostCommentReportOnly } from "./compat";
 
 export function isPostCommentReport(

@@ -1,11 +1,11 @@
-import type { CommunitySortType } from "./CommunitySortType";
 import type { ListingType } from ".";
+import type { CommunitySortType } from "./CommunitySortType";
 /**
  * Fetches a list of communities.
  */
 export type ListCommunities = CommunitySortType & {
-  type_?: ListingType;
-  show_nsfw?: boolean;
-  page?: number;
   limit?: number;
+  page?: number;
+  show_nsfw?: boolean;
+  type_?: ListingType;
 };

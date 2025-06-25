@@ -1,59 +1,60 @@
 import { z } from "zod/v4-mini";
-import { PersonAggregates, PersonView } from "./PersonView";
-import { Person } from "./Person";
-import { CommunityModeratorView } from "./CommunityModeratorView";
+
 import { Community } from "./Community";
 import { CommunityFollowerView } from "./CommunityFollowerView";
+import { CommunityModeratorView } from "./CommunityModeratorView";
 import { Instance } from "./Instance";
-import { SiteAggregates } from "./SiteAggregates";
+import { Person } from "./Person";
+import { PersonAggregates, PersonView } from "./PersonView";
 import { RegistrationMode } from "./RegistrationMode";
+import { SiteAggregates } from "./SiteAggregates";
 
 export const MyUserInfo = z.object({
+  community_blocks: z.array(Community),
+  follows: z.array(CommunityFollowerView),
+  instance_blocks: z.array(Instance),
   local_user_view: z.object({
-    person: Person,
     counts: PersonAggregates,
     local_user: z.object({
       admin: z.boolean(),
       show_nsfw: z.boolean(),
     }),
+    person: Person,
   }),
-  follows: z.array(CommunityFollowerView),
   moderates: z.array(CommunityModeratorView),
-  community_blocks: z.array(Community),
-  instance_blocks: z.array(Instance),
   person_blocks: z.array(Person),
 });
 
 export const LocalSite = z.object({
-  require_email_verification: z.boolean(),
-  captcha_enabled: z.boolean(),
   /**
    * An optional registration application questionnaire in markdown.
    */
   application_question: z.optional(z.string()),
-  registration_mode: RegistrationMode,
+  captcha_enabled: z.boolean(),
   legal_information: z.optional(z.string()),
+  registration_mode: RegistrationMode,
+  require_email_verification: z.boolean(),
 });
 
 export const Site = z.object({
-  name: z.string(),
+  actor_id: z.string(),
+  banner: z.optional(z.string()),
   description: z.optional(z.string()),
   icon: z.optional(z.string()),
-  banner: z.optional(z.string()),
-  actor_id: z.string(),
-  version: z.optional(z.string()),
+  name: z.string(),
   sidebar: z.optional(z.string()),
+  version: z.optional(z.string()),
 });
 
 export const SiteView = z.object({
-  site: Site,
-  local_site: LocalSite,
   counts: z.optional(SiteAggregates),
+  local_site: LocalSite,
+  site: Site,
 });
 
 export const GetSiteResponse = z.object({
-  version: z.string(),
   admins: z.array(PersonView),
-  site_view: SiteView,
   my_user: z.optional(MyUserInfo),
+  site_view: SiteView,
+  version: z.string(),
 });

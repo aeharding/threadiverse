@@ -1,6 +1,7 @@
 import { vi } from "vitest";
-import ThreadiverseClient from "../src/ThreadiverseClient";
+
 import { BaseClientOptions } from "../src/BaseClient";
+import ThreadiverseClient from "../src/ThreadiverseClient";
 
 export type ProviderTestConfig = {
   baseUrl: string;
@@ -32,40 +33,40 @@ export function setupProviderTest({
         JSON.stringify({
           links: [
             {
-              rel: "http://nodeinfo.diaspora.software/ns/schema/2.1",
               href: nodeinfoHref,
+              rel: "http://nodeinfo.diaspora.software/ns/schema/2.1",
             },
           ],
         }),
         {
+          headers: { "Content-Type": "application/json" },
           status: 200,
           statusText: "OK",
-          headers: { "Content-Type": "application/json" },
         },
       );
     }
     // Nodeinfo
     if (urlStr === nodeinfoHref) {
       return new Response(JSON.stringify({ software: nodeinfoSoftware }), {
+        headers: { "Content-Type": "application/json" },
         status: 200,
         statusText: "OK",
-        headers: { "Content-Type": "application/json" },
       });
     }
     // Lemmy getPosts
     if (urlStr.startsWith("https://lemmy.example.com/api/v3/post/list")) {
       return new Response(JSON.stringify({ posts: [] }), {
+        headers: { "Content-Type": "application/json" },
         status: 200,
         statusText: "OK",
-        headers: { "Content-Type": "application/json" },
       });
     }
     // Piefed openapi-fetch getPosts
     if (urlStr.startsWith("https://piefed.example.com/api/alpha/post/list")) {
       return new Response(JSON.stringify({ posts: [] }), {
+        headers: { "Content-Type": "application/json" },
         status: 200,
         statusText: "OK",
-        headers: { "Content-Type": "application/json" },
       });
     }
     throw new Error(`Unexpected fetch call: ${urlStr}`);

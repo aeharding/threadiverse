@@ -3,3424 +3,261 @@
  * Do not make direct changes to the file.
  */
 
-export interface paths {
-    "/site": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Gets the site, and your user data. */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GetSiteResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/site/block": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Block an instance. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["BlockInstance"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BlockInstanceResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Search PieFed. */
-        get: {
-            parameters: {
-                query?: {
-                    Search?: components["schemas"]["Search"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SearchResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/resolve_object": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Fetch a non-local / federated object. */
-        get: {
-            parameters: {
-                query?: {
-                    ResolveObject?: components["schemas"]["ResolveObject"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ResolveObjectResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/federated_instances": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Fetch federated instances. */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GetFederatedInstancesResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/community": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get / fetch a community. */
-        get: {
-            parameters: {
-                query?: {
-                    GetCommunity?: components["schemas"]["GetCommunity"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GetCommunityResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        /** Edit community. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["EditCommunity"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommunityResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        /** Create a new community. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["CreateCommunity"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommunityResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-                /** @description You are being rate limited */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/community/delete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Delete a community. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["DeleteCommunity"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommunityResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/community/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List communities, with various filters. */
-        get: {
-            parameters: {
-                query?: {
-                    ListCommunities?: components["schemas"]["ListCommunities"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ListCommunitiesResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/community/follow": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Follow / subscribe to a community. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["FollowCommunity"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommunityResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/community/block": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Block a community. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["BlockCommunity"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BlockCommunityResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/community/mod": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Add or remove a moderator for your community.. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["AddModToCommunity"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["AddModToCommunityResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/community/subscribe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Subscribe to activities in a community. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["SubscribeCommunity"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommunityResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/community/moderate/bans": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get the list of banned users for a community. */
-        get: {
-            parameters: {
-                query?: {
-                    GetCommunityModerationBansList?: components["schemas"]["GetCommunityModerationBansList"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ModerationCommunityBansListResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/community/moderate/ban": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Ban a user from a community. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["ModerateCommunityBan"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ModerateCommunityBanResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/community/moderate/unban": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Unban a user from a community. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["ModerateCommunityUnBan"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ModerateCommunityUnBanResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/community/moderate/post/nsfw": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Mark or unmark a post as NSFW. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["ModerateCommunityPostNsfw"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ModerateCommunityPostNsfwResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/post/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get / fetch posts, with various filters. */
-        get: {
-            parameters: {
-                query?: {
-                    GetPosts?: components["schemas"]["GetPosts"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GetPostsResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/post": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get / fetch a post. */
-        get: {
-            parameters: {
-                query?: {
-                    GetPost?: components["schemas"]["GetPost"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GetPostResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        /** Edit a post. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["EditPost"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PostResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        /** Create a post. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["CreatePost"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PostResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-                /** @description You are being rate limited */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/post/like": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Like / vote on a post. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["CreatePostLike"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PostResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/post/save": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Save a post. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["SavePost"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PostResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/post/subscribe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Subscribe to a post. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["SubscribePost"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PostResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/post/delete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Delete a post. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["DeletePost"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PostResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/post/report": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Report a post. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["CreatePostReport"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PostReportResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/post/lock": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** A moderator can lock a post ( IE disable new comments ). */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["LockPost"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PostResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/post/feature": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** A moderator can feature a community post ( IE stick it to the top of a community ). */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["FeaturePost"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PostResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/post/remove": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** A moderator remove for a post. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["RemovePost"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PostResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comment": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get / fetch a comment. */
-        get: {
-            parameters: {
-                query?: {
-                    GetComments?: components["schemas"]["GetComment"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        /** Edit a comment. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["EditComment"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        /** Create a comment. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["CreateComment"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-                /** @description You are being rate limited */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comment/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get / fetch comments. */
-        get: {
-            parameters: {
-                query?: {
-                    GetComments?: components["schemas"]["GetComments"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GetCommentsResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comment/delete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Delete a comment. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["DeleteComment"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comment/remove": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** A moderator remove for a comment. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["RemoveComment"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comment/like": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Like / vote on a comment. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["CreateCommentLike"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comment/save": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Save a comment. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["SaveComment"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comment/subscribe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Subscribe to a comment. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["SubscribeComment"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comment/report": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Report a comment. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["CreateCommentReport"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentReportResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/private_message/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get / fetch private messages. */
-        get: {
-            parameters: {
-                query?: {
-                    GetPrivateMessages?: components["schemas"]["GetPrivateMessages"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PrivateMessagesResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get the details for a person. */
-        get: {
-            parameters: {
-                query?: {
-                    GetPersonDetails?: components["schemas"]["GetPersonDetails"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GetPersonDetailsResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/replies": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get comment replies. */
-        get: {
-            parameters: {
-                query?: {
-                    GetReplies?: components["schemas"]["GetReplies"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GetRepliesResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/block": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Block a person. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["BlockPerson"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BlockPersonResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Log into PieFed. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["Login"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["LoginResponse"];
-                    };
-                };
-                /** @description BAD REQUEST */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponseLogin"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/mark_all_as_read": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Mark all replies as read. */
-        post: operations["markAllAsRead"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/unread_count": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get your unread counts */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GetUnreadCountResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/subscribe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Subscribe to activities from another user */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["SubscribePerson"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PersonResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/save_user_settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Save your user settings. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["SaveUserSettings"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/notifications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get your user notifications */
-        get: {
-            parameters: {
-                query?: {
-                    Status?: components["schemas"]["GetNotificationStatus"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["NotificationsResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/notification_state": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Set the read status of a given notification. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["EditNotificationState"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["NotificationsReadStatusResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/notifications_count": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get user unread notifications count. */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["NotificationsCountResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/mark_all_notifications_read": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Set all unread user notifications to read. */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["NotificationsMarkAllReadResponse"];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/user/verify_credentials": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Verify username / password credentials */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["Login"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description BAD REQUEST */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/upload/image": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "multipart/form-data": components["schemas"]["ImageUpload"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["UploadResponse"];
-                    };
-                };
-                /** @description The uploaded image was missing or invalid */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-                /** @description You are being rate limited */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/upload/community_image": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "multipart/form-data": components["schemas"]["ImageUpload"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["UploadResponse"];
-                    };
-                };
-                /** @description The uploaded image was missing or invalid */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-                /** @description You are being rate limited */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/upload/user_image": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "multipart/form-data": components["schemas"]["ImageUpload"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["UploadResponse"];
-                    };
-                };
-                /** @description The uploaded image was missing or invalid */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-                /** @description You are being rate limited */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BadRequest"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-}
-export type webhooks = Record<string, never>;
+export type $defs = Record<string, never>;
 export interface components {
+    headers: never;
+    parameters: never;
+    pathItems: never;
+    requestBodies: never;
+    responses: never;
     schemas: {
-        /** BlockInstance */
-        BlockInstance: {
-            /** BlockInstance.instance_id */
-            instance_id: number;
-            /** BlockInstance.block */
-            block: boolean;
-        };
-        /** Search */
-        Search: {
-            /** Search.q */
-            q: string;
-            /** Search.type_ */
-            type_?: components["schemas"]["SearchType"];
-            /** Search.sort */
-            sort?: components["schemas"]["SortType"];
-            /** Search.listing_type */
-            listing_type?: components["schemas"]["ListingType"];
-            /** Search.page */
-            page?: number;
-            /** Search.limit */
-            limit?: number;
-        };
-        /** ResolveObject */
-        ResolveObject: {
-            /** ResolveObject.q */
-            q: string;
-        };
-        /** GetCommunity */
-        GetCommunity: {
-            /** GetCommunity.id */
-            id?: number;
-            /** GetCommunity.name */
-            name?: string;
-        };
-        /** CreateCommunity */
-        CreateCommunity: {
-            /** CreateCommunity.name */
-            name: string;
-            /** CreateCommunity.title */
-            title: string;
-            /** CreateCommunity.description */
-            description?: string;
-            /** CreateCommunity.rules */
-            rules?: string;
-            /** CreateCommunity.icon */
-            icon_url?: string;
-            /** CreateCommunity.banner */
-            banner_url?: string;
-            /** CreateCommunity.nsfw */
-            nsfw?: boolean;
-            /** CreateCommunity.restricted_to_mods */
-            restricted_to_mods?: boolean;
-            /** CreateCommunity.local_only */
-            local_only?: boolean;
-            /** CreateCommunity.discussion_languages */
-            discussion_languages?: number[];
-        };
-        /** CreateCommunity */
-        EditCommunity: {
-            /** CreateCommunity.id */
-            id: number;
-            /** CreateCommunity.title */
-            title?: string;
-            /** CreateCommunity.description */
-            description?: string;
-            /** CreateCommunity.rules */
-            rules?: string;
-            /** CreateCommunity.icon */
-            icon_url?: string;
-            /** CreateCommunity.banner */
-            banner_url?: string;
-            /** CreateCommunity.nsfw */
-            nsfw?: boolean;
-            /** CreateCommunity.restricted_to_mods */
-            restricted_to_mods?: boolean;
-            /** CreateCommunity.local_only */
-            local_only?: boolean;
-            /** CreateCommunity.discussion_languages */
-            discussion_languages?: number[];
-        };
-        /** DeleteCommunity */
-        DeleteCommunity: {
-            /** DeleteCommunity.community_id */
-            community_id: number;
-            /** DeleteCommunity.deleted */
-            deleted: boolean;
-        };
         /** AddModToCommunity */
         AddModToCommunity: {
+            /** AddModToCommunity.added */
+            added: boolean;
             /** AddModToCommunity.community_id */
             community_id: number;
             /** AddModToCommunity.person_id */
             person_id: number;
-            /** AddModToCommunity.added */
-            added: boolean;
-        };
-        /** ListCommunities */
-        ListCommunities: {
-            /** ListCommunities.type_ */
-            type_?: components["schemas"]["ListingType"];
-            /** ListCommunities.sort */
-            sort?: components["schemas"]["CommunitySortType"];
-            /** ListCommunities.show_nsfw */
-            show_nsfw?: boolean;
-            /** ListCommunities.page */
-            page?: number;
-            /** ListCommunities.limit */
-            limit?: number;
-        };
-        /** FollowCommunity */
-        FollowCommunity: {
-            /** FollowCommunity.community_id */
-            community_id: number;
-            /** FollowCommunity.follow */
-            follow: boolean;
-        };
-        /** BlockCommunity */
-        BlockCommunity: {
-            /** BlockCommunity.community_id */
-            community_id: number;
-            /** BlockCommunity.block */
-            block: boolean;
-        };
-        /** SubscribeCommunity */
-        SubscribeCommunity: {
-            /** SubscribeCommunity.community_id */
-            community_id: number;
-            /** SubscribeCommunity.subscribe */
-            subscribe: boolean;
-        };
-        /** GetCommunityModerationBansList */
-        GetCommunityModerationBansList: {
-            /**
-             * GetCommunityModerationBansList.community_id
-             * @example 42
-             */
-            community_id?: number;
-            /**
-             * GetCommunityModerationBansList.page
-             * @example 1
-             */
-            page?: number;
-        };
-        /** ModerateCommunityBan */
-        ModerateCommunityBan: {
-            /**
-             * PostCommunityModerateBan.community_id
-             * @example 42
-             */
-            community_id: number;
-            /**
-             * PostCommunityModerateBan.user_id
-             * @example 1234
-             */
-            user_id: number;
-            /**
-             * PostCommunityModerateBan.reason
-             * @example Violation of Rule 1.
-             */
-            reason: string;
-            /**
-             * PostCommunityModerateBan.expiredAt
-             * @example 2025-01-01T12:00:00
-             */
-            expiredAt: string;
-        };
-        /** ModerateCommunityUnBan */
-        ModerateCommunityUnBan: {
-            /**
-             * PutCommunityModerateUnBan.community_id
-             * @example 42
-             */
-            community_id: number;
-            /**
-             * PutCommunityModerateUnBan.user_id
-             * @example 1234
-             */
-            user_id: number;
-        };
-        /** ModerateCommunityPostNsfw */
-        ModerateCommunityPostNsfw: {
-            /**
-             * PostCommunityModeratePostNsfw.post_id
-             * @example 123456
-             */
-            post_id: number;
-            /**
-             * PostCommunityModeratePostNsfw.nsfw_status
-             * @example true
-             */
-            nsfw_status: boolean;
-        };
-        /** GetPosts */
-        GetPosts: {
-            /** GetPosts.type_ */
-            type_?: components["schemas"]["ListingType"];
-            /** GetPosts.sort */
-            sort?: components["schemas"]["SortType"];
-            /** GetPosts.page */
-            page?: number;
-            /** GetPosts.limit */
-            limit?: number;
-            /** GetPosts.community_id */
-            community_id?: number;
-            /** GetPosts.person_id */
-            person_id?: number;
-            /** GetPosts.community_name */
-            community_name?: string;
-            /** GetPosts.liked_only */
-            liked_only?: boolean;
-        };
-        /** GetPost */
-        GetPost: {
-            /** GetPost.id */
-            id?: number;
-            /** GetPost.comment_id */
-            comment_id?: number;
-        };
-        /** EditPost */
-        EditPost: {
-            /** EditPost.post_id */
-            post_id: number;
-            /** EditPost.title */
-            title?: string;
-            /** EditPost.url */
-            url?: string;
-            /** EditPost.body */
-            body?: string;
-            /** EditPost.nsfw */
-            nsfw?: boolean;
-            /** EditPost.language_id */
-            language_id?: number;
-        };
-        /** CreatePost */
-        CreatePost: {
-            /** CreatePost.title */
-            title: string;
-            /** CreatePost.community_id */
-            community_id: number;
-            /** CreatePost.url */
-            url?: string;
-            /** CreatePost.body */
-            body?: string;
-            /** CreatePost.nsfw */
-            nsfw?: boolean;
-            /** CreatePost.language_id */
-            language_id?: number;
-        };
-        /** CreatePostLike */
-        CreatePostLike: {
-            /** CreatePostLike.post_id */
-            post_id: number;
-            /** CreatePostLike.score */
-            score: number;
-        };
-        /** SavePost */
-        SavePost: {
-            /** SavePost.post_id */
-            post_id: number;
-            /** SavePost.save */
-            save: boolean;
-        };
-        /** SubscribePost */
-        SubscribePost: {
-            /** SubscribePost.post_id */
-            post_id: number;
-            /** SubscribePost.subscribe */
-            subscribe: boolean;
-        };
-        /** DeletePost */
-        DeletePost: {
-            /** DeletePost.post_id */
-            post_id: number;
-            /** DeletePost.deleted */
-            deleted: boolean;
-        };
-        /** CreatePostReport */
-        CreatePostReport: {
-            /** CreatePostReport.post_id */
-            post_id: number;
-            /** CreatePostReport.reason */
-            reason: string;
-        };
-        /** LockPost */
-        LockPost: {
-            /** LockPost.post_id */
-            post_id: number;
-            /** LockPost.locked */
-            locked: boolean;
-        };
-        /** FeaturePost */
-        FeaturePost: {
-            /** FeaturePost.post_id */
-            post_id: number;
-            /** FeaturePost.featured */
-            featured: boolean;
-            /** FeaturePost.feature_type */
-            feature_type: components["schemas"]["PostFeatureType"];
-        };
-        /** RemovePost */
-        RemovePost: {
-            /** RemovePost.post_id */
-            post_id: number;
-            /** RemovePost.removed */
-            removed: boolean;
-            /** RemovePost.reason */
-            reason?: string;
-        };
-        /** CreateComment */
-        CreateComment: {
-            /** CreateComment.content */
-            content: string;
-            /** CreateComment.post_id */
-            post_id: number;
-            /** CreateComment.parent_id */
-            parent_id?: number;
-            /** CreateComment.language_id */
-            language_id?: number;
-        };
-        /** EditComment */
-        EditComment: {
-            /** EditComment.comment_id */
-            comment_id: number;
-            /** EditComment.content */
-            content?: string;
-            /** EditComment.language_id */
-            language_id?: number;
-        };
-        /** GetComment */
-        GetComment: {
-            /** GetComment.id */
-            id: number;
-        };
-        /** GetComments */
-        GetComments: {
-            /** GetComments.type_ */
-            type_?: components["schemas"]["ListingType"];
-            /** GetComments.sort */
-            sort?: components["schemas"]["CommentSortType"];
-            /** GetComments.max_depth */
-            max_depth?: number;
-            /** GetComments.page */
-            page?: number;
-            /** GetComments.limit */
-            limit?: number;
-            /** GetComments.community_id */
-            community_id?: number;
-            /** GetComments.post_id */
-            post_id?: number;
-            /** GetComments.parent_id */
-            parent_id?: number;
-            /** GetComments.person_id */
-            person_id?: number;
-        };
-        /** DeleteComment */
-        DeleteComment: {
-            /** DeleteComment.comment_id */
-            comment_id: number;
-            /** DeleteComment.deleted */
-            deleted: boolean;
-        };
-        /** RemoveComment */
-        RemoveComment: {
-            /** RemoveComment.comment_id */
-            comment_id: number;
-            /** RemoveComment.removed */
-            removed: boolean;
-            /** RemoveComment.reason */
-            reason?: string;
-        };
-        /** CreateCommentLike */
-        CreateCommentLike: {
-            /** CreateCommentLike.comment_id */
-            comment_id: number;
-            /** CreateCommentLike.score */
-            score: number;
-        };
-        /** SaveComment */
-        SaveComment: {
-            /** SaveComment.comment_id */
-            comment_id: number;
-            /** SaveComment.save */
-            save: boolean;
-        };
-        /** SaveComment */
-        SubscribeComment: {
-            /** SubscribeComment.comment_id */
-            comment_id: number;
-            /** SubscribeComment.subscribe */
-            subscribe: boolean;
-        };
-        /** CreateCommentReport */
-        CreateCommentReport: {
-            /** CreateCommentReport.comment_id */
-            comment_id: number;
-            /** CreateCommentReport.reason */
-            reason: string;
-        };
-        /** GetPrivateMessages */
-        GetPrivateMessages: {
-            /** GetPrivateMessages.unread_only */
-            unread_only?: boolean;
-            /** GetPrivateMessages.page */
-            page?: number;
-            /** GetPrivateMessages.limit */
-            limit?: number;
-            /** GetPrivateMessages.creator_id */
-            creator_id?: number;
-        };
-        /** GetPersonDetails */
-        GetPersonDetails: {
-            /** GetPersonDetails.person_id */
-            person_id?: number;
-            /** GetPersonDetails.username */
-            username?: string;
-            /** GetPersonDetails.sort */
-            sort?: components["schemas"]["SortType"];
-            /** GetPersonDetails.page */
-            page?: number;
-            /** GetPersonDetails.limit */
-            limit?: number;
-            /** GetPersonDetails.community_id */
-            community_id?: number;
-            /** GetPersonDetails.saved_only */
-            saved_only?: boolean;
-            /** GetPersonDetails.include_content */
-            include_content?: boolean;
-        };
-        /** GetReplies */
-        GetReplies: {
-            /** GetReplies.sort */
-            sort?: components["schemas"]["CommentSortType"];
-            /** GetReplies.page */
-            page?: number;
-            /** GetReplies.limit */
-            limit?: number;
-            /** GetReplies.unread_only */
-            unread_only?: boolean;
-        };
-        /** BlockPerson */
-        BlockPerson: {
-            /** BlockPerson.person_id */
-            person_id: number;
-            /** BlockPerson.block */
-            block: boolean;
-        };
-        /** Login */
-        Login: {
-            /** Login.username */
-            username: string;
-            /** Login.password */
-            password: string;
-        };
-        /** GetUnreadCountResponse */
-        GetUnreadCountResponse: {
-            /** GetUnreadCountResponse.replies */
-            replies: number;
-            /** GetUnreadCountResponse.mentions */
-            mentions: number;
-            /** GetUnreadCountResponse.private_messages */
-            private_messages: number;
-        };
-        /** SubscribePerson */
-        SubscribePerson: {
-            /** SubscribePerson.person_id */
-            person_id: number;
-            /** SubscribePerson.subscribe */
-            subscribe: boolean;
-        };
-        SaveUserSettings: {
-            /** SaveUserSettings.show_nsfw */
-            show_nsfw?: boolean;
-            /** SaveUserSettings.show_read_posts */
-            show_read_posts?: boolean;
-            /** SaveUserSettings.bio */
-            bio?: string;
-        };
-        /** GetNotificationStatus */
-        GetNotificationStatus: {
-            /**
-             * GetNotificationStatus.status
-             * @enum {string}
-             */
-            status: "All" | "New" | "Read";
-            /**
-             * GetNotificationStatus.page
-             * @default 1
-             */
-            page: number;
-        };
-        /** EditNotificationState */
-        EditNotificationState: {
-            /** GetNotificationStatus.notif_id */
-            notif_id?: number;
-            /** GetNotificationStatus.read_state */
-            read_state?: boolean;
-        };
-        ImageUpload: {
-            /** Format: binary */
-            file: string;
-        };
-        BadRequest: {
-            /** @example An error occurred */
-            error: string;
-        };
-        /** GetSiteResponse */
-        GetSiteResponse: {
-            /** GetSiteResponse.my_user */
-            my_user?: components["schemas"]["MyUserInfo"];
-            /** GetSiteResponse.site */
-            site: components["schemas"]["Site"];
-            /** GetSiteResponse.version */
-            version: string;
-            /** GetSiteResponse.admins */
-            admins: components["schemas"]["PersonView"][];
-        };
-        /** BlockInstanceResponse */
-        BlockInstanceResponse: {
-            /** BlockInstanceResponse.blocked */
-            blocked: boolean;
-        };
-        /** SearchResponse */
-        SearchResponse: {
-            /** SearchResponse.type_ */
-            type_: components["schemas"]["SearchType"];
-            /** SearchResponse.posts */
-            posts: components["schemas"]["PostView"][];
-            /** SearchResponse.communities */
-            communities: components["schemas"]["CommunityView"][];
-            /** SearchResponse.users */
-            users: components["schemas"]["PersonView"][];
-        };
-        /** ResolveObjectResponse */
-        ResolveObjectResponse: {
-            /** ResolveObjectResponse.comment */
-            comment?: components["schemas"]["CommentView"];
-            /** ResolveObjectResponse.post */
-            post?: components["schemas"]["PostView"];
-            /** ResolveObjectResponse.community */
-            community?: components["schemas"]["CommunityView"];
-            /** ResolveObjectResponse.person */
-            person?: components["schemas"]["PersonView"];
-        };
-        /** GetFederatedInstancesResponse */
-        GetFederatedInstancesResponse: {
-            /** GetFederatedInstancesResponse.federated_instances */
-            federated_instances?: components["schemas"]["FederatedInstancesView"];
-        };
-        /** GetCommunityResponse */
-        GetCommunityResponse: {
-            /** GetCommunityResponse.community_view */
-            community_view: components["schemas"]["CommunityView"];
-            /** GetCommunityResponse.site */
-            site?: components["schemas"]["Site"];
-            /** GetCommunityResponse.moderators */
-            moderators: components["schemas"]["CommunityModeratorView"][];
-            /** GetCommunityResponse.discussion_languages */
-            discussion_languages: number[];
-        };
-        /** CommunityResponse */
-        CommunityResponse: {
-            /** CommunityResponse.community_view */
-            community_view: components["schemas"]["CommunityView"];
-            /** CommunityResponse.discussion_languages */
-            discussion_languages: number[];
-        };
-        /** ListCommunitiesResponse */
-        ListCommunitiesResponse: {
-            /** ListCommunitiesResponse.communities */
-            communities: components["schemas"]["CommunityView"][];
-        };
-        /** BlockCommunityResponse */
-        BlockCommunityResponse: {
-            /** BlockCommunityResponse.community_view */
-            community_view: components["schemas"]["CommunityView"];
-            /** BlockCommunityResponse.blocked */
-            blocked: boolean;
         };
         /** AddModToCommunityResponse */
         AddModToCommunityResponse: {
             /** AddModToCommunityResponse.moderators */
             moderators: components["schemas"]["CommunityModeratorView"][];
         };
-        /** ModerationCommunityBansListResponse */
-        ModerationCommunityBansListResponse: {
-            /** GetCommunityModerationBansListResponse.items */
-            items?: components["schemas"]["CommunityModerationBanItem"][];
-            /**
-             * GetCommunityModerationBansListResponse.next_page
-             * @example 3
-             */
-            next_page?: string;
+        BadRequest: {
+            /** @example An error occurred */
+            error: string;
         };
-        /** ModerateCommunityBanResponse */
-        ModerateCommunityBanResponse: components["schemas"]["CommunityModerationBanItem"];
-        /** ModerateCommunityUnBanResponse */
-        ModerateCommunityUnBanResponse: components["schemas"]["CommunityModerationBanItem"];
-        /** ModerateCommunityPostNsfwResponse */
-        ModerateCommunityPostNsfwResponse: components["schemas"]["PostView"];
-        /** GetPostsResponse */
-        GetPostsResponse: {
-            /** GetPostsResponse.posts */
-            posts: components["schemas"]["PostView"][];
+        /** BlockCommunity */
+        BlockCommunity: {
+            /** BlockCommunity.block */
+            block: boolean;
+            /** BlockCommunity.community_id */
+            community_id: number;
         };
-        /** GetPostResponse */
-        GetPostResponse: {
-            /** GetPostResponse.post_view */
-            post_view: components["schemas"]["PostView"];
-            /** GetPostResponse.community_view */
+        /** BlockCommunityResponse */
+        BlockCommunityResponse: {
+            /** BlockCommunityResponse.blocked */
+            blocked: boolean;
+            /** BlockCommunityResponse.community_view */
             community_view: components["schemas"]["CommunityView"];
-            /** GetPostResponse.moderators */
-            moderators: components["schemas"]["CommunityModeratorView"][];
-            /** GetPostResponse.cross_posts */
-            cross_posts: components["schemas"]["PostView"][];
         };
-        /** PostResponse */
-        PostResponse: {
-            /** PostResponse.post_view */
-            post_view: components["schemas"]["PostView"];
+        /** BlockInstance */
+        BlockInstance: {
+            /** BlockInstance.block */
+            block: boolean;
+            /** BlockInstance.instance_id */
+            instance_id: number;
         };
-        /** PostReportResponse */
-        PostReportResponse: {
-            /** PostReportResponse.post_report_view */
-            post_report_view: components["schemas"]["PostReportView"];
+        /** BlockInstanceResponse */
+        BlockInstanceResponse: {
+            /** BlockInstanceResponse.blocked */
+            blocked: boolean;
         };
-        /** CommentResponse */
-        CommentResponse: {
-            /** CommentResponse.comment_view */
-            comment_view: components["schemas"]["CommentView"];
+        /** BlockPerson */
+        BlockPerson: {
+            /** BlockPerson.block */
+            block: boolean;
+            /** BlockPerson.person_id */
+            person_id: number;
         };
-        /** GetCommentsResponse */
-        GetCommentsResponse: {
-            /** GetCommentsResponse.comments */
-            comments: components["schemas"]["CommentView"][];
+        /** BlockPersonResponse */
+        BlockPersonResponse: {
+            /** BlockPersonResponse.blocked */
+            blocked: boolean;
+            /** BlockPersonResponse.person_view */
+            person_view: components["schemas"]["PersonView"];
+        };
+        /** Comment */
+        Comment: {
+            /** Comment.ap_id */
+            ap_id: string;
+            /** Comment.content */
+            content: string;
+            /** Comment.creator_id */
+            creator_id: number;
+            /** Comment.deleted */
+            deleted: boolean;
+            /** Comment.distinguished */
+            distinguished: boolean;
+            /** Comment.id */
+            id: number;
+            /** Comment.language_id */
+            language_id: number;
+            /** Comment.local */
+            local: boolean;
+            /** Comment.path */
+            path: string;
+            /** Comment.post_id */
+            post_id: number;
+            /** Comment.published */
+            published: string;
+            /** Comment.removed */
+            removed: boolean;
+            /** Comment.updated */
+            updated?: string;
+        };
+        /** CommentAggregates */
+        CommentAggregates: {
+            /** CommentAggregates.child_count */
+            child_count: number;
+            /** CommentAggregates.comment_id */
+            comment_id: number;
+            /** CommentAggregates.downvotes */
+            downvotes: number;
+            /** CommentAggregates.published */
+            published: string;
+            /** CommentAggregates.score */
+            score: number;
+            /** CommentAggregates.upvotes */
+            upvotes: number;
+        };
+        /** CommentReply */
+        CommentReply: {
+            /** CommentReply.comment_id */
+            comment_id: number;
+            /** CommentReply.id */
+            id: number;
+            /** CommentReply.published */
+            published: string;
+            /** CommentReply.read */
+            read: boolean;
+            /** CommentReply.recipient_id */
+            recipient_id: number;
+        };
+        /** CommentReplyView */
+        CommentReplyView: {
+            /** CommentReplyView.banned_from_community */
+            banned_from_community: boolean;
+            /** CommentReplyView.comment */
+            comment: components["schemas"]["Comment"];
+            /** CommentReplyView.comment_reply */
+            comment_reply: components["schemas"]["CommentReply"];
+            /** CommentReplyView.community */
+            community: components["schemas"]["Community"];
+            /** CommentReplyView.counts */
+            counts: components["schemas"]["CommentAggregates"];
+            /** CommentReplyView.creator */
+            creator: components["schemas"]["Person"];
+            /** CommentReplyView.creator_banned_from_community */
+            creator_banned_from_community: boolean;
+            /** CommentReplyView.creator_blocked */
+            creator_blocked: boolean;
+            /** CommentReplyView.creator_is_admin */
+            creator_is_admin: boolean;
+            /** CommentReplyView.creator_is_moderator */
+            creator_is_moderator: boolean;
+            /** CommentReplyView.my_vote */
+            my_vote?: number;
+            /** CommentReplyView.post */
+            post: components["schemas"]["Post"];
+            /** CommentReplyView.recipient */
+            recipient: components["schemas"]["Person"];
+            /** CommentReplyView.saved */
+            saved: boolean;
+            /** CommentReplyView.subscribed */
+            subscribed: components["schemas"]["SubscribedType"];
+        };
+        /** CommentReport */
+        CommentReport: {
+            /** CommentReport.comment_id */
+            comment_id: number;
+            /** CommentReport.creator_id */
+            creator_id: number;
+            /** CommentReport.id */
+            id: number;
+            /** CommentReport.original_comment_text */
+            original_comment_text: string;
+            /** CommentReport.published */
+            published: string;
+            /** CommentReport.reason */
+            reason: string;
+            /** CommentReport.resolved */
+            resolved: boolean;
+            /** CommentReport.resolver_id */
+            resolver_id?: number;
+            /** CommentReport.updated */
+            updated?: string;
         };
         /** CommentReportResponse */
         CommentReportResponse: {
             /** CommentReportResponse.comment_report_view */
             comment_report_view: components["schemas"]["CommentReportView"];
         };
-        /** PrivateMessagesResponse */
-        PrivateMessagesResponse: {
-            /** PrivateMessagesResponse.private_messages */
-            private_messages: components["schemas"]["PrivateMessageView"][];
+        /** CommentReportView */
+        CommentReportView: {
+            /** CommentReportView.comment */
+            comment: components["schemas"]["Comment"];
+            /** CommentReportView.comment_creator */
+            comment_creator: components["schemas"]["Person"];
+            /** CommentReportView.comment_report */
+            comment_report: components["schemas"]["CommentReport"];
+            /** CommentReportView.community */
+            community: components["schemas"]["Community"];
+            /** CommentReportView.counts */
+            counts: components["schemas"]["CommentAggregates"];
+            /** CommentReportView.creator */
+            creator: components["schemas"]["Person"];
+            /** CommentReportView.creator_banned_from_community */
+            creator_banned_from_community: boolean;
+            /** CommentReportView.creator_blocked */
+            creator_blocked: boolean;
+            /** CommentReportView.creator_is_admin */
+            creator_is_admin: boolean;
+            /** CommentReportView.creator_is_moderator */
+            creator_is_moderator: boolean;
+            /** CommentReportView.my_vote */
+            my_vote?: number;
+            /** CommentReportView.post */
+            post: components["schemas"]["Post"];
+            /** CommentReportView.resolver */
+            resolver?: components["schemas"]["Person"];
+            /** CommentReportView.saved */
+            saved: boolean;
+            /** CommentReportView.subscribed */
+            subscribed: components["schemas"]["SubscribedType"];
         };
-        /** GetPersonDetailsResponse */
-        GetPersonDetailsResponse: {
-            /** GetPersonDetailsResponse.person_view */
-            person_view: components["schemas"]["PersonView"];
-            /** GetPersonDetailsResponse.site */
-            site?: components["schemas"]["Site"];
-            /** GetPersonDetailsResponse.comments */
-            comments: components["schemas"]["CommentView"][];
-            /** GetPersonDetailsResponse.posts */
-            posts: components["schemas"]["PostView"][];
-            /** GetPersonDetailsResponse.moderates */
-            moderates: components["schemas"]["CommunityModeratorView"][];
+        /** CommentResponse */
+        CommentResponse: {
+            /** CommentResponse.comment_view */
+            comment_view: components["schemas"]["CommentView"];
         };
-        /** GetRepliesResponse */
-        GetRepliesResponse: {
-            /** GetRepliesResponse.replies */
-            replies: components["schemas"]["CommentReplyView"][];
-        };
-        /** PersonResponse */
-        PersonResponse: {
-            /** PersonResponse.person_view */
-            person_view: components["schemas"]["PersonView"];
-        };
-        /** BlockPersonResponse */
-        BlockPersonResponse: {
-            /** BlockPersonResponse.person_view */
-            person_view: components["schemas"]["PersonView"];
-            /** BlockPersonResponse.blocked */
-            blocked: boolean;
-        };
-        /** LoginResponse */
-        LoginResponse: {
-            /** LoginResponse.jwt */
-            jwt?: string;
-        };
-        ErrorResponseLogin: {
-            /** @example incorrect_login */
-            error?: string;
-        };
-        /** NotificationsResponse */
-        NotificationsResponse: {
-            /** NotificationsResponse.counts */
-            counts: components["schemas"]["NotificationsCountsView"];
-            /** NotificationsResponse.items */
-            items: (components["schemas"]["NotificationsItemUserView"] | components["schemas"]["NotificationsItemCommunityView"] | components["schemas"]["NotificationsItemTopicView"] | components["schemas"]["NotificationsItemPostView"] | components["schemas"]["NotificationsItemReplyView"] | components["schemas"]["NotificationsItemFeedView"] | components["schemas"]["NotificationsItemPostMentionView"] | components["schemas"]["NotificationsItemCommentMentionView"])[];
-            /**
-             * NotificationsResponse.status
-             * @example New
-             */
-            status: string;
-            /**
-             * NotificationsResponse.user
-             * @example MyPieFedUserName
-             */
-            user: string;
-        };
-        /** NotificationsReadStatusResponse */
-        NotificationsReadStatusResponse: components["schemas"]["NotificationsItemUserView"] | components["schemas"]["NotificationsItemCommunityView"] | components["schemas"]["NotificationsItemTopicView"] | components["schemas"]["NotificationsItemPostView"] | components["schemas"]["NotificationsItemReplyView"] | components["schemas"]["NotificationsItemFeedView"] | components["schemas"]["NotificationsItemPostMentionView"] | components["schemas"]["NotificationsItemCommentMentionView"];
-        /** NotificationsCountResponse */
-        NotificationsCountResponse: {
-            /**
-             * NotificationsCountResponse.count
-             * @example 42
-             */
-            count?: number;
-        };
-        /** NotificationsMarkAllReadResponse */
-        NotificationsMarkAllReadResponse: {
-            /**
-             * NotificationsMarkAllReadResponse.mark_all_notifications_as_read
-             * @example complete
-             */
-            mark_all_notifications_as_read?: string;
-        };
-        UploadResponse: {
-            /** @example https://preferred.social/static/media/image.png */
-            url: string;
-        };
-        /** Site */
-        Site: {
-            /**
-             * Site.actor_id
-             * @example https://piefed.social/
-             */
-            actor_id: string;
-            /** Site.all_languages */
-            all_languages?: components["schemas"]["LanguageView"][];
-            /** Site.description */
-            description?: string;
-            /** Site.enable_downvotes */
-            enable_downvotes?: boolean;
-            /** Site.icon */
-            icon?: string;
-            /** Site.name */
-            name: string;
-            /** Site.registration_mode */
-            registration_mode?: components["schemas"]["RegistrationMode"];
-            /** Site.sidebar */
-            sidebar?: string;
-            /** Site.user_count */
-            user_count?: number;
-        };
-        /** Instance */
-        Instance: {
-            /** Instance.id */
-            id: number;
-            /** Instance.domain */
-            domain: string;
-            /** Instance.published */
-            published: string;
-            /** Instance.updated */
-            updated?: string;
-            /** Instance.software */
-            software?: string;
-            /** Instance.version */
-            version?: string;
-        };
-        /** InstanceWithoutFederationState */
-        InstanceWithoutFederationState: {
-            /** InstanceWithoutFederationState.id */
-            id: number;
-            /** InstanceWithoutFederationState.domain */
-            domain: string;
-            /** InstanceWithoutFederationState.published */
-            published: string;
-            /** InstanceWithoutFederationState.updated */
-            updated?: string;
-            /** InstanceWithoutFederationState.software */
-            software?: string;
-            /** InstanceWithoutFederationState.version */
-            version?: string;
+        /**
+         * CommentSortType
+         * @enum {string}
+         */
+        CommentSortType: "Hot" | "New" | "Old" | "Top";
+        /** CommentView */
+        CommentView: {
+            /** CommentView.activity_alert */
+            activity_alert: boolean;
+            /** CommentView.banned_from_community */
+            banned_from_community: boolean;
+            /** CommentView.comment */
+            comment: components["schemas"]["Comment"];
+            /** CommentView.community */
+            community: components["schemas"]["Community"];
+            /** CommentView.counts */
+            counts: components["schemas"]["CommentAggregates"];
+            /** CommentView.creator */
+            creator: components["schemas"]["Person"];
+            /** CommentView.creator_banned_from_community */
+            creator_banned_from_community: boolean;
+            /** CommentView.creator_blocked */
+            creator_blocked: boolean;
+            /** CommentView.creator_is_admin */
+            creator_is_admin: boolean;
+            /** CommentView.creator_is_moderator */
+            creator_is_moderator: boolean;
+            /** CommentView.my_vote */
+            my_vote?: number;
+            /** CommentView.post */
+            post: components["schemas"]["Post"];
+            /** CommentView.saved */
+            saved: boolean;
+            /** CommentView.subscribed */
+            subscribed: components["schemas"]["SubscribedType"];
         };
         /** Community */
         Community: {
@@ -3461,155 +298,997 @@ export interface components {
             /** Community.updated */
             updated?: string;
         };
-        /** Post */
-        Post: {
-            /** Post.id */
-            id: number;
-            /** Post.title */
-            title: string;
-            /** Post.url */
-            url?: string;
-            /** Post.body */
-            body?: string;
-            /** Post.creator_id */
-            creator_id: number;
-            /** Post.community_id */
+        /** CommunityAggregates */
+        CommunityAggregates: {
+            /** CommunityAggregates.community_id */
             community_id: number;
-            /** Post.removed */
-            removed: boolean;
-            /** Post.locked */
+            /** CommunityAggregates.post_count */
+            post_count: number;
+            /** CommunityAggregates.post_reply_count */
+            post_reply_count: number;
+            /** CommunityAggregates.published */
+            published: string;
+            /** CommunityAggregates.subscriptions_count */
+            subscriptions_count: number;
+        };
+        /** CommunityBlockView */
+        CommunityBlockView: {
+            /** CommunityBlockView.community */
+            community: components["schemas"]["Community"];
+            /** CommunityBlockView.person */
+            person: components["schemas"]["Person"];
+        };
+        /** CommunityFollowerView */
+        CommunityFollowerView: {
+            /** CommunityFollowerView.community */
+            community: components["schemas"]["Community"];
+            /** CommunityFollowerView.follower */
+            follower: components["schemas"]["Person"];
+        };
+        /** CommunityModerationBanItem */
+        CommunityModerationBanItem: {
+            /** CommunityModerationBanItem.bannedBy */
+            bannedBy?: components["schemas"]["Person"];
+            /** CommunityModerationBanItem.bannedUser */
+            bannedUser?: components["schemas"]["Person"];
+            /** CommunityModerationBanItem.community */
+            community?: components["schemas"]["CommunityView"];
+            /**
+             * CommunityModerationBanItem.expired
+             * @example false
+             */
+            expired?: boolean;
+            /**
+             * CommunityModerationBanItem.expiredAt
+             * @example 2042-01-01T12:00:00
+             */
+            expiredAt?: string;
+            /**
+             * CommunityModerationBanItem.reason
+             * @example Violation of Rule 4
+             */
+            reason?: string;
+        };
+        /** CommunityModeratorView */
+        CommunityModeratorView: {
+            /** CommunityModeratorView.community */
+            community: components["schemas"]["Community"];
+            /** CommunityModeratorView.moderator */
+            moderator: components["schemas"]["Person"];
+        };
+        /** CommunityResponse */
+        CommunityResponse: {
+            /** CommunityResponse.community_view */
+            community_view: components["schemas"]["CommunityView"];
+            /** CommunityResponse.discussion_languages */
+            discussion_languages: number[];
+        };
+        /**
+         * CommunitySortType
+         * @enum {string}
+         */
+        CommunitySortType: "Active" | "New";
+        /** CommunityView */
+        CommunityView: {
+            /** CommunityView.activity_alert */
+            activity_alert: boolean;
+            /** CommunityView.banned_from_community */
+            banned_from_community: boolean;
+            /** CommunityView.blocked */
+            blocked: boolean;
+            /** CommunityView.community */
+            community: components["schemas"]["Community"];
+            /** CommunityView.counts */
+            counts: components["schemas"]["CommunityAggregates"];
+            /** CommunityView.subscribed */
+            subscribed: components["schemas"]["SubscribedType"];
+        };
+        /** CreateComment */
+        CreateComment: {
+            /** CreateComment.content */
+            content: string;
+            /** CreateComment.language_id */
+            language_id?: number;
+            /** CreateComment.parent_id */
+            parent_id?: number;
+            /** CreateComment.post_id */
+            post_id: number;
+        };
+        /** CreateCommentLike */
+        CreateCommentLike: {
+            /** CreateCommentLike.comment_id */
+            comment_id: number;
+            /** CreateCommentLike.score */
+            score: number;
+        };
+        /** CreateCommentReport */
+        CreateCommentReport: {
+            /** CreateCommentReport.comment_id */
+            comment_id: number;
+            /** CreateCommentReport.reason */
+            reason: string;
+        };
+        /** CreateCommunity */
+        CreateCommunity: {
+            /** CreateCommunity.banner */
+            banner_url?: string;
+            /** CreateCommunity.description */
+            description?: string;
+            /** CreateCommunity.discussion_languages */
+            discussion_languages?: number[];
+            /** CreateCommunity.icon */
+            icon_url?: string;
+            /** CreateCommunity.local_only */
+            local_only?: boolean;
+            /** CreateCommunity.name */
+            name: string;
+            /** CreateCommunity.nsfw */
+            nsfw?: boolean;
+            /** CreateCommunity.restricted_to_mods */
+            restricted_to_mods?: boolean;
+            /** CreateCommunity.rules */
+            rules?: string;
+            /** CreateCommunity.title */
+            title: string;
+        };
+        /** CreatePost */
+        CreatePost: {
+            /** CreatePost.body */
+            body?: string;
+            /** CreatePost.community_id */
+            community_id: number;
+            /** CreatePost.language_id */
+            language_id?: number;
+            /** CreatePost.nsfw */
+            nsfw?: boolean;
+            /** CreatePost.title */
+            title: string;
+            /** CreatePost.url */
+            url?: string;
+        };
+        /** CreatePostLike */
+        CreatePostLike: {
+            /** CreatePostLike.post_id */
+            post_id: number;
+            /** CreatePostLike.score */
+            score: number;
+        };
+        /** CreatePostReport */
+        CreatePostReport: {
+            /** CreatePostReport.post_id */
+            post_id: number;
+            /** CreatePostReport.reason */
+            reason: string;
+        };
+        /** DeleteComment */
+        DeleteComment: {
+            /** DeleteComment.comment_id */
+            comment_id: number;
+            /** DeleteComment.deleted */
+            deleted: boolean;
+        };
+        /** DeleteCommunity */
+        DeleteCommunity: {
+            /** DeleteCommunity.community_id */
+            community_id: number;
+            /** DeleteCommunity.deleted */
+            deleted: boolean;
+        };
+        /** DeletePost */
+        DeletePost: {
+            /** DeletePost.deleted */
+            deleted: boolean;
+            /** DeletePost.post_id */
+            post_id: number;
+        };
+        /** EditComment */
+        EditComment: {
+            /** EditComment.comment_id */
+            comment_id: number;
+            /** EditComment.content */
+            content?: string;
+            /** EditComment.language_id */
+            language_id?: number;
+        };
+        /** CreateCommunity */
+        EditCommunity: {
+            /** CreateCommunity.banner */
+            banner_url?: string;
+            /** CreateCommunity.description */
+            description?: string;
+            /** CreateCommunity.discussion_languages */
+            discussion_languages?: number[];
+            /** CreateCommunity.icon */
+            icon_url?: string;
+            /** CreateCommunity.id */
+            id: number;
+            /** CreateCommunity.local_only */
+            local_only?: boolean;
+            /** CreateCommunity.nsfw */
+            nsfw?: boolean;
+            /** CreateCommunity.restricted_to_mods */
+            restricted_to_mods?: boolean;
+            /** CreateCommunity.rules */
+            rules?: string;
+            /** CreateCommunity.title */
+            title?: string;
+        };
+        /** EditNotificationState */
+        EditNotificationState: {
+            /** GetNotificationStatus.notif_id */
+            notif_id?: number;
+            /** GetNotificationStatus.read_state */
+            read_state?: boolean;
+        };
+        /** EditPost */
+        EditPost: {
+            /** EditPost.body */
+            body?: string;
+            /** EditPost.language_id */
+            language_id?: number;
+            /** EditPost.nsfw */
+            nsfw?: boolean;
+            /** EditPost.post_id */
+            post_id: number;
+            /** EditPost.title */
+            title?: string;
+            /** EditPost.url */
+            url?: string;
+        };
+        ErrorResponseLogin: {
+            /** @example incorrect_login */
+            error?: string;
+        };
+        /** FeaturePost */
+        FeaturePost: {
+            /** FeaturePost.feature_type */
+            feature_type: components["schemas"]["PostFeatureType"];
+            /** FeaturePost.featured */
+            featured: boolean;
+            /** FeaturePost.post_id */
+            post_id: number;
+        };
+        /** FederatedInstances */
+        FederatedInstancesView: {
+            /** FederatedInstances.allowed */
+            allowed: components["schemas"]["InstanceWithoutFederationState"][];
+            /** FederatedInstances.blocked */
+            blocked: components["schemas"]["InstanceWithoutFederationState"][];
+            /** FederatedInstances.linked */
+            linked: components["schemas"]["InstanceWithoutFederationState"][];
+        };
+        /** FollowCommunity */
+        FollowCommunity: {
+            /** FollowCommunity.community_id */
+            community_id: number;
+            /** FollowCommunity.follow */
+            follow: boolean;
+        };
+        /** GetComment */
+        GetComment: {
+            /** GetComment.id */
+            id: number;
+        };
+        /** GetComments */
+        GetComments: {
+            /** GetComments.community_id */
+            community_id?: number;
+            /** GetComments.limit */
+            limit?: number;
+            /** GetComments.max_depth */
+            max_depth?: number;
+            /** GetComments.page */
+            page?: number;
+            /** GetComments.parent_id */
+            parent_id?: number;
+            /** GetComments.person_id */
+            person_id?: number;
+            /** GetComments.post_id */
+            post_id?: number;
+            /** GetComments.sort */
+            sort?: components["schemas"]["CommentSortType"];
+            /** GetComments.type_ */
+            type_?: components["schemas"]["ListingType"];
+        };
+        /** GetCommentsResponse */
+        GetCommentsResponse: {
+            /** GetCommentsResponse.comments */
+            comments: components["schemas"]["CommentView"][];
+        };
+        /** GetCommunity */
+        GetCommunity: {
+            /** GetCommunity.id */
+            id?: number;
+            /** GetCommunity.name */
+            name?: string;
+        };
+        /** GetCommunityModerationBansList */
+        GetCommunityModerationBansList: {
+            /**
+             * GetCommunityModerationBansList.community_id
+             * @example 42
+             */
+            community_id?: number;
+            /**
+             * GetCommunityModerationBansList.page
+             * @example 1
+             */
+            page?: number;
+        };
+        /** GetCommunityResponse */
+        GetCommunityResponse: {
+            /** GetCommunityResponse.community_view */
+            community_view: components["schemas"]["CommunityView"];
+            /** GetCommunityResponse.discussion_languages */
+            discussion_languages: number[];
+            /** GetCommunityResponse.moderators */
+            moderators: components["schemas"]["CommunityModeratorView"][];
+            /** GetCommunityResponse.site */
+            site?: components["schemas"]["Site"];
+        };
+        /** GetFederatedInstancesResponse */
+        GetFederatedInstancesResponse: {
+            /** GetFederatedInstancesResponse.federated_instances */
+            federated_instances?: components["schemas"]["FederatedInstancesView"];
+        };
+        /** GetNotificationStatus */
+        GetNotificationStatus: {
+            /**
+             * GetNotificationStatus.page
+             * @default 1
+             */
+            page: number;
+            /**
+             * GetNotificationStatus.status
+             * @enum {string}
+             */
+            status: "All" | "New" | "Read";
+        };
+        /** GetPersonDetails */
+        GetPersonDetails: {
+            /** GetPersonDetails.community_id */
+            community_id?: number;
+            /** GetPersonDetails.include_content */
+            include_content?: boolean;
+            /** GetPersonDetails.limit */
+            limit?: number;
+            /** GetPersonDetails.page */
+            page?: number;
+            /** GetPersonDetails.person_id */
+            person_id?: number;
+            /** GetPersonDetails.saved_only */
+            saved_only?: boolean;
+            /** GetPersonDetails.sort */
+            sort?: components["schemas"]["SortType"];
+            /** GetPersonDetails.username */
+            username?: string;
+        };
+        /** GetPersonDetailsResponse */
+        GetPersonDetailsResponse: {
+            /** GetPersonDetailsResponse.comments */
+            comments: components["schemas"]["CommentView"][];
+            /** GetPersonDetailsResponse.moderates */
+            moderates: components["schemas"]["CommunityModeratorView"][];
+            /** GetPersonDetailsResponse.person_view */
+            person_view: components["schemas"]["PersonView"];
+            /** GetPersonDetailsResponse.posts */
+            posts: components["schemas"]["PostView"][];
+            /** GetPersonDetailsResponse.site */
+            site?: components["schemas"]["Site"];
+        };
+        /** GetPost */
+        GetPost: {
+            /** GetPost.comment_id */
+            comment_id?: number;
+            /** GetPost.id */
+            id?: number;
+        };
+        /** GetPostResponse */
+        GetPostResponse: {
+            /** GetPostResponse.community_view */
+            community_view: components["schemas"]["CommunityView"];
+            /** GetPostResponse.cross_posts */
+            cross_posts: components["schemas"]["PostView"][];
+            /** GetPostResponse.moderators */
+            moderators: components["schemas"]["CommunityModeratorView"][];
+            /** GetPostResponse.post_view */
+            post_view: components["schemas"]["PostView"];
+        };
+        /** GetPosts */
+        GetPosts: {
+            /** GetPosts.community_id */
+            community_id?: number;
+            /** GetPosts.community_name */
+            community_name?: string;
+            /** GetPosts.liked_only */
+            liked_only?: boolean;
+            /** GetPosts.limit */
+            limit?: number;
+            /** GetPosts.page */
+            page?: number;
+            /** GetPosts.person_id */
+            person_id?: number;
+            /** GetPosts.sort */
+            sort?: components["schemas"]["SortType"];
+            /** GetPosts.type_ */
+            type_?: components["schemas"]["ListingType"];
+        };
+        /** GetPostsResponse */
+        GetPostsResponse: {
+            /** GetPostsResponse.posts */
+            posts: components["schemas"]["PostView"][];
+        };
+        /** GetPrivateMessages */
+        GetPrivateMessages: {
+            /** GetPrivateMessages.creator_id */
+            creator_id?: number;
+            /** GetPrivateMessages.limit */
+            limit?: number;
+            /** GetPrivateMessages.page */
+            page?: number;
+            /** GetPrivateMessages.unread_only */
+            unread_only?: boolean;
+        };
+        /** GetReplies */
+        GetReplies: {
+            /** GetReplies.limit */
+            limit?: number;
+            /** GetReplies.page */
+            page?: number;
+            /** GetReplies.sort */
+            sort?: components["schemas"]["CommentSortType"];
+            /** GetReplies.unread_only */
+            unread_only?: boolean;
+        };
+        /** GetRepliesResponse */
+        GetRepliesResponse: {
+            /** GetRepliesResponse.replies */
+            replies: components["schemas"]["CommentReplyView"][];
+        };
+        /** GetSiteResponse */
+        GetSiteResponse: {
+            /** GetSiteResponse.admins */
+            admins: components["schemas"]["PersonView"][];
+            /** GetSiteResponse.my_user */
+            my_user?: components["schemas"]["MyUserInfo"];
+            /** GetSiteResponse.site */
+            site: components["schemas"]["Site"];
+            /** GetSiteResponse.version */
+            version: string;
+        };
+        /** GetUnreadCountResponse */
+        GetUnreadCountResponse: {
+            /** GetUnreadCountResponse.mentions */
+            mentions: number;
+            /** GetUnreadCountResponse.private_messages */
+            private_messages: number;
+            /** GetUnreadCountResponse.replies */
+            replies: number;
+        };
+        ImageUpload: {
+            /** Format: binary */
+            file: string;
+        };
+        /** Instance */
+        Instance: {
+            /** Instance.domain */
+            domain: string;
+            /** Instance.id */
+            id: number;
+            /** Instance.published */
+            published: string;
+            /** Instance.software */
+            software?: string;
+            /** Instance.updated */
+            updated?: string;
+            /** Instance.version */
+            version?: string;
+        };
+        /** InstanceBlockView */
+        InstanceBlockView: {
+            /** InstanceBlockView.instance */
+            instance: components["schemas"]["Instance"];
+            /** InstanceBlockView.person */
+            person: components["schemas"]["Person"];
+            /** InstanceBlockView.site */
+            site?: components["schemas"]["Site"];
+        };
+        /** InstanceWithoutFederationState */
+        InstanceWithoutFederationState: {
+            /** InstanceWithoutFederationState.domain */
+            domain: string;
+            /** InstanceWithoutFederationState.id */
+            id: number;
+            /** InstanceWithoutFederationState.published */
+            published: string;
+            /** InstanceWithoutFederationState.software */
+            software?: string;
+            /** InstanceWithoutFederationState.updated */
+            updated?: string;
+            /** InstanceWithoutFederationState.version */
+            version?: string;
+        };
+        /** LanguageView */
+        LanguageView: {
+            /**
+             * Language.code
+             * @example en
+             */
+            code?: string;
+            /**
+             * Language.id
+             * @example 2
+             */
+            id?: number;
+            /**
+             * Language.name
+             * @example English
+             */
+            name?: string;
+        };
+        /** ListCommunities */
+        ListCommunities: {
+            /** ListCommunities.limit */
+            limit?: number;
+            /** ListCommunities.page */
+            page?: number;
+            /** ListCommunities.show_nsfw */
+            show_nsfw?: boolean;
+            /** ListCommunities.sort */
+            sort?: components["schemas"]["CommunitySortType"];
+            /** ListCommunities.type_ */
+            type_?: components["schemas"]["ListingType"];
+        };
+        /** ListCommunitiesResponse */
+        ListCommunitiesResponse: {
+            /** ListCommunitiesResponse.communities */
+            communities: components["schemas"]["CommunityView"][];
+        };
+        /**
+         * ListingType
+         * @enum {string}
+         */
+        ListingType: "All" | "Local" | "ModeratorView" | "Popular" | "Subscribed";
+        /** LocalUser */
+        LocalUser: {
+            /** LocalUser.default_listing_type */
+            default_listing_type: components["schemas"]["ListingType"];
+            /** LocalUser.default_sort_type */
+            default_sort_type: components["schemas"]["SortType"];
+            /** LocalUser.show_bot_accounts */
+            show_bot_accounts: boolean;
+            /** LocalUser.show_nsfw */
+            show_nsfw: boolean;
+            /** LocalUser.show_read_posts */
+            show_read_posts: boolean;
+            /** LocalUser.show_scores */
+            show_scores: boolean;
+        };
+        /** LocalUserView */
+        LocalUserView: {
+            /** LocalUserView.counts */
+            counts: components["schemas"]["PersonAggregates"];
+            /** LocalUserView.local_user */
+            local_user: components["schemas"]["LocalUser"];
+            /** LocalUserView.person */
+            person: components["schemas"]["Person"];
+        };
+        /** LockPost */
+        LockPost: {
+            /** LockPost.locked */
             locked: boolean;
-            /** Post.published */
-            published: string;
-            /** Post.updated */
-            updated?: string;
-            /** Post.deleted */
-            deleted: boolean;
-            /** Post.nsfw */
-            nsfw: boolean;
-            /** Post.thumbnail_url */
-            thumbnail_url?: string;
-            /** Post.ap_id */
-            ap_id: string;
-            /** Post.local */
-            local: boolean;
-            /** Post.language_id */
-            language_id: number;
-            /** Post.sticky */
-            sticky: boolean;
-            /** Post.alt_text */
-            alt_text?: string;
-        };
-        /** PostReport */
-        PostReport: {
-            /** PostReport.id */
-            id: number;
-            /** PostReport.creator_id */
-            creator_id: number;
-            /** PostReport.post_id */
+            /** LockPost.post_id */
             post_id: number;
-            /** PostReport.original_post_name */
-            original_post_name: string;
-            /** PostReport.original_post_url */
-            original_post_url?: string;
-            /** PostReport.original_post_body */
-            original_post_body?: string;
-            /** PostReport.reason */
-            reason: string;
-            /** PostReport.resolved */
-            resolved: boolean;
-            /** PostReport.resolver_id */
-            resolver_id?: number;
-            /** PostReport.published */
-            published: string;
-            /** PostReport.updated */
-            updated?: string;
         };
-        /** Comment */
-        Comment: {
-            /** Comment.id */
-            id: number;
-            /** Comment.creator_id */
-            creator_id: number;
-            /** Comment.post_id */
+        /** Login */
+        Login: {
+            /** Login.password */
+            password: string;
+            /** Login.username */
+            username: string;
+        };
+        /** LoginResponse */
+        LoginResponse: {
+            /** LoginResponse.jwt */
+            jwt?: string;
+        };
+        /** ModerateCommunityBan */
+        ModerateCommunityBan: {
+            /**
+             * PostCommunityModerateBan.community_id
+             * @example 42
+             */
+            community_id: number;
+            /**
+             * PostCommunityModerateBan.expiredAt
+             * @example 2025-01-01T12:00:00
+             */
+            expiredAt: string;
+            /**
+             * PostCommunityModerateBan.reason
+             * @example Violation of Rule 1.
+             */
+            reason: string;
+            /**
+             * PostCommunityModerateBan.user_id
+             * @example 1234
+             */
+            user_id: number;
+        };
+        /** ModerateCommunityBanResponse */
+        ModerateCommunityBanResponse: components["schemas"]["CommunityModerationBanItem"];
+        /** ModerateCommunityPostNsfw */
+        ModerateCommunityPostNsfw: {
+            /**
+             * PostCommunityModeratePostNsfw.nsfw_status
+             * @example true
+             */
+            nsfw_status: boolean;
+            /**
+             * PostCommunityModeratePostNsfw.post_id
+             * @example 123456
+             */
             post_id: number;
-            /** Comment.content */
-            content: string;
-            /** Comment.removed */
-            removed: boolean;
-            /** Comment.published */
-            published: string;
-            /** Comment.updated */
-            updated?: string;
-            /** Comment.deleted */
-            deleted: boolean;
-            /** Comment.ap_id */
-            ap_id: string;
-            /** Comment.local */
-            local: boolean;
-            /** Comment.path */
-            path: string;
-            /** Comment.distinguished */
-            distinguished: boolean;
-            /** Comment.language_id */
-            language_id: number;
         };
-        /** CommentReply */
-        CommentReply: {
-            /** CommentReply.id */
-            id: number;
-            /** CommentReply.recipient_id */
-            recipient_id: number;
-            /** CommentReply.comment_id */
-            comment_id: number;
-            /** CommentReply.read */
-            read: boolean;
-            /** CommentReply.published */
-            published: string;
+        /** ModerateCommunityPostNsfwResponse */
+        ModerateCommunityPostNsfwResponse: components["schemas"]["PostView"];
+        /** ModerateCommunityUnBan */
+        ModerateCommunityUnBan: {
+            /**
+             * PutCommunityModerateUnBan.community_id
+             * @example 42
+             */
+            community_id: number;
+            /**
+             * PutCommunityModerateUnBan.user_id
+             * @example 1234
+             */
+            user_id: number;
         };
-        /** CommentReport */
-        CommentReport: {
-            /** CommentReport.id */
-            id: number;
-            /** CommentReport.creator_id */
-            creator_id: number;
-            /** CommentReport.comment_id */
-            comment_id: number;
-            /** CommentReport.original_comment_text */
-            original_comment_text: string;
-            /** CommentReport.reason */
-            reason: string;
-            /** CommentReport.resolved */
-            resolved: boolean;
-            /** CommentReport.resolver_id */
-            resolver_id?: number;
-            /** CommentReport.published */
-            published: string;
-            /** CommentReport.updated */
-            updated?: string;
+        /** ModerateCommunityUnBanResponse */
+        ModerateCommunityUnBanResponse: components["schemas"]["CommunityModerationBanItem"];
+        /** ModerationCommunityBansListResponse */
+        ModerationCommunityBansListResponse: {
+            /** GetCommunityModerationBansListResponse.items */
+            items?: components["schemas"]["CommunityModerationBanItem"][];
+            /**
+             * GetCommunityModerationBansListResponse.next_page
+             * @example 3
+             */
+            next_page?: string;
         };
-        /** PrivateMessage */
-        PrivateMessage: {
-            /** PrivateMessage.id */
-            id: number;
-            /** PrivateMessage.creator_id */
-            creator_id: number;
-            /** PrivateMessage.recipient_id */
-            recipient_id: number;
-            /** PrivateMessage.content */
-            content: string;
-            /** PrivateMessage.deleted */
-            deleted: boolean;
-            /** PrivateMessage.read */
-            read: boolean;
-            /** PrivateMessage.published */
-            published: string;
-            /** PrivateMessage.updated */
-            updated?: string;
-            /** PrivateMessage.ap_id */
-            ap_id: string;
-            /** PrivateMessage.local */
-            local: boolean;
+        /** MyUserInfo */
+        MyUserInfo: {
+            /** MyUserInfo.community_blocks */
+            community_blocks: components["schemas"]["CommunityBlockView"][];
+            /** MyUserInfo.discussion_languages */
+            discussion_languages: components["schemas"]["LanguageView"][];
+            /** MyUserInfo.follows */
+            follows: components["schemas"]["CommunityFollowerView"][];
+            /** MyUserInfo.instance_blocks */
+            instance_blocks: components["schemas"]["InstanceBlockView"][];
+            /** MyUserInfo.local_user_view */
+            local_user_view: components["schemas"]["LocalUserView"];
+            /** MyUserInfo.moderates */
+            moderates: components["schemas"]["CommunityModeratorView"][];
+            /** MyUserInfo.person_blocks */
+            person_blocks: components["schemas"]["PersonBlockView"][];
+        };
+        /** NotificationsCountResponse */
+        NotificationsCountResponse: {
+            /**
+             * NotificationsCountResponse.count
+             * @example 42
+             */
+            count?: number;
+        };
+        /** NotificationsCountsView */
+        NotificationsCountsView: {
+            /** NotificationsCountsView.new_notifications */
+            new_notifications: number;
+            /** NotificationsCountsView.read_notifications */
+            read_notifications: number;
+            /** NotificationsCountsView.total_notifications */
+            total_notifications?: number;
+        };
+        /** NotificationsItemCommentMentionView */
+        NotificationsItemCommentMentionView: {
+            /** NotificationsItemCommentMentionView.author */
+            author?: components["schemas"]["Person"];
+            /** NotificationsItemCommentMentionView.comment */
+            comment?: components["schemas"]["Comment"];
+            /**
+             * NotificationsItemCommentMentionView.comment_id
+             * @example 1234
+             */
+            comment_id?: number;
+            /**
+             * NotificationsItemCommentMentionView.notif_body
+             * @example This is the body of a comment.
+             */
+            notif_body?: string;
+            /**
+             * NotificationsItemCommentMentionView.notif_id
+             * @example 1234
+             */
+            notif_id?: number;
+            /**
+             * NotificationsItemCommentMentionView.notif_subtype
+             * @example comment_mention
+             */
+            notif_subtype?: string;
+            /**
+             * NotificationsItemCommentMentionView.notif_type
+             * @example 6
+             */
+            notif_type?: number;
+        };
+        /** NotificationsItemCommunityView */
+        NotificationsItemCommunityView: {
+            /** NotificationsItemCommunityView.author */
+            author?: components["schemas"]["Person"];
+            /** NotificationsItemCommunityView.community */
+            community?: components["schemas"]["CommunityView"];
+            /**
+             * NotificationsItemCommunityView.notif_body
+             * @example This is the body of a post.
+             */
+            notif_body?: string;
+            /**
+             * NotificationsItemCommunityView.notif_id
+             * @example 1234
+             */
+            notif_id?: number;
+            /**
+             * NotificationsItemCommunityView.notif_subtype
+             * @example new_post_in_followed_community
+             */
+            notif_subtype?: string;
+            /**
+             * NotificationsItemCommunityView.notif_type
+             * @example 1
+             */
+            notif_type?: number;
+            /** NotificationsItemCommunityView.post */
+            post?: components["schemas"]["PostView"];
+            /**
+             * NotificationsItemCommunityView.post_id
+             * @example 1234
+             */
+            post_id?: number;
+        };
+        /** NotificationsItemFeedView */
+        NotificationsItemFeedView: {
+            /** NotificationsItemFeedView.author */
+            author?: components["schemas"]["Person"];
+            /**
+             * NotificationsItemFeedView.notif_body
+             * @example This is the body of a post.
+             */
+            notif_body?: string;
+            /**
+             * NotificationsItemFeedView.notif_id
+             * @example 1234
+             */
+            notif_id?: number;
+            /**
+             * NotificationsItemFeedView.notif_subtype
+             * @example new_post_in_followed_feed
+             */
+            notif_subtype?: string;
+            /**
+             * NotificationsItemFeedView.notif_type
+             * @example 5
+             */
+            notif_type?: number;
+            /** NotificationsItemFeedView.post */
+            post?: components["schemas"]["PostView"];
+            /**
+             * NotificationsItemFeedView.post_id
+             * @example 1234
+             */
+            post_id?: number;
+        };
+        /** NotificationsItemPostMentionView */
+        NotificationsItemPostMentionView: {
+            /** NotificationsItemPostMentionView.author */
+            author?: components["schemas"]["Person"];
+            /**
+             * NotificationsItemPostMentionView.notif_body
+             * @example This is the body of a post.
+             */
+            notif_body?: string;
+            /**
+             * NotificationsItemPostMentionView.notif_id
+             * @example 1234
+             */
+            notif_id?: number;
+            /**
+             * NotificationsItemPostMentionView.notif_subtype
+             * @example post_mention
+             */
+            notif_subtype?: string;
+            /**
+             * NotificationsItemPostMentionView.notif_type
+             * @example 6
+             */
+            notif_type?: number;
+            /** NotificationsItemPostMentionView.post */
+            post?: components["schemas"]["PostView"];
+            /**
+             * NotificationsItemPostMentionView.post_id
+             * @example 1234
+             */
+            post_id?: number;
+        };
+        /** NotificationsItemPostView */
+        NotificationsItemPostView: {
+            /** NotificationsItemPostView.author */
+            author?: components["schemas"]["Person"];
+            /** NotificationsItemPostView.comment */
+            comment?: components["schemas"]["Comment"];
+            /**
+             * NotificationsItemPostView.comment_id
+             * @example 1234
+             */
+            comment_id?: number;
+            /**
+             * NotificationsItemPostView.notif_body
+             * @example This is the body of a comment.
+             */
+            notif_body?: string;
+            /**
+             * NotificationsItemPostView.notif_id
+             * @example 1234
+             */
+            notif_id?: number;
+            /**
+             * NotificationsItemPostView.notif_subtype
+             * @example top_level_comment_on_followed_post
+             */
+            notif_subtype?: string;
+            /**
+             * NotificationsItemPostView.notif_type
+             * @example 3
+             */
+            notif_type?: number;
+            /** NotificationsItemPostView.post */
+            post?: components["schemas"]["PostView"];
+            /**
+             * NotificationsItemPostView.post_id
+             * @example 1234
+             */
+            post_id?: number;
+        };
+        /** NotificationsItemReplyView */
+        NotificationsItemReplyView: {
+            /** NotificationsItemReplyView.author */
+            author?: components["schemas"]["Person"];
+            /** NotificationsItemReplyView.comment */
+            comment?: components["schemas"]["Comment"];
+            /**
+             * NotificationsItemReplyView.comment_id
+             * @example 1234
+             */
+            comment_id?: number;
+            /**
+             * NotificationsItemReplyView.notif_body
+             * @example This is the body of a comment.
+             */
+            notif_body?: string;
+            /**
+             * NotificationsItemReplyView.notif_id
+             * @example 1234
+             */
+            notif_id?: number;
+            /**
+             * NotificationsItemReplyView.notif_subtype
+             * @example new_reply_on_followed_comment
+             */
+            notif_subtype?: string;
+            /**
+             * NotificationsItemReplyView.notif_type
+             * @example 4
+             */
+            notif_type?: number;
+            /** NotificationsItemReplyView.post */
+            post?: components["schemas"]["PostView"];
+            /**
+             * NotificationsItemReplyView.post_id
+             * @example 1234
+             */
+            post_id?: number;
+        };
+        /** NotificationsItemTopicView */
+        NotificationsItemTopicView: {
+            /** NotificationsItemTopicView.author */
+            author?: components["schemas"]["Person"];
+            /**
+             * NotificationsItemTopicView.notif_body
+             * @example This is the body of a post.
+             */
+            notif_body?: string;
+            /**
+             * NotificationsItemTopicView.notif_id
+             * @example 1234
+             */
+            notif_id?: number;
+            /**
+             * NotificationsItemTopicView.notif_subtype
+             * @example new_post_in_followed_topic
+             */
+            notif_subtype?: string;
+            /**
+             * NotificationsItemTopicView.notif_type
+             * @example 2
+             */
+            notif_type?: number;
+            /** NotificationsItemTopicView.post */
+            post?: components["schemas"]["PostView"];
+            /**
+             * NotificationsItemTopicView.post_id
+             * @example 1234
+             */
+            post_id?: number;
+        };
+        /** NotificationsItemUserView */
+        NotificationsItemUserView: {
+            /** NotificationsItemUserView.author */
+            author?: components["schemas"]["Person"];
+            /**
+             * NotificationsItemUserView.notif_body
+             * @example This is the body of a post.
+             */
+            notif_body?: string;
+            /**
+             * NotificationsItemUserView.notif_id
+             * @example 1234
+             */
+            notif_id?: number;
+            /**
+             * NotificationsItemUserView.notif_subtype
+             * @example new_post_from_followed_user
+             */
+            notif_subtype?: string;
+            /**
+             * NotificationsItemUserView.notif_type
+             * @example 0
+             */
+            notif_type?: number;
+            /** NotificationsItemUserView.post */
+            post?: components["schemas"]["PostView"];
+            /**
+             * NotificationsItemUserView.post_id
+             * @example 1234
+             */
+            post_id?: number;
+        };
+        /** NotificationsMarkAllReadResponse */
+        NotificationsMarkAllReadResponse: {
+            /**
+             * NotificationsMarkAllReadResponse.mark_all_notifications_as_read
+             * @example complete
+             */
+            mark_all_notifications_as_read?: string;
+        };
+        /** NotificationsReadStatusResponse */
+        NotificationsReadStatusResponse: components["schemas"]["NotificationsItemCommentMentionView"] | components["schemas"]["NotificationsItemCommunityView"] | components["schemas"]["NotificationsItemFeedView"] | components["schemas"]["NotificationsItemPostMentionView"] | components["schemas"]["NotificationsItemPostView"] | components["schemas"]["NotificationsItemReplyView"] | components["schemas"]["NotificationsItemTopicView"] | components["schemas"]["NotificationsItemUserView"];
+        /** NotificationsResponse */
+        NotificationsResponse: {
+            /** NotificationsResponse.counts */
+            counts: components["schemas"]["NotificationsCountsView"];
+            /** NotificationsResponse.items */
+            items: (components["schemas"]["NotificationsItemCommentMentionView"] | components["schemas"]["NotificationsItemCommunityView"] | components["schemas"]["NotificationsItemFeedView"] | components["schemas"]["NotificationsItemPostMentionView"] | components["schemas"]["NotificationsItemPostView"] | components["schemas"]["NotificationsItemReplyView"] | components["schemas"]["NotificationsItemTopicView"] | components["schemas"]["NotificationsItemUserView"])[];
+            /**
+             * NotificationsResponse.status
+             * @example New
+             */
+            status: string;
+            /**
+             * NotificationsResponse.user
+             * @example MyPieFedUserName
+             */
+            user: string;
         };
         /** Person */
         Person: {
@@ -3638,660 +1317,6 @@ export interface components {
             /** Person.user_name */
             user_name?: string;
         };
-        /** LocalUser */
-        LocalUser: {
-            /** LocalUser.default_listing_type */
-            default_listing_type: components["schemas"]["ListingType"];
-            /** LocalUser.default_sort_type */
-            default_sort_type: components["schemas"]["SortType"];
-            /** LocalUser.show_bot_accounts */
-            show_bot_accounts: boolean;
-            /** LocalUser.show_nsfw */
-            show_nsfw: boolean;
-            /** LocalUser.show_read_posts */
-            show_read_posts: boolean;
-            /** LocalUser.show_scores */
-            show_scores: boolean;
-        };
-        /** MyUserInfo */
-        MyUserInfo: {
-            /** MyUserInfo.community_blocks */
-            community_blocks: components["schemas"]["CommunityBlockView"][];
-            /** MyUserInfo.discussion_languages */
-            discussion_languages: components["schemas"]["LanguageView"][];
-            /** MyUserInfo.follows */
-            follows: components["schemas"]["CommunityFollowerView"][];
-            /** MyUserInfo.instance_blocks */
-            instance_blocks: components["schemas"]["InstanceBlockView"][];
-            /** MyUserInfo.local_user_view */
-            local_user_view: components["schemas"]["LocalUserView"];
-            /** MyUserInfo.moderates */
-            moderates: components["schemas"]["CommunityModeratorView"][];
-            /** MyUserInfo.person_blocks */
-            person_blocks: components["schemas"]["PersonBlockView"][];
-        };
-        /** FederatedInstances */
-        FederatedInstancesView: {
-            /** FederatedInstances.linked */
-            linked: components["schemas"]["InstanceWithoutFederationState"][];
-            /** FederatedInstances.allowed */
-            allowed: components["schemas"]["InstanceWithoutFederationState"][];
-            /** FederatedInstances.blocked */
-            blocked: components["schemas"]["InstanceWithoutFederationState"][];
-        };
-        /** CommunityBlockView */
-        CommunityBlockView: {
-            /** CommunityBlockView.community */
-            community: components["schemas"]["Community"];
-            /** CommunityBlockView.person */
-            person: components["schemas"]["Person"];
-        };
-        /** CommunityFollowerView */
-        CommunityFollowerView: {
-            /** CommunityFollowerView.community */
-            community: components["schemas"]["Community"];
-            /** CommunityFollowerView.follower */
-            follower: components["schemas"]["Person"];
-        };
-        /** LanguageView */
-        LanguageView: {
-            /**
-             * Language.code
-             * @example en
-             */
-            code?: string;
-            /**
-             * Language.id
-             * @example 2
-             */
-            id?: number;
-            /**
-             * Language.name
-             * @example English
-             */
-            name?: string;
-        };
-        /** InstanceBlockView */
-        InstanceBlockView: {
-            /** InstanceBlockView.person */
-            person: components["schemas"]["Person"];
-            /** InstanceBlockView.instance */
-            instance: components["schemas"]["Instance"];
-            /** InstanceBlockView.site */
-            site?: components["schemas"]["Site"];
-        };
-        /** LocalUserView */
-        LocalUserView: {
-            /** LocalUserView.counts */
-            counts: components["schemas"]["PersonAggregates"];
-            /** LocalUserView.local_user */
-            local_user: components["schemas"]["LocalUser"];
-            /** LocalUserView.person */
-            person: components["schemas"]["Person"];
-        };
-        /** CommunityModeratorView */
-        CommunityModeratorView: {
-            /** CommunityModeratorView.community */
-            community: components["schemas"]["Community"];
-            /** CommunityModeratorView.moderator */
-            moderator: components["schemas"]["Person"];
-        };
-        /** PersonBlockView */
-        PersonBlockView: {
-            /** PersonBlockView.person */
-            person: components["schemas"]["Person"];
-            /** PersonBlockView.target */
-            target: components["schemas"]["Person"];
-        };
-        /** PersonView */
-        PersonView: {
-            /** PersonView.person */
-            person: components["schemas"]["Person"];
-            /** PersonView.counts */
-            counts: components["schemas"]["PersonAggregates"];
-            /** PersonView.is_admin */
-            is_admin: boolean;
-            /** PersonView.activity_alert */
-            activity_alert: boolean;
-        };
-        /** CommentView */
-        CommentView: {
-            /** CommentView.comment */
-            comment: components["schemas"]["Comment"];
-            /** CommentView.creator */
-            creator: components["schemas"]["Person"];
-            /** CommentView.post */
-            post: components["schemas"]["Post"];
-            /** CommentView.community */
-            community: components["schemas"]["Community"];
-            /** CommentView.counts */
-            counts: components["schemas"]["CommentAggregates"];
-            /** CommentView.creator_banned_from_community */
-            creator_banned_from_community: boolean;
-            /** CommentView.banned_from_community */
-            banned_from_community: boolean;
-            /** CommentView.creator_is_moderator */
-            creator_is_moderator: boolean;
-            /** CommentView.creator_is_admin */
-            creator_is_admin: boolean;
-            /** CommentView.subscribed */
-            subscribed: components["schemas"]["SubscribedType"];
-            /** CommentView.saved */
-            saved: boolean;
-            /** CommentView.activity_alert */
-            activity_alert: boolean;
-            /** CommentView.creator_blocked */
-            creator_blocked: boolean;
-            /** CommentView.my_vote */
-            my_vote?: number;
-        };
-        /** PostView */
-        PostView: {
-            /** PostView.post */
-            post: components["schemas"]["Post"];
-            /** PostView.creator */
-            creator: components["schemas"]["Person"];
-            /** PostView.community */
-            community: components["schemas"]["Community"];
-            /** PostView.creator_banned_from_community */
-            creator_banned_from_community: boolean;
-            /** PostView.banned_from_community */
-            banned_from_community: boolean;
-            /** PostView.creator_is_moderator */
-            creator_is_moderator: boolean;
-            /** PostView.creator_is_admin */
-            creator_is_admin: boolean;
-            /** PostView.counts */
-            counts: components["schemas"]["PostAggregates"];
-            /** PostView.subscribed */
-            subscribed: components["schemas"]["SubscribedType"];
-            /** PostView.saved */
-            saved: boolean;
-            /** PostView.activity_alert */
-            activity_alert?: boolean;
-            /** PostView.read */
-            read: boolean;
-            /** PostView.hidden */
-            hidden: boolean;
-            /** PostView.creator_blocked */
-            creator_blocked: boolean;
-            /** PostView.my_vote */
-            my_vote?: number;
-            /** PostView.unread_comments */
-            unread_comments: number;
-        };
-        /** CommunityView */
-        CommunityView: {
-            /** CommunityView.community */
-            community: components["schemas"]["Community"];
-            /** CommunityView.subscribed */
-            subscribed: components["schemas"]["SubscribedType"];
-            /** CommunityView.blocked */
-            blocked: boolean;
-            /** CommunityView.counts */
-            counts: components["schemas"]["CommunityAggregates"];
-            /** CommunityView.banned_from_community */
-            banned_from_community: boolean;
-            /** CommunityView.activity_alert */
-            activity_alert: boolean;
-        };
-        /** PostReportView */
-        PostReportView: {
-            /** PostReportView.post_report */
-            post_report: components["schemas"]["PostReport"];
-            /** PostReportView.post */
-            post: components["schemas"]["Post"];
-            /** PostReportView.community */
-            community: components["schemas"]["Community"];
-            /** PostReportView.creator */
-            creator: components["schemas"]["Person"];
-            /** PostReportView.post_creator */
-            post_creator: components["schemas"]["Person"];
-            /** PostReportView.creator_banned_from_community */
-            creator_banned_from_community: boolean;
-            /** PostReportView.creator_is_moderator */
-            creator_is_moderator: boolean;
-            /** PostReportView.creator_is_admin */
-            creator_is_admin: boolean;
-            /** PostReportView.subscribed */
-            subscribed: components["schemas"]["SubscribedType"];
-            /** PostReportView.saved */
-            saved: boolean;
-            /** PostReportView.read */
-            read: boolean;
-            /** PostReportView.hidden */
-            hidden: boolean;
-            /** PostReportView.creator_blocked */
-            creator_blocked: boolean;
-            /** PostReportView.my_vote */
-            my_vote?: number;
-            /** PostReportView.unread_comments */
-            unread_comments: number;
-            /** PostReportView.counts */
-            counts: components["schemas"]["PostAggregates"];
-            /** PostReportView.resolver */
-            resolver?: components["schemas"]["Person"];
-        };
-        /** CommentReportView */
-        CommentReportView: {
-            /** CommentReportView.comment_report */
-            comment_report: components["schemas"]["CommentReport"];
-            /** CommentReportView.comment */
-            comment: components["schemas"]["Comment"];
-            /** CommentReportView.post */
-            post: components["schemas"]["Post"];
-            /** CommentReportView.community */
-            community: components["schemas"]["Community"];
-            /** CommentReportView.creator */
-            creator: components["schemas"]["Person"];
-            /** CommentReportView.comment_creator */
-            comment_creator: components["schemas"]["Person"];
-            /** CommentReportView.counts */
-            counts: components["schemas"]["CommentAggregates"];
-            /** CommentReportView.creator_banned_from_community */
-            creator_banned_from_community: boolean;
-            /** CommentReportView.creator_is_moderator */
-            creator_is_moderator: boolean;
-            /** CommentReportView.creator_is_admin */
-            creator_is_admin: boolean;
-            /** CommentReportView.creator_blocked */
-            creator_blocked: boolean;
-            /** CommentReportView.subscribed */
-            subscribed: components["schemas"]["SubscribedType"];
-            /** CommentReportView.saved */
-            saved: boolean;
-            /** CommentReportView.my_vote */
-            my_vote?: number;
-            /** CommentReportView.resolver */
-            resolver?: components["schemas"]["Person"];
-        };
-        /** CommentReplyView */
-        CommentReplyView: {
-            /** CommentReplyView.comment_reply */
-            comment_reply: components["schemas"]["CommentReply"];
-            /** CommentReplyView.comment */
-            comment: components["schemas"]["Comment"];
-            /** CommentReplyView.creator */
-            creator: components["schemas"]["Person"];
-            /** CommentReplyView.post */
-            post: components["schemas"]["Post"];
-            /** CommentReplyView.community */
-            community: components["schemas"]["Community"];
-            /** CommentReplyView.recipient */
-            recipient: components["schemas"]["Person"];
-            /** CommentReplyView.counts */
-            counts: components["schemas"]["CommentAggregates"];
-            /** CommentReplyView.creator_banned_from_community */
-            creator_banned_from_community: boolean;
-            /** CommentReplyView.banned_from_community */
-            banned_from_community: boolean;
-            /** CommentReplyView.creator_is_moderator */
-            creator_is_moderator: boolean;
-            /** CommentReplyView.creator_is_admin */
-            creator_is_admin: boolean;
-            /** CommentReplyView.subscribed */
-            subscribed: components["schemas"]["SubscribedType"];
-            /** CommentReplyView.saved */
-            saved: boolean;
-            /** CommentReplyView.creator_blocked */
-            creator_blocked: boolean;
-            /** CommentReplyView.my_vote */
-            my_vote?: number;
-        };
-        /** PrivateMessageView */
-        PrivateMessageView: {
-            /** PrivateMessageView.private_message */
-            private_message: components["schemas"]["PrivateMessage"];
-            /** PrivateMessageView.creator */
-            creator: components["schemas"]["Person"];
-            /** PrivateMessageView.recipient */
-            recipient: components["schemas"]["Person"];
-        };
-        /** CommunityModerationBanItem */
-        CommunityModerationBanItem: {
-            /**
-             * CommunityModerationBanItem.reason
-             * @example Violation of Rule 4
-             */
-            reason?: string;
-            /**
-             * CommunityModerationBanItem.expiredAt
-             * @example 2042-01-01T12:00:00
-             */
-            expiredAt?: string;
-            /** CommunityModerationBanItem.community */
-            community?: components["schemas"]["CommunityView"];
-            /** CommunityModerationBanItem.bannedUser */
-            bannedUser?: components["schemas"]["Person"];
-            /** CommunityModerationBanItem.bannedBy */
-            bannedBy?: components["schemas"]["Person"];
-            /**
-             * CommunityModerationBanItem.expired
-             * @example false
-             */
-            expired?: boolean;
-        };
-        /** NotificationsCountsView */
-        NotificationsCountsView: {
-            /** NotificationsCountsView.new_notifications */
-            new_notifications: number;
-            /** NotificationsCountsView.read_notifications */
-            read_notifications: number;
-            /** NotificationsCountsView.total_notifications */
-            total_notifications?: number;
-        };
-        /** NotificationsItemUserView */
-        NotificationsItemUserView: {
-            /**
-             * NotificationsItemUserView.notif_id
-             * @example 1234
-             */
-            notif_id?: number;
-            /**
-             * NotificationsItemUserView.notif_type
-             * @example 0
-             */
-            notif_type?: number;
-            /**
-             * NotificationsItemUserView.notif_subtype
-             * @example new_post_from_followed_user
-             */
-            notif_subtype?: string;
-            /** NotificationsItemUserView.author */
-            author?: components["schemas"]["Person"];
-            /** NotificationsItemUserView.post */
-            post?: components["schemas"]["PostView"];
-            /**
-             * NotificationsItemUserView.post_id
-             * @example 1234
-             */
-            post_id?: number;
-            /**
-             * NotificationsItemUserView.notif_body
-             * @example This is the body of a post.
-             */
-            notif_body?: string;
-        };
-        /** NotificationsItemCommunityView */
-        NotificationsItemCommunityView: {
-            /**
-             * NotificationsItemCommunityView.notif_id
-             * @example 1234
-             */
-            notif_id?: number;
-            /**
-             * NotificationsItemCommunityView.notif_type
-             * @example 1
-             */
-            notif_type?: number;
-            /**
-             * NotificationsItemCommunityView.notif_subtype
-             * @example new_post_in_followed_community
-             */
-            notif_subtype?: string;
-            /** NotificationsItemCommunityView.author */
-            author?: components["schemas"]["Person"];
-            /** NotificationsItemCommunityView.post */
-            post?: components["schemas"]["PostView"];
-            /**
-             * NotificationsItemCommunityView.post_id
-             * @example 1234
-             */
-            post_id?: number;
-            /** NotificationsItemCommunityView.community */
-            community?: components["schemas"]["CommunityView"];
-            /**
-             * NotificationsItemCommunityView.notif_body
-             * @example This is the body of a post.
-             */
-            notif_body?: string;
-        };
-        /** NotificationsItemTopicView */
-        NotificationsItemTopicView: {
-            /**
-             * NotificationsItemTopicView.notif_id
-             * @example 1234
-             */
-            notif_id?: number;
-            /**
-             * NotificationsItemTopicView.notif_type
-             * @example 2
-             */
-            notif_type?: number;
-            /**
-             * NotificationsItemTopicView.notif_subtype
-             * @example new_post_in_followed_topic
-             */
-            notif_subtype?: string;
-            /** NotificationsItemTopicView.author */
-            author?: components["schemas"]["Person"];
-            /** NotificationsItemTopicView.post */
-            post?: components["schemas"]["PostView"];
-            /**
-             * NotificationsItemTopicView.post_id
-             * @example 1234
-             */
-            post_id?: number;
-            /**
-             * NotificationsItemTopicView.notif_body
-             * @example This is the body of a post.
-             */
-            notif_body?: string;
-        };
-        /** NotificationsItemPostView */
-        NotificationsItemPostView: {
-            /**
-             * NotificationsItemPostView.notif_id
-             * @example 1234
-             */
-            notif_id?: number;
-            /**
-             * NotificationsItemPostView.notif_type
-             * @example 3
-             */
-            notif_type?: number;
-            /**
-             * NotificationsItemPostView.notif_subtype
-             * @example top_level_comment_on_followed_post
-             */
-            notif_subtype?: string;
-            /** NotificationsItemPostView.author */
-            author?: components["schemas"]["Person"];
-            /** NotificationsItemPostView.post */
-            post?: components["schemas"]["PostView"];
-            /**
-             * NotificationsItemPostView.post_id
-             * @example 1234
-             */
-            post_id?: number;
-            /** NotificationsItemPostView.comment */
-            comment?: components["schemas"]["Comment"];
-            /**
-             * NotificationsItemPostView.comment_id
-             * @example 1234
-             */
-            comment_id?: number;
-            /**
-             * NotificationsItemPostView.notif_body
-             * @example This is the body of a comment.
-             */
-            notif_body?: string;
-        };
-        /** NotificationsItemReplyView */
-        NotificationsItemReplyView: {
-            /**
-             * NotificationsItemReplyView.notif_id
-             * @example 1234
-             */
-            notif_id?: number;
-            /**
-             * NotificationsItemReplyView.notif_type
-             * @example 4
-             */
-            notif_type?: number;
-            /**
-             * NotificationsItemReplyView.notif_subtype
-             * @example new_reply_on_followed_comment
-             */
-            notif_subtype?: string;
-            /** NotificationsItemReplyView.author */
-            author?: components["schemas"]["Person"];
-            /** NotificationsItemReplyView.post */
-            post?: components["schemas"]["PostView"];
-            /**
-             * NotificationsItemReplyView.post_id
-             * @example 1234
-             */
-            post_id?: number;
-            /** NotificationsItemReplyView.comment */
-            comment?: components["schemas"]["Comment"];
-            /**
-             * NotificationsItemReplyView.comment_id
-             * @example 1234
-             */
-            comment_id?: number;
-            /**
-             * NotificationsItemReplyView.notif_body
-             * @example This is the body of a comment.
-             */
-            notif_body?: string;
-        };
-        /** NotificationsItemFeedView */
-        NotificationsItemFeedView: {
-            /**
-             * NotificationsItemFeedView.notif_id
-             * @example 1234
-             */
-            notif_id?: number;
-            /**
-             * NotificationsItemFeedView.notif_type
-             * @example 5
-             */
-            notif_type?: number;
-            /**
-             * NotificationsItemFeedView.notif_subtype
-             * @example new_post_in_followed_feed
-             */
-            notif_subtype?: string;
-            /** NotificationsItemFeedView.author */
-            author?: components["schemas"]["Person"];
-            /** NotificationsItemFeedView.post */
-            post?: components["schemas"]["PostView"];
-            /**
-             * NotificationsItemFeedView.post_id
-             * @example 1234
-             */
-            post_id?: number;
-            /**
-             * NotificationsItemFeedView.notif_body
-             * @example This is the body of a post.
-             */
-            notif_body?: string;
-        };
-        /** NotificationsItemPostMentionView */
-        NotificationsItemPostMentionView: {
-            /**
-             * NotificationsItemPostMentionView.notif_id
-             * @example 1234
-             */
-            notif_id?: number;
-            /**
-             * NotificationsItemPostMentionView.notif_type
-             * @example 6
-             */
-            notif_type?: number;
-            /**
-             * NotificationsItemPostMentionView.notif_subtype
-             * @example post_mention
-             */
-            notif_subtype?: string;
-            /** NotificationsItemPostMentionView.author */
-            author?: components["schemas"]["Person"];
-            /** NotificationsItemPostMentionView.post */
-            post?: components["schemas"]["PostView"];
-            /**
-             * NotificationsItemPostMentionView.post_id
-             * @example 1234
-             */
-            post_id?: number;
-            /**
-             * NotificationsItemPostMentionView.notif_body
-             * @example This is the body of a post.
-             */
-            notif_body?: string;
-        };
-        /** NotificationsItemCommentMentionView */
-        NotificationsItemCommentMentionView: {
-            /**
-             * NotificationsItemCommentMentionView.notif_id
-             * @example 1234
-             */
-            notif_id?: number;
-            /**
-             * NotificationsItemCommentMentionView.notif_type
-             * @example 6
-             */
-            notif_type?: number;
-            /**
-             * NotificationsItemCommentMentionView.notif_subtype
-             * @example comment_mention
-             */
-            notif_subtype?: string;
-            /** NotificationsItemCommentMentionView.author */
-            author?: components["schemas"]["Person"];
-            /** NotificationsItemCommentMentionView.comment */
-            comment?: components["schemas"]["Comment"];
-            /**
-             * NotificationsItemCommentMentionView.comment_id
-             * @example 1234
-             */
-            comment_id?: number;
-            /**
-             * NotificationsItemCommentMentionView.notif_body
-             * @example This is the body of a comment.
-             */
-            notif_body?: string;
-        };
-        /**
-         * RegistrationMode
-         * @enum {string}
-         */
-        RegistrationMode: "Closed" | "RequireApplication" | "Open";
-        /**
-         * SearchType
-         * @enum {string}
-         */
-        SearchType: "Communities" | "Posts" | "Users" | "Url";
-        /**
-         * CommunitySortType
-         * @enum {string}
-         */
-        CommunitySortType: "Active" | "New";
-        /**
-         * ListingType
-         * @enum {string}
-         */
-        ListingType: "All" | "Local" | "Subscribed" | "Popular" | "ModeratorView";
-        /**
-         * SortType
-         * @enum {string}
-         */
-        SortType: "Active" | "Hot" | "New" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopDay" | "TopWeek" | "TopMonth" | "Scaled";
-        /**
-         * SubscribedType
-         * @enum {string}
-         */
-        SubscribedType: "Subscribed" | "NotSubscribed" | "Pending";
-        /**
-         * PostFeatureType
-         * @enum {string}
-         */
-        PostFeatureType: "Local" | "Community";
-        /**
-         * CommentSortType
-         * @enum {string}
-         */
-        CommentSortType: "Hot" | "Top" | "New" | "Old";
         /** PersonAggregates */
         PersonAggregates: {
             /** PersonAggregates.comment_count */
@@ -4301,87 +1326,3062 @@ export interface components {
             /** PersonAggregates.post_count */
             post_count: number;
         };
-        /** CommentAggregates */
-        CommentAggregates: {
-            /** CommentAggregates.comment_id */
-            comment_id: number;
-            /** CommentAggregates.score */
-            score: number;
-            /** CommentAggregates.upvotes */
-            upvotes: number;
-            /** CommentAggregates.downvotes */
-            downvotes: number;
-            /** CommentAggregates.published */
+        /** PersonBlockView */
+        PersonBlockView: {
+            /** PersonBlockView.person */
+            person: components["schemas"]["Person"];
+            /** PersonBlockView.target */
+            target: components["schemas"]["Person"];
+        };
+        /** PersonResponse */
+        PersonResponse: {
+            /** PersonResponse.person_view */
+            person_view: components["schemas"]["PersonView"];
+        };
+        /** PersonView */
+        PersonView: {
+            /** PersonView.activity_alert */
+            activity_alert: boolean;
+            /** PersonView.counts */
+            counts: components["schemas"]["PersonAggregates"];
+            /** PersonView.is_admin */
+            is_admin: boolean;
+            /** PersonView.person */
+            person: components["schemas"]["Person"];
+        };
+        /** Post */
+        Post: {
+            /** Post.alt_text */
+            alt_text?: string;
+            /** Post.ap_id */
+            ap_id: string;
+            /** Post.body */
+            body?: string;
+            /** Post.community_id */
+            community_id: number;
+            /** Post.creator_id */
+            creator_id: number;
+            /** Post.deleted */
+            deleted: boolean;
+            /** Post.id */
+            id: number;
+            /** Post.language_id */
+            language_id: number;
+            /** Post.local */
+            local: boolean;
+            /** Post.locked */
+            locked: boolean;
+            /** Post.nsfw */
+            nsfw: boolean;
+            /** Post.published */
             published: string;
-            /** CommentAggregates.child_count */
-            child_count: number;
+            /** Post.removed */
+            removed: boolean;
+            /** Post.sticky */
+            sticky: boolean;
+            /** Post.thumbnail_url */
+            thumbnail_url?: string;
+            /** Post.title */
+            title: string;
+            /** Post.updated */
+            updated?: string;
+            /** Post.url */
+            url?: string;
         };
         /** PostAggregates */
         PostAggregates: {
-            /** PostAggregates.post_id */
-            post_id: number;
             /** PostAggregates.comments */
             comments: number;
+            /** PostAggregates.downvotes */
+            downvotes: number;
+            /** PostAggregates.newest_comment_time */
+            newest_comment_time: string;
+            /** PostAggregates.post_id */
+            post_id: number;
+            /** PostAggregates.published */
+            published: string;
             /** PostAggregates.score */
             score: number;
             /** PostAggregates.upvotes */
             upvotes: number;
-            /** PostAggregates.downvotes */
-            downvotes: number;
-            /** PostAggregates.published */
-            published: string;
-            /** PostAggregates.newest_comment_time */
-            newest_comment_time: string;
         };
-        /** CommunityAggregates */
-        CommunityAggregates: {
-            /** CommunityAggregates.community_id */
-            community_id: number;
-            /** CommunityAggregates.subscriptions_count */
-            subscriptions_count: number;
-            /** CommunityAggregates.post_count */
-            post_count: number;
-            /** CommunityAggregates.post_reply_count */
-            post_reply_count: number;
-            /** CommunityAggregates.published */
+        /**
+         * PostFeatureType
+         * @enum {string}
+         */
+        PostFeatureType: "Community" | "Local";
+        /** PostReport */
+        PostReport: {
+            /** PostReport.creator_id */
+            creator_id: number;
+            /** PostReport.id */
+            id: number;
+            /** PostReport.original_post_body */
+            original_post_body?: string;
+            /** PostReport.original_post_name */
+            original_post_name: string;
+            /** PostReport.original_post_url */
+            original_post_url?: string;
+            /** PostReport.post_id */
+            post_id: number;
+            /** PostReport.published */
             published: string;
+            /** PostReport.reason */
+            reason: string;
+            /** PostReport.resolved */
+            resolved: boolean;
+            /** PostReport.resolver_id */
+            resolver_id?: number;
+            /** PostReport.updated */
+            updated?: string;
+        };
+        /** PostReportResponse */
+        PostReportResponse: {
+            /** PostReportResponse.post_report_view */
+            post_report_view: components["schemas"]["PostReportView"];
+        };
+        /** PostReportView */
+        PostReportView: {
+            /** PostReportView.community */
+            community: components["schemas"]["Community"];
+            /** PostReportView.counts */
+            counts: components["schemas"]["PostAggregates"];
+            /** PostReportView.creator */
+            creator: components["schemas"]["Person"];
+            /** PostReportView.creator_banned_from_community */
+            creator_banned_from_community: boolean;
+            /** PostReportView.creator_blocked */
+            creator_blocked: boolean;
+            /** PostReportView.creator_is_admin */
+            creator_is_admin: boolean;
+            /** PostReportView.creator_is_moderator */
+            creator_is_moderator: boolean;
+            /** PostReportView.hidden */
+            hidden: boolean;
+            /** PostReportView.my_vote */
+            my_vote?: number;
+            /** PostReportView.post */
+            post: components["schemas"]["Post"];
+            /** PostReportView.post_creator */
+            post_creator: components["schemas"]["Person"];
+            /** PostReportView.post_report */
+            post_report: components["schemas"]["PostReport"];
+            /** PostReportView.read */
+            read: boolean;
+            /** PostReportView.resolver */
+            resolver?: components["schemas"]["Person"];
+            /** PostReportView.saved */
+            saved: boolean;
+            /** PostReportView.subscribed */
+            subscribed: components["schemas"]["SubscribedType"];
+            /** PostReportView.unread_comments */
+            unread_comments: number;
+        };
+        /** PostResponse */
+        PostResponse: {
+            /** PostResponse.post_view */
+            post_view: components["schemas"]["PostView"];
+        };
+        /** PostView */
+        PostView: {
+            /** PostView.activity_alert */
+            activity_alert?: boolean;
+            /** PostView.banned_from_community */
+            banned_from_community: boolean;
+            /** PostView.community */
+            community: components["schemas"]["Community"];
+            /** PostView.counts */
+            counts: components["schemas"]["PostAggregates"];
+            /** PostView.creator */
+            creator: components["schemas"]["Person"];
+            /** PostView.creator_banned_from_community */
+            creator_banned_from_community: boolean;
+            /** PostView.creator_blocked */
+            creator_blocked: boolean;
+            /** PostView.creator_is_admin */
+            creator_is_admin: boolean;
+            /** PostView.creator_is_moderator */
+            creator_is_moderator: boolean;
+            /** PostView.hidden */
+            hidden: boolean;
+            /** PostView.my_vote */
+            my_vote?: number;
+            /** PostView.post */
+            post: components["schemas"]["Post"];
+            /** PostView.read */
+            read: boolean;
+            /** PostView.saved */
+            saved: boolean;
+            /** PostView.subscribed */
+            subscribed: components["schemas"]["SubscribedType"];
+            /** PostView.unread_comments */
+            unread_comments: number;
+        };
+        /** PrivateMessage */
+        PrivateMessage: {
+            /** PrivateMessage.ap_id */
+            ap_id: string;
+            /** PrivateMessage.content */
+            content: string;
+            /** PrivateMessage.creator_id */
+            creator_id: number;
+            /** PrivateMessage.deleted */
+            deleted: boolean;
+            /** PrivateMessage.id */
+            id: number;
+            /** PrivateMessage.local */
+            local: boolean;
+            /** PrivateMessage.published */
+            published: string;
+            /** PrivateMessage.read */
+            read: boolean;
+            /** PrivateMessage.recipient_id */
+            recipient_id: number;
+            /** PrivateMessage.updated */
+            updated?: string;
+        };
+        /** PrivateMessagesResponse */
+        PrivateMessagesResponse: {
+            /** PrivateMessagesResponse.private_messages */
+            private_messages: components["schemas"]["PrivateMessageView"][];
+        };
+        /** PrivateMessageView */
+        PrivateMessageView: {
+            /** PrivateMessageView.creator */
+            creator: components["schemas"]["Person"];
+            /** PrivateMessageView.private_message */
+            private_message: components["schemas"]["PrivateMessage"];
+            /** PrivateMessageView.recipient */
+            recipient: components["schemas"]["Person"];
+        };
+        /**
+         * RegistrationMode
+         * @enum {string}
+         */
+        RegistrationMode: "Closed" | "Open" | "RequireApplication";
+        /** RemoveComment */
+        RemoveComment: {
+            /** RemoveComment.comment_id */
+            comment_id: number;
+            /** RemoveComment.reason */
+            reason?: string;
+            /** RemoveComment.removed */
+            removed: boolean;
+        };
+        /** RemovePost */
+        RemovePost: {
+            /** RemovePost.post_id */
+            post_id: number;
+            /** RemovePost.reason */
+            reason?: string;
+            /** RemovePost.removed */
+            removed: boolean;
+        };
+        /** ResolveObject */
+        ResolveObject: {
+            /** ResolveObject.q */
+            q: string;
+        };
+        /** ResolveObjectResponse */
+        ResolveObjectResponse: {
+            /** ResolveObjectResponse.comment */
+            comment?: components["schemas"]["CommentView"];
+            /** ResolveObjectResponse.community */
+            community?: components["schemas"]["CommunityView"];
+            /** ResolveObjectResponse.person */
+            person?: components["schemas"]["PersonView"];
+            /** ResolveObjectResponse.post */
+            post?: components["schemas"]["PostView"];
+        };
+        /** SaveComment */
+        SaveComment: {
+            /** SaveComment.comment_id */
+            comment_id: number;
+            /** SaveComment.save */
+            save: boolean;
+        };
+        /** SavePost */
+        SavePost: {
+            /** SavePost.post_id */
+            post_id: number;
+            /** SavePost.save */
+            save: boolean;
+        };
+        SaveUserSettings: {
+            /** SaveUserSettings.bio */
+            bio?: string;
+            /** SaveUserSettings.show_nsfw */
+            show_nsfw?: boolean;
+            /** SaveUserSettings.show_read_posts */
+            show_read_posts?: boolean;
+        };
+        /** Search */
+        Search: {
+            /** Search.limit */
+            limit?: number;
+            /** Search.listing_type */
+            listing_type?: components["schemas"]["ListingType"];
+            /** Search.page */
+            page?: number;
+            /** Search.q */
+            q: string;
+            /** Search.sort */
+            sort?: components["schemas"]["SortType"];
+            /** Search.type_ */
+            type_?: components["schemas"]["SearchType"];
+        };
+        /** SearchResponse */
+        SearchResponse: {
+            /** SearchResponse.communities */
+            communities: components["schemas"]["CommunityView"][];
+            /** SearchResponse.posts */
+            posts: components["schemas"]["PostView"][];
+            /** SearchResponse.type_ */
+            type_: components["schemas"]["SearchType"];
+            /** SearchResponse.users */
+            users: components["schemas"]["PersonView"][];
+        };
+        /**
+         * SearchType
+         * @enum {string}
+         */
+        SearchType: "Communities" | "Posts" | "Url" | "Users";
+        /** Site */
+        Site: {
+            /**
+             * Site.actor_id
+             * @example https://piefed.social/
+             */
+            actor_id: string;
+            /** Site.all_languages */
+            all_languages?: components["schemas"]["LanguageView"][];
+            /** Site.description */
+            description?: string;
+            /** Site.enable_downvotes */
+            enable_downvotes?: boolean;
+            /** Site.icon */
+            icon?: string;
+            /** Site.name */
+            name: string;
+            /** Site.registration_mode */
+            registration_mode?: components["schemas"]["RegistrationMode"];
+            /** Site.sidebar */
+            sidebar?: string;
+            /** Site.user_count */
+            user_count?: number;
+        };
+        /**
+         * SortType
+         * @enum {string}
+         */
+        SortType: "Active" | "Hot" | "New" | "Scaled" | "TopDay" | "TopHour" | "TopMonth" | "TopSixHour" | "TopTwelveHour" | "TopWeek";
+        /** SaveComment */
+        SubscribeComment: {
+            /** SubscribeComment.comment_id */
+            comment_id: number;
+            /** SubscribeComment.subscribe */
+            subscribe: boolean;
+        };
+        /** SubscribeCommunity */
+        SubscribeCommunity: {
+            /** SubscribeCommunity.community_id */
+            community_id: number;
+            /** SubscribeCommunity.subscribe */
+            subscribe: boolean;
+        };
+        /**
+         * SubscribedType
+         * @enum {string}
+         */
+        SubscribedType: "NotSubscribed" | "Pending" | "Subscribed";
+        /** SubscribePerson */
+        SubscribePerson: {
+            /** SubscribePerson.person_id */
+            person_id: number;
+            /** SubscribePerson.subscribe */
+            subscribe: boolean;
+        };
+        /** SubscribePost */
+        SubscribePost: {
+            /** SubscribePost.post_id */
+            post_id: number;
+            /** SubscribePost.subscribe */
+            subscribe: boolean;
+        };
+        UploadResponse: {
+            /** @example https://preferred.social/static/media/image.png */
+            url: string;
         };
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
 }
-export type $defs = Record<string, never>;
 export interface operations {
     markAllAsRead: {
         parameters: {
-            query?: never;
+            cookie?: never;
             header?: never;
             path?: never;
-            cookie?: never;
+            query?: never;
         };
         requestBody?: never;
         responses: {
             /** @description OK */
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
                 content: {
                     "application/json": components["schemas"]["GetRepliesResponse"];
+                };
+                headers: {
+                    [name: string]: unknown;
                 };
             };
             /** @description Bad request */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
                 content: {
                     "application/json": components["schemas"]["BadRequest"];
+                };
+                headers: {
+                    [name: string]: unknown;
                 };
             };
         };
     };
 }
+export interface paths {
+    "/comment": {
+        delete?: never;
+        /** Get / fetch a comment. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    GetComments?: components["schemas"]["GetComment"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommentResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Create a comment. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateComment"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommentResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description You are being rate limited */
+                429: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        /** Edit a comment. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["EditComment"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommentResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/comment/delete": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Delete a comment. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["DeleteComment"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommentResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/comment/like": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Like / vote on a comment. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateCommentLike"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommentResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/comment/list": {
+        delete?: never;
+        /** Get / fetch comments. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    GetComments?: components["schemas"]["GetComments"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["GetCommentsResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/comment/remove": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** A moderator remove for a comment. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["RemoveComment"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommentResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/comment/report": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Report a comment. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateCommentReport"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommentReportResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/comment/save": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        /** Save a comment. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SaveComment"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommentResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/comment/subscribe": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        /** Subscribe to a comment. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SubscribeComment"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommentResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/community": {
+        delete?: never;
+        /** Get / fetch a community. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    GetCommunity?: components["schemas"]["GetCommunity"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["GetCommunityResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Create a new community. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateCommunity"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommunityResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description You are being rate limited */
+                429: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        /** Edit community. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["EditCommunity"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommunityResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/community/block": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Block a community. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["BlockCommunity"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["BlockCommunityResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/community/delete": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Delete a community. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["DeleteCommunity"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommunityResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/community/follow": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Follow / subscribe to a community. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["FollowCommunity"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommunityResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/community/list": {
+        delete?: never;
+        /** List communities, with various filters. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    ListCommunities?: components["schemas"]["ListCommunities"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["ListCommunitiesResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/community/mod": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Add or remove a moderator for your community.. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["AddModToCommunity"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["AddModToCommunityResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/community/moderate/ban": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Ban a user from a community. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["ModerateCommunityBan"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["ModerateCommunityBanResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/community/moderate/bans": {
+        delete?: never;
+        /** Get the list of banned users for a community. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    GetCommunityModerationBansList?: components["schemas"]["GetCommunityModerationBansList"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["ModerationCommunityBansListResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/community/moderate/post/nsfw": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Mark or unmark a post as NSFW. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["ModerateCommunityPostNsfw"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["ModerateCommunityPostNsfwResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/community/moderate/unban": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        /** Unban a user from a community. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["ModerateCommunityUnBan"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["ModerateCommunityUnBanResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/community/subscribe": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        /** Subscribe to activities in a community. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SubscribeCommunity"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["CommunityResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/federated_instances": {
+        delete?: never;
+        /** Fetch federated instances. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["GetFederatedInstancesResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/post": {
+        delete?: never;
+        /** Get / fetch a post. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    GetPost?: components["schemas"]["GetPost"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["GetPostResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Create a post. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreatePost"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PostResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description You are being rate limited */
+                429: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        /** Edit a post. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["EditPost"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PostResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/post/delete": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Delete a post. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["DeletePost"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PostResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/post/feature": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** A moderator can feature a community post ( IE stick it to the top of a community ). */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["FeaturePost"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PostResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/post/like": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Like / vote on a post. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreatePostLike"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PostResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/post/list": {
+        delete?: never;
+        /** Get / fetch posts, with various filters. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    GetPosts?: components["schemas"]["GetPosts"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["GetPostsResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/post/lock": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** A moderator can lock a post ( IE disable new comments ). */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["LockPost"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PostResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/post/remove": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** A moderator remove for a post. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["RemovePost"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PostResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/post/report": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Report a post. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreatePostReport"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PostReportResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/post/save": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        /** Save a post. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SavePost"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PostResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/post/subscribe": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        /** Subscribe to a post. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SubscribePost"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PostResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/private_message/list": {
+        delete?: never;
+        /** Get / fetch private messages. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    GetPrivateMessages?: components["schemas"]["GetPrivateMessages"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PrivateMessagesResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/resolve_object": {
+        delete?: never;
+        /** Fetch a non-local / federated object. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    ResolveObject?: components["schemas"]["ResolveObject"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["ResolveObjectResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/search": {
+        delete?: never;
+        /** Search PieFed. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    Search?: components["schemas"]["Search"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["SearchResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/site": {
+        delete?: never;
+        /** Gets the site, and your user data. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["GetSiteResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/site/block": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Block an instance. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["BlockInstance"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["BlockInstanceResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/upload/community_image": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "multipart/form-data": components["schemas"]["ImageUpload"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["UploadResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description The uploaded image was missing or invalid */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description You are being rate limited */
+                429: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/upload/image": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "multipart/form-data": components["schemas"]["ImageUpload"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["UploadResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description The uploaded image was missing or invalid */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description You are being rate limited */
+                429: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/upload/user_image": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "multipart/form-data": components["schemas"]["ImageUpload"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["UploadResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description The uploaded image was missing or invalid */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description You are being rate limited */
+                429: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/user": {
+        delete?: never;
+        /** Get the details for a person. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    GetPersonDetails?: components["schemas"]["GetPersonDetails"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["GetPersonDetailsResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/user/block": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Block a person. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["BlockPerson"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["BlockPersonResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/user/login": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Log into PieFed. */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["Login"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["LoginResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description BAD REQUEST */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponseLogin"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+    "/user/mark_all_as_read": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Mark all replies as read. */
+        post: operations["markAllAsRead"];
+        put?: never;
+        trace?: never;
+    };
+    "/user/mark_all_notifications_read": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        /** Set all unread user notifications to read. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["NotificationsMarkAllReadResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/user/notification_state": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        /** Set the read status of a given notification. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["EditNotificationState"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["NotificationsReadStatusResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/user/notifications": {
+        delete?: never;
+        /** Get your user notifications */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    Status?: components["schemas"]["GetNotificationStatus"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["NotificationsResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/user/notifications_count": {
+        delete?: never;
+        /** Get user unread notifications count. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["NotificationsCountResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/user/replies": {
+        delete?: never;
+        /** Get comment replies. */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: {
+                    GetReplies?: components["schemas"]["GetReplies"];
+                };
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["GetRepliesResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/user/save_user_settings": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        /** Save your user settings. */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SaveUserSettings"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content?: never;
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/user/subscribe": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        /** Subscribe to activities from another user */
+        put: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SubscribePerson"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["PersonResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/user/unread_count": {
+        delete?: never;
+        /** Get your unread counts */
+        get: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["GetUnreadCountResponse"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        post?: never;
+        put?: never;
+        trace?: never;
+    };
+    "/user/verify_credentials": {
+        delete?: never;
+        get?: never;
+        head?: never;
+        options?: never;
+        parameters: {
+            cookie?: never;
+            header?: never;
+            path?: never;
+            query?: never;
+        };
+        patch?: never;
+        /** Verify username / password credentials */
+        post: {
+            parameters: {
+                cookie?: never;
+                header?: never;
+                path?: never;
+                query?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["Login"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    content?: never;
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+                /** @description BAD REQUEST */
+                400: {
+                    content?: never;
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        trace?: never;
+    };
+}
+export type webhooks = Record<string, never>;

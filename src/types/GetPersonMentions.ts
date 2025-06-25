@@ -2,7 +2,7 @@
  * Get mentions for your user.
  */
 export type GetPersonMentions = {
-  page?: number;
   limit?: number;
+  page?: number;
   unread_only?: boolean;
 };
