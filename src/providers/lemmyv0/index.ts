@@ -419,9 +419,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
   }
 
   async getPersonMentions(
-    ...params: Parameters<BaseClient["getPersonMentions"]>
+    payload: Parameters<BaseClient["getPersonMentions"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getPersonMentions"]> {
-    const response = await this.#client.getPersonMentions(...params);
+    const response = await this.#client.getPersonMentions(
+      { ...payload, sort: "New" },
+      options,
+    );
 
     return {
       mentions: response.mentions.map(compatLemmyMentionView),
@@ -546,9 +550,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
   }
 
   async getReplies(
-    ...params: Parameters<BaseClient["getReplies"]>
+    payload: Parameters<BaseClient["getReplies"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getReplies"]> {
-    const response = await this.#client.getReplies(...params);
+    const response = await this.#client.getReplies(
+      { ...payload, sort: "New" },
+      options,
+    );
 
     return {
       replies: response.replies.map(compatLemmyReplyView),
