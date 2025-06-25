@@ -11,10 +11,14 @@ export const LoginResponse = z.object({
   jwt: z.optional(z.string()),
   /**
    * If registration applications are required, this will return true for a signup response.
+   *
+   * Omitted for piefed
    */
-  registration_created: z.boolean(),
+  registration_created: z.optional(z.boolean()),
   /**
    * If email verifications are required, this will return true for a signup response.
+   *
+   * Omitted for piefed
    */
-  verify_email_sent: z.boolean(),
+  verify_email_sent: z.optional(z.boolean()),
 });
