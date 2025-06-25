@@ -10,7 +10,7 @@ import {
 } from "../../types";
 
 export function getInboxItemPublished(
-  item: PersonMentionView | CommentReplyView | PrivateMessageView,
+  item: CommentReplyView | PersonMentionView | PrivateMessageView,
 ): string {
   if ("comment_reply" in item) {
     return item.comment_reply.published;
@@ -21,13 +21,6 @@ export function getInboxItemPublished(
   }
 
   return item.person_mention.published;
-}
-
-export function getPostCommentItemCreatedDate(
-  item: PostReportView | CommentReportView | PostView | CommentView,
-): number {
-  if ("comment" in item) return Date.parse(item.comment.published);
-  return Date.parse(item.post.published);
 }
 
 export function getLogDate(item: GetModlogResponse["modlog"][number]): string {
@@ -69,4 +62,11 @@ export function getLogDate(item: GetModlogResponse["modlog"][number]): string {
       // and needs to be handled.
       return item;
   }
+}
+
+export function getPostCommentItemCreatedDate(
+  item: CommentReportView | CommentView | PostReportView | PostView,
+): number {
+  if ("comment" in item) return Date.parse(item.comment.published);
+  return Date.parse(item.post.published);
 }

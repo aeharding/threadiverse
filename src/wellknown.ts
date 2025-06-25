@@ -1,5 +1,21 @@
 import { BaseClientOptions } from "./BaseClient";
 
+export interface Nodeinfo21Payload {
+  software: {
+    name: string;
+    version: string;
+  };
+}
+
+interface NodeinfoLink {
+  href: string;
+  rel: string;
+}
+
+interface NodeinfoLinksPayload {
+  links: NodeinfoLink[];
+}
+
 export async function resolveSoftware(
   url: string,
   options?: BaseClientOptions,
@@ -32,25 +48,9 @@ export async function resolveSoftware(
   );
 }
 
-interface NodeinfoLink {
-  rel: string;
-  href: string;
-}
-
-interface NodeinfoLinksPayload {
-  links: NodeinfoLink[];
-}
-
 // {"links":[{"rel":"http://nodeinfo.diaspora.software/ns/schema/2.1","href":"https://lemmy.zip/nodeinfo/2.1"}]}
 function resolveNodeinfoLink(data: NodeinfoLinksPayload): string | undefined {
   return data.links.find(
     (link) => link.rel === "http://nodeinfo.diaspora.software/ns/schema/2.1",
   )?.href;
-}
-
-export interface Nodeinfo21Payload {
-  software: {
-    name: string;
-    version: string;
-  };
 }

@@ -1,24 +1,22 @@
 import { z } from "zod/v4-mini";
 
 export const Comment = z.object({
-  id: z.number(),
-  creator_id: z.number(),
-  post_id: z.number(),
-  content: z.string(),
   /**
-   * Whether the comment has been removed.
+   * The federated activity id / ap_id.
    */
-  removed: z.boolean(),
-  published: z.string(),
-  updated: z.optional(z.string()),
+  ap_id: z.string(),
+  content: z.string(),
+  creator_id: z.number(),
   /**
    * Whether the comment has been deleted by its creator.
    */
   deleted: z.boolean(),
   /**
-   * The federated activity id / ap_id.
+   * Whether the comment has been distinguished(speaking officially) by a mod.
    */
-  ap_id: z.string(),
+  distinguished: z.boolean(),
+  id: z.number(),
+  language_id: z.number(),
   /**
    * Whether the comment is local.
    */
@@ -28,9 +26,11 @@ export const Comment = z.object({
    * 0.24.27
    */
   path: z.string(),
+  post_id: z.number(),
+  published: z.string(),
   /**
-   * Whether the comment has been distinguished(speaking officially) by a mod.
+   * Whether the comment has been removed.
    */
-  distinguished: z.boolean(),
-  language_id: z.number(),
+  removed: z.boolean(),
+  updated: z.optional(z.string()),
 });

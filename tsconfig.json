@@ -9,7 +9,8 @@
     "noEmit": true,
     "composite": true,
     "allowImportingTsExtensions": true,
-    "isolatedDeclarations": false
+    "isolatedDeclarations": false,
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src"]
 }

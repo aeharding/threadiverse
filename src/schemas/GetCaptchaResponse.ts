@@ -9,13 +9,13 @@ export const CaptchaResponse = z.object({
    */
   png: z.string(),
   /**
-   * A Base64 encoded wav audio
-   */
-  wav: z.string(),
-  /**
    * The UUID for the captcha item.
    */
   uuid: z.string(),
+  /**
+   * A Base64 encoded wav audio
+   */
+  wav: z.string(),
 });
 
 /**

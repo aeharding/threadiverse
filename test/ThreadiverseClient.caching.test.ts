@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { clearCache } from "../src/ThreadiverseClient";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { BaseClientOptions } from "../src/BaseClient";
+import { clearCache } from "../src/ThreadiverseClient";
 import ThreadiverseClient from "../src/ThreadiverseClient";
 
 describe("ThreadiverseClient - Caching", () => {
@@ -29,15 +30,15 @@ describe("ThreadiverseClient - Caching", () => {
           JSON.stringify({
             links: [
               {
-                rel: "http://nodeinfo.diaspora.software/ns/schema/2.1",
                 href: "https://lemmy-cache-test.example.com/nodeinfo/2.1",
+                rel: "http://nodeinfo.diaspora.software/ns/schema/2.1",
               },
             ],
           }),
           {
+            headers: { "Content-Type": "application/json" },
             status: 200,
             statusText: "OK",
-            headers: { "Content-Type": "application/json" },
           },
         );
       }
@@ -46,9 +47,9 @@ describe("ThreadiverseClient - Caching", () => {
         return new Response(
           JSON.stringify({ software: { name: "lemmy", version: "0.19.6" } }),
           {
+            headers: { "Content-Type": "application/json" },
             status: 200,
             statusText: "OK",
-            headers: { "Content-Type": "application/json" },
           },
         );
       }
@@ -59,9 +60,9 @@ describe("ThreadiverseClient - Caching", () => {
         )
       ) {
         return new Response(JSON.stringify({ posts: [] }), {
+          headers: { "Content-Type": "application/json" },
           status: 200,
           statusText: "OK",
-          headers: { "Content-Type": "application/json" },
         });
       }
       throw new Error(`Unexpected fetch call: ${urlStr}`);
