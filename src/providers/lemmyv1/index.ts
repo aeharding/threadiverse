@@ -41,14 +41,17 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   static softwareVersionRange = ">=1.0.0-alpha.5";
 
-  private client: LemmyV1Http;
+  #client: LemmyV1Http;
 
   constructor(hostname: string, options: BaseClientOptions) {
-    this.client = new LemmyV1Http(hostname, options);
+    this.#client = new LemmyV1Http(hostname, options);
   }
 
-  async resolveObject(payload: Parameters<BaseClient["resolveObject"]>[0]) {
-    const response = await this.client.resolveObject(payload);
+  async resolveObject(
+    payload: Parameters<BaseClient["resolveObject"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["resolveObject"]> {
+    const response = await this.#client.resolveObject(payload, options);
 
     const compatResponse: Awaited<ReturnType<BaseClient["resolveObject"]>> = {};
 
@@ -73,11 +76,13 @@ export class UnsafeLemmyV1Client implements BaseClient {
     return compatResponse;
   }
 
-  async getSite(...params: Parameters<BaseClient["getSite"]>) {
+  async getSite(
+    ...params: Parameters<BaseClient["getSite"]>
+  ): ReturnType<BaseClient["getSite"]> {
     const [siteResponse, myUserResponse] = await Promise.all([
-      this.client.getSite(...params),
-      this.client.getHeader("Authorization") &&
-        this.client.getMyUser(...params),
+      this.#client.getSite(...params),
+      this.#client.getHeader("Authorization") &&
+        this.#client.getMyUser(...params),
     ]);
 
     return {
@@ -88,16 +93,22 @@ export class UnsafeLemmyV1Client implements BaseClient {
     };
   }
 
-  async login(...params: Parameters<BaseClient["login"]>) {
-    return this.client.login(...params);
+  async login(
+    ...params: Parameters<BaseClient["login"]>
+  ): ReturnType<BaseClient["login"]> {
+    return this.#client.login(...params);
   }
 
-  async logout(...params: Parameters<BaseClient["logout"]>) {
-    await this.client.logout(...params);
+  async logout(
+    ...params: Parameters<BaseClient["logout"]>
+  ): ReturnType<BaseClient["logout"]> {
+    await this.#client.logout(...params);
   }
 
-  async getCommunity(...params: Parameters<BaseClient["getCommunity"]>) {
-    const response = await this.client.getCommunity(...params);
+  async getCommunity(
+    ...params: Parameters<BaseClient["getCommunity"]>
+  ): ReturnType<BaseClient["getCommunity"]> {
+    const response = await this.#client.getCommunity(...params);
 
     return {
       ...response,
@@ -109,13 +120,13 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async getPosts(
     payload: Parameters<BaseClient["getPosts"]>[0],
     options?: RequestOptions,
-  ) {
+  ): ReturnType<BaseClient["getPosts"]> {
     if (payload.mode && payload.mode !== "lemmyv1")
       throw new InvalidPayloadError(
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const response = await this.client.getPosts(
+    const response = await this.#client.getPosts(
       cleanThreadiverseParams(payload),
       options,
     );
@@ -126,48 +137,60 @@ export class UnsafeLemmyV1Client implements BaseClient {
     };
   }
 
-  async getComments(...params: Parameters<BaseClient["getComments"]>) {
-    const response = await this.client.getComments(...params);
+  async getComments(
+    ...params: Parameters<BaseClient["getComments"]>
+  ): ReturnType<BaseClient["getComments"]> {
+    const response = await this.#client.getComments(...params);
 
     return {
       comments: response.comments.map(compatLemmyCommentView),
     };
   }
 
-  async createPost(...params: Parameters<BaseClient["createPost"]>) {
-    const response = await this.client.createPost(...params);
+  async createPost(
+    ...params: Parameters<BaseClient["createPost"]>
+  ): ReturnType<BaseClient["createPost"]> {
+    const response = await this.#client.createPost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
     };
   }
 
-  async editPost(...params: Parameters<BaseClient["editPost"]>) {
-    const response = await this.client.editPost(...params);
+  async editPost(
+    ...params: Parameters<BaseClient["editPost"]>
+  ): ReturnType<BaseClient["editPost"]> {
+    const response = await this.#client.editPost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
     };
   }
 
-  async getPost(...params: Parameters<BaseClient["getPost"]>) {
-    const response = await this.client.getPost(...params);
+  async getPost(
+    ...params: Parameters<BaseClient["getPost"]>
+  ): ReturnType<BaseClient["getPost"]> {
+    const response = await this.#client.getPost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
     };
   }
 
-  async createComment(...params: Parameters<BaseClient["createComment"]>) {
-    const response = await this.client.createComment(...params);
+  async createComment(
+    ...params: Parameters<BaseClient["createComment"]>
+  ): ReturnType<BaseClient["createComment"]> {
+    const response = await this.#client.createComment(...params);
 
     return {
       comment_view: compatLemmyCommentView(response.comment_view),
     };
   }
 
-  async editComment(...params: Parameters<BaseClient["editComment"]>) {
-    const response = await this.client.editComment(...params);
+  async editComment(
+    ...params: Parameters<BaseClient["editComment"]>
+  ): ReturnType<BaseClient["editComment"]> {
+    const response = await this.#client.editComment(...params);
 
     return {
       comment_view: compatLemmyCommentView(response.comment_view),
@@ -176,8 +199,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async createPrivateMessage(
     ...params: Parameters<BaseClient["createPrivateMessage"]>
-  ) {
-    const response = await this.client.createPrivateMessage(...params);
+  ): ReturnType<BaseClient["createPrivateMessage"]> {
+    const response = await this.#client.createPrivateMessage(...params);
 
     return {
       private_message_view: compatLemmyPrivateMessageView(
@@ -186,8 +209,10 @@ export class UnsafeLemmyV1Client implements BaseClient {
     };
   }
 
-  async getUnreadCount(...params: Parameters<BaseClient["getUnreadCount"]>) {
-    const response = await this.client.getUnreadCount(...params);
+  async getUnreadCount(
+    ...params: Parameters<BaseClient["getUnreadCount"]>
+  ): ReturnType<BaseClient["getUnreadCount"]> {
+    const response = await this.#client.getUnreadCount(...params);
 
     // TODO: Implement
     return {
@@ -199,8 +224,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async getFederatedInstances(
     ...params: Parameters<BaseClient["getFederatedInstances"]>
-  ) {
-    const response = await this.client.getFederatedInstances(...params);
+  ): ReturnType<BaseClient["getFederatedInstances"]> {
+    const response = await this.#client.getFederatedInstances(...params);
 
     return {
       federated_instances: response.federated_instances
@@ -209,60 +234,76 @@ export class UnsafeLemmyV1Client implements BaseClient {
     };
   }
 
-  async markPostAsRead(...params: Parameters<BaseClient["markPostAsRead"]>) {
-    await this.client.markManyPostAsRead(...params);
+  async markPostAsRead(
+    ...params: Parameters<BaseClient["markPostAsRead"]>
+  ): ReturnType<BaseClient["markPostAsRead"]> {
+    await this.#client.markManyPostAsRead(...params);
   }
 
-  async likePost(...params: Parameters<BaseClient["likePost"]>) {
-    const response = await this.client.likePost(...params);
+  async likePost(
+    ...params: Parameters<BaseClient["likePost"]>
+  ): ReturnType<BaseClient["likePost"]> {
+    const response = await this.#client.likePost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
     };
   }
 
-  async likeComment(...params: Parameters<BaseClient["likeComment"]>) {
-    const response = await this.client.likeComment(...params);
+  async likeComment(
+    ...params: Parameters<BaseClient["likeComment"]>
+  ): ReturnType<BaseClient["likeComment"]> {
+    const response = await this.#client.likeComment(...params);
 
     return {
       comment_view: compatLemmyCommentView(response.comment_view),
     };
   }
 
-  async savePost(...params: Parameters<BaseClient["savePost"]>) {
-    const response = await this.client.savePost(...params);
+  async savePost(
+    ...params: Parameters<BaseClient["savePost"]>
+  ): ReturnType<BaseClient["savePost"]> {
+    const response = await this.#client.savePost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
     };
   }
 
-  async deletePost(...params: Parameters<BaseClient["deletePost"]>) {
-    const response = await this.client.deletePost(...params);
+  async deletePost(
+    ...params: Parameters<BaseClient["deletePost"]>
+  ): ReturnType<BaseClient["deletePost"]> {
+    const response = await this.#client.deletePost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
     };
   }
 
-  async removePost(...params: Parameters<BaseClient["removePost"]>) {
-    const response = await this.client.removePost(...params);
+  async removePost(
+    ...params: Parameters<BaseClient["removePost"]>
+  ): ReturnType<BaseClient["removePost"]> {
+    const response = await this.#client.removePost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
     };
   }
 
-  async lockPost(...params: Parameters<BaseClient["lockPost"]>) {
-    const response = await this.client.lockPost(...params);
+  async lockPost(
+    ...params: Parameters<BaseClient["lockPost"]>
+  ): ReturnType<BaseClient["lockPost"]> {
+    const response = await this.#client.lockPost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
     };
   }
 
-  async featurePost(...params: Parameters<BaseClient["featurePost"]>) {
-    const response = await this.client.featurePost(...params);
+  async featurePost(
+    ...params: Parameters<BaseClient["featurePost"]>
+  ): ReturnType<BaseClient["featurePost"]> {
+    const response = await this.#client.featurePost(...params);
 
     return {
       post_view: compatLemmyPostView(response.post_view),
@@ -272,13 +313,13 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async listCommunities(
     payload: Parameters<BaseClient["listCommunities"]>[0],
     options?: RequestOptions,
-  ) {
+  ): ReturnType<BaseClient["listCommunities"]> {
     if (payload.mode && payload.mode !== "lemmyv1")
       throw new InvalidPayloadError(
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const response = await this.client.listCommunities(
+    const response = await this.#client.listCommunities(
       cleanThreadiverseParams(payload),
       options,
     );
@@ -291,13 +332,13 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async search(
     payload: Parameters<BaseClient["search"]>[0],
     options?: RequestOptions,
-  ) {
+  ): ReturnType<BaseClient["search"]> {
     if (payload.mode && payload.mode !== "lemmyv1")
       throw new InvalidPayloadError(
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const response = await this.client.search(
+    const response = await this.#client.search(
       cleanThreadiverseParams(payload),
       options,
     );
@@ -330,23 +371,21 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async getPersonDetails(
     ...params: Parameters<BaseClient["getPersonDetails"]>
-  ) {
-    const response = await this.client.getPersonDetails(...params);
+  ): ReturnType<BaseClient["getPersonDetails"]> {
+    const response = await this.#client.getPersonDetails(...params);
 
     return {
       ...response,
       person_view: compatLemmyPersonView(response.person_view),
       moderates: response.moderates.map(compatLemmyCommunityModeratorView),
-      comments: [],
-      posts: [],
     };
   }
 
   async listPersonSaved(
     payload: Parameters<BaseClient["listPersonSaved"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.listPersonSaved(payload, options);
+  ): ReturnType<BaseClient["listPersonSaved"]> {
+    const response = await this.#client.listPersonSaved(payload, options);
 
     return {
       ...response,
@@ -360,8 +399,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async listPersonContent(
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.listPersonContent(payload, options);
+  ): ReturnType<BaseClient["listPersonContent"]> {
+    const response = await this.#client.listPersonContent(payload, options);
 
     return {
       content: response.content.map((item) => {
@@ -373,8 +412,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async getNotifications(
     ...params: Parameters<BaseClient["getNotifications"]>
-  ) {
-    const response = await this.client.listInbox(...params);
+  ): ReturnType<BaseClient["getNotifications"]> {
+    const response = await this.#client.listInbox(...params);
 
     return {
       notifications: response.inbox
@@ -386,8 +425,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async getPersonMentions(
     payload: Parameters<BaseClient["getPersonMentions"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.listInbox(
+  ): ReturnType<BaseClient["getPersonMentions"]> {
+    const response = await this.#client.listInbox(
       {
         ...payload,
         type_: "CommentMention",
@@ -406,8 +445,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async markPersonMentionAsRead(
     payload: Parameters<BaseClient["markPersonMentionAsRead"]>[0],
     options?: RequestOptions,
-  ) {
-    await this.client.markCommentMentionAsRead(
+  ): ReturnType<BaseClient["markPersonMentionAsRead"]> {
+    await this.#client.markCommentMentionAsRead(
       {
         ...payload,
         person_comment_mention_id: payload.person_mention_id,
@@ -418,25 +457,27 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async markPrivateMessageAsRead(
     ...params: Parameters<BaseClient["markPrivateMessageAsRead"]>
-  ) {
-    await this.client.markPrivateMessageAsRead(...params);
+  ): ReturnType<BaseClient["markPrivateMessageAsRead"]> {
+    await this.#client.markPrivateMessageAsRead(...params);
   }
 
   async markCommentReplyAsRead(
     ...params: Parameters<BaseClient["markCommentReplyAsRead"]>
-  ) {
-    await this.client.markCommentReplyAsRead(...params);
+  ): ReturnType<BaseClient["markCommentReplyAsRead"]> {
+    await this.#client.markCommentReplyAsRead(...params);
   }
 
-  async markAllAsRead(...params: Parameters<BaseClient["markAllAsRead"]>) {
-    await this.client.markAllNotificationsAsRead(...params);
+  async markAllAsRead(
+    ...params: Parameters<BaseClient["markAllAsRead"]>
+  ): ReturnType<BaseClient["markAllAsRead"]> {
+    await this.#client.markAllNotificationsAsRead(...params);
   }
 
   async getPrivateMessages(
     payload: Parameters<BaseClient["getPrivateMessages"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.listInbox(
+  ): ReturnType<BaseClient["getPrivateMessages"]> {
+    const response = await this.#client.listInbox(
       {
         ...payload,
         type_: "PrivateMessage",
@@ -454,19 +495,21 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async saveUserSettings(
     ...params: Parameters<BaseClient["saveUserSettings"]>
-  ) {
-    await this.client.saveUserSettings(...params);
+  ): ReturnType<BaseClient["saveUserSettings"]> {
+    await this.#client.saveUserSettings(...params);
   }
 
-  async blockInstance(...params: Parameters<BaseClient["blockInstance"]>) {
-    await this.client.userBlockInstance(...params);
+  async blockInstance(
+    ...params: Parameters<BaseClient["blockInstance"]>
+  ): ReturnType<BaseClient["blockInstance"]> {
+    await this.#client.userBlockInstance(...params);
   }
 
   async uploadImage(
     payload: Parameters<BaseClient["uploadImage"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.uploadImage(
+  ): ReturnType<BaseClient["uploadImage"]> {
+    const response = await this.#client.uploadImage(
       { image: payload.file },
       options,
     );
@@ -480,26 +523,30 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async deleteImage(
     payload: Parameters<BaseClient["deleteImage"]>[0],
     options?: RequestOptions,
-  ) {
-    await this.client.deleteMedia(
+  ): ReturnType<BaseClient["deleteImage"]> {
+    await this.#client.deleteMedia(
       { filename: payload.url }, // delete_token is not needed. Lemmy verifies account ownership
       options,
     );
   }
 
-  async register(...params: Parameters<BaseClient["register"]>) {
-    return this.client.register(...params);
+  async register(
+    ...params: Parameters<BaseClient["register"]>
+  ): ReturnType<BaseClient["register"]> {
+    return this.#client.register(...params);
   }
 
-  async getCaptcha(...params: Parameters<BaseClient["getCaptcha"]>) {
-    return this.client.getCaptcha(...params);
+  async getCaptcha(
+    ...params: Parameters<BaseClient["getCaptcha"]>
+  ): ReturnType<BaseClient["getCaptcha"]> {
+    return this.#client.getCaptcha(...params);
   }
 
   async listReports(
     payload: Parameters<BaseClient["listReports"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.listReports(payload, options);
+  ): ReturnType<BaseClient["listReports"]> {
+    const response = await this.#client.listReports(payload, options);
 
     return {
       reports: response.reports
@@ -508,8 +555,10 @@ export class UnsafeLemmyV1Client implements BaseClient {
     };
   }
 
-  async getModlog(...params: Parameters<BaseClient["getModlog"]>) {
-    const response = await this.client.getModlog(...params);
+  async getModlog(
+    ...params: Parameters<BaseClient["getModlog"]>
+  ): ReturnType<BaseClient["getModlog"]> {
+    const response = await this.#client.getModlog(...params);
 
     return {
       modlog: response.modlog.map(compatLemmyModlogView).filter((m) => !!m),
@@ -519,8 +568,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async getReplies(
     payload: Parameters<BaseClient["getReplies"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.listInbox(
+  ): ReturnType<BaseClient["getReplies"]> {
+    const response = await this.#client.listInbox(
       {
         ...payload,
         type_: "CommentReply",
@@ -537,12 +586,14 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async banFromCommunity(
     ...params: Parameters<BaseClient["banFromCommunity"]>
-  ) {
-    await this.client.banFromCommunity(...params);
+  ): ReturnType<BaseClient["banFromCommunity"]> {
+    await this.#client.banFromCommunity(...params);
   }
 
-  async saveComment(...params: Parameters<BaseClient["saveComment"]>) {
-    const response = await this.client.saveComment(...params);
+  async saveComment(
+    ...params: Parameters<BaseClient["saveComment"]>
+  ): ReturnType<BaseClient["saveComment"]> {
+    const response = await this.#client.saveComment(...params);
 
     return {
       comment_view: compatLemmyCommentView(response.comment_view),
@@ -551,40 +602,48 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async distinguishComment(
     ...params: Parameters<BaseClient["distinguishComment"]>
-  ) {
-    const response = await this.client.distinguishComment(...params);
+  ): ReturnType<BaseClient["distinguishComment"]> {
+    const response = await this.#client.distinguishComment(...params);
 
     return {
       comment_view: compatLemmyCommentView(response.comment_view),
     };
   }
 
-  async deleteComment(...params: Parameters<BaseClient["deleteComment"]>) {
-    const response = await this.client.deleteComment(...params);
+  async deleteComment(
+    ...params: Parameters<BaseClient["deleteComment"]>
+  ): ReturnType<BaseClient["deleteComment"]> {
+    const response = await this.#client.deleteComment(...params);
 
     return {
       comment_view: compatLemmyCommentView(response.comment_view),
     };
   }
 
-  async removeComment(...params: Parameters<BaseClient["removeComment"]>) {
-    const response = await this.client.removeComment(...params);
+  async removeComment(
+    ...params: Parameters<BaseClient["removeComment"]>
+  ): ReturnType<BaseClient["removeComment"]> {
+    const response = await this.#client.removeComment(...params);
 
     return {
       comment_view: compatLemmyCommentView(response.comment_view),
     };
   }
 
-  async followCommunity(...params: Parameters<BaseClient["followCommunity"]>) {
-    const response = await this.client.followCommunity(...params);
+  async followCommunity(
+    ...params: Parameters<BaseClient["followCommunity"]>
+  ): ReturnType<BaseClient["followCommunity"]> {
+    const response = await this.#client.followCommunity(...params);
 
     return {
       community_view: compatLemmyCommunityView(response.community_view),
     };
   }
 
-  async blockCommunity(...params: Parameters<BaseClient["blockCommunity"]>) {
-    const response = await this.client.blockCommunity(...params);
+  async blockCommunity(
+    ...params: Parameters<BaseClient["blockCommunity"]>
+  ): ReturnType<BaseClient["blockCommunity"]> {
+    const response = await this.#client.blockCommunity(...params);
 
     return {
       ...response,
@@ -592,8 +651,10 @@ export class UnsafeLemmyV1Client implements BaseClient {
     };
   }
 
-  async blockPerson(...params: Parameters<BaseClient["blockPerson"]>) {
-    const response = await this.client.blockPerson(...params);
+  async blockPerson(
+    ...params: Parameters<BaseClient["blockPerson"]>
+  ): ReturnType<BaseClient["blockPerson"]> {
+    const response = await this.#client.blockPerson(...params);
 
     return {
       ...response,
@@ -603,36 +664,38 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async createPostReport(
     ...params: Parameters<BaseClient["createPostReport"]>
-  ) {
-    await this.client.createPostReport(...params);
+  ): ReturnType<BaseClient["createPostReport"]> {
+    await this.#client.createPostReport(...params);
   }
 
   async createCommentReport(
     ...params: Parameters<BaseClient["createCommentReport"]>
-  ) {
-    await this.client.createCommentReport(...params);
+  ): ReturnType<BaseClient["createCommentReport"]> {
+    await this.#client.createCommentReport(...params);
   }
 
   async createPrivateMessageReport(
     ...params: Parameters<BaseClient["createPrivateMessageReport"]>
-  ) {
-    await this.client.createPrivateMessageReport(...params);
+  ): ReturnType<BaseClient["createPrivateMessageReport"]> {
+    await this.#client.createPrivateMessageReport(...params);
   }
 
-  async getSiteMetadata(...params: Parameters<BaseClient["getSiteMetadata"]>) {
-    return this.client.getSiteMetadata(...params);
+  async getSiteMetadata(
+    ...params: Parameters<BaseClient["getSiteMetadata"]>
+  ): ReturnType<BaseClient["getSiteMetadata"]> {
+    return this.#client.getSiteMetadata(...params);
   }
 
   async resolvePostReport(
     ...params: Parameters<BaseClient["resolvePostReport"]>
-  ) {
-    await this.client.resolvePostReport(...params);
+  ): ReturnType<BaseClient["resolvePostReport"]> {
+    await this.#client.resolvePostReport(...params);
   }
 
   async resolveCommentReport(
     ...params: Parameters<BaseClient["resolveCommentReport"]>
-  ) {
-    await this.client.resolveCommentReport(...params);
+  ): ReturnType<BaseClient["resolveCommentReport"]> {
+    await this.#client.resolveCommentReport(...params);
   }
 
   async getRandomCommunity(
@@ -646,8 +709,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async listPostReports(
     payload: Parameters<BaseClient["listPostReports"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.listReports(
+  ): ReturnType<BaseClient["listPostReports"]> {
+    const response = await this.#client.listReports(
       {
         ...payload,
         type_: "Posts",
@@ -666,8 +729,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async listCommentReports(
     payload: Parameters<BaseClient["listCommentReports"]>[0],
     options?: RequestOptions,
-  ) {
-    const response = await this.client.listReports(
+  ): ReturnType<BaseClient["listCommentReports"]> {
+    const response = await this.#client.listReports(
       {
         ...payload,
         type_: "Comments",
@@ -684,5 +747,4 @@ export class UnsafeLemmyV1Client implements BaseClient {
   }
 }
 
-// @ts-expect-error TODO: fix this
 export default buildSafeClient(UnsafeLemmyV1Client);

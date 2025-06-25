@@ -165,7 +165,7 @@ export class UnsafePiefedClient implements BaseClient {
   async getPosts(
     payload: Parameters<BaseClient["getPosts"]>[0],
     options?: RequestOptions,
-  ) {
+  ): ReturnType<BaseClient["getPosts"]> {
     if (payload.mode && payload.mode !== "piefed")
       throw new InvalidPayloadError(
         `Connected to piefed, ${payload.mode} is not supported`,

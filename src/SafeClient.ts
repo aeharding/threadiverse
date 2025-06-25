@@ -1,4 +1,6 @@
 import type { BaseClient } from "./BaseClient";
+import { UnsafeLemmyV0Client } from "./providers/lemmyv0";
+import { UnsafeLemmyV1Client } from "./providers/lemmyv1";
 import type { UnsafePiefedClient } from "./providers/piefed";
 import {
   PostView,
@@ -26,7 +28,16 @@ import {
   Notification,
 } from "./schemas";
 
-export default function buildSafeClient(Client: typeof UnsafePiefedClient) {
+type AnyClient =
+  | typeof UnsafePiefedClient
+  | typeof UnsafeLemmyV0Client
+  | typeof UnsafeLemmyV1Client;
+
+export default function buildSafeClient(_Client: AnyClient): AnyClient {
+  // Typescript is not smart enough to infer the correct type from the union
+  // Since they all implement BaseClient, cast to the first one
+  const Client = _Client as typeof UnsafeLemmyV0Client;
+
   return class SafeClient extends Client {
     async resolveObject(...params: Parameters<BaseClient["resolveObject"]>) {
       const response = await super.resolveObject(...params);
