@@ -205,17 +205,8 @@ export default function buildSafeClient(Client: typeof UnsafePiefedClient) {
     async listPersonSaved(
       ...params: Parameters<BaseClient["listPersonSaved"]>
     ) {
-      const { content, next_page } = await super.listPersonSaved(...params);
-      return {
-        content: content.map((item) => {
-          if ("post" in item) {
-            return PostView.parse(item);
-          } else {
-            return CommentView.parse(item);
-          }
-        }),
-        next_page,
-      };
+      const response = await super.listPersonSaved(...params);
+      return ListPersonContentResponse.parse(response);
     }
 
     async getNotifications(

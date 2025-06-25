@@ -168,18 +168,12 @@ export abstract class BaseClient {
 
   abstract listPersonSaved(
     payload: {
-      /**
-       * Needed for lemmyv0
-       */
-      username: string;
+      person_id: number;
       page?: number;
       limit: number;
     },
     options?: RequestOptions,
-  ): Promise<{
-    content: (types.PostView | types.CommentView)[];
-    next_page?: string;
-  }>;
+  ): Promise<types.ListPersonContentResponse>;
 
   abstract getNotifications(
     payload: types.GetPersonMentions,

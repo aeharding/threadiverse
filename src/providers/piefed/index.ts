@@ -536,7 +536,16 @@ export class UnsafePiefedClient implements BaseClient {
   async listPersonSaved(
     ..._params: Parameters<BaseClient["listPersonSaved"]>
   ): ReturnType<BaseClient["listPersonSaved"]> {
+    // TODO: https://codeberg.org/rimu/pyfedi/issues/925
     throw new UnsupportedError("List person saved is not supported by piefed");
+    // return this.listPersonContent(
+    //   {
+    //     ...payload,
+    //     // @ts-expect-error TODO: fix this
+    //     saved_only: true,
+    //   },
+    //   options,
+    // );
   }
 
   async getNotifications(
