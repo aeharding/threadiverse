@@ -90,7 +90,8 @@ export class UnsafePiefedClient implements BaseClient {
 
     return {
       ...response.data!,
-      admins: response.data!.admins.map(compatPiefedPersonView),
+      // TODO: piefed.ca is missing admins in the response for some reason????
+      admins: (response.data!.admins ?? []).map(compatPiefedPersonView),
       site_view: {
         site: response.data!.site,
         local_site: {
