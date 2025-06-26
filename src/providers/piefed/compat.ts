@@ -10,6 +10,7 @@ export function compatPiefedComment(
     // @ts-expect-error TODO: fix this
     content: comment.body,
     creator_id,
+    distinguished: comment.distinguished ?? false,
   };
 }
 
