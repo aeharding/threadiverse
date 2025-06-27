@@ -217,6 +217,11 @@ export abstract class BaseClient {
     options?: RequestOptions,
   ): Promise<types.ListPersonContentResponse>;
 
+  abstract listPersonLiked(
+    payload: types.PageParams & { type: types.LikeType },
+    options?: RequestOptions,
+  ): Promise<types.ListPersonLikedResponse>;
+
   abstract listPersonSaved(
     payload: types.PageParams & { person_id: number },
     options?: RequestOptions,

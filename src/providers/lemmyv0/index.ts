@@ -1,4 +1,5 @@
 import { LemmyHttp } from "lemmy-js-client";
+import * as LemmyV0 from "lemmy-js-client";
 
 import {
   BaseClient,
@@ -12,6 +13,7 @@ import {
 } from "../../errors";
 import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
+import { ListPersonLikedResponse } from "../../types";
 import {
   compatBlocks,
   compatLemmyCommentReportView,
@@ -31,6 +33,7 @@ import {
   getInboxItemPublished,
   getLogDate,
   getPostCommentItemCreatedDate,
+  sortPostCommentByPublished,
 } from "./helpers";
 
 export class UnsafeLemmyV0Client implements BaseClient {
@@ -344,14 +347,18 @@ export class UnsafeLemmyV0Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
+    const page_cursor = payload.page_cursor;
+    if (typeof page_cursor === "number")
+      throw new InvalidPayloadError("page_cursor must be string");
+
     const response = await this.#client.getPosts(
-      compatLemmyPageParams(cleanThreadiverseParams(payload)),
+      { ...cleanThreadiverseParams(payload), page_cursor },
       options,
     );
 
     return {
-      ...compatLemmyPageResponse(payload),
       data: response.posts.map(compatLemmyPostView),
+      next_page: response.next_page,
     };
   }
 
@@ -515,6 +522,31 @@ export class UnsafeLemmyV0Client implements BaseClient {
     return {
       ...compatLemmyPageResponse(payload),
       data,
+    };
+  }
+
+  async listPersonLiked(
+    { type, ...payload }: Parameters<BaseClient["listPersonLiked"]>[0],
+    options?: RequestOptions,
+  ): Promise<ListPersonLikedResponse> {
+    const v0Payload: LemmyV0.GetComments & LemmyV0.GetPosts = {
+      ...compatLemmyPageParams(payload),
+      disliked_only: type === "Downvoted",
+      liked_only: type === "Upvoted",
+      show_read: true,
+    };
+
+    const [{ posts }, { comments }] = await Promise.all([
+      this.#client.getPosts(v0Payload, options),
+      this.#client.getComments(v0Payload, options),
+    ]);
+
+    return {
+      data: [
+        ...comments.map(compatLemmyCommentView),
+        ...posts.map(compatLemmyPostView),
+      ].sort(sortPostCommentByPublished),
+      ...compatLemmyPageResponse(payload),
     };
   }
 

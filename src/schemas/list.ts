@@ -30,3 +30,4 @@ export const ListPostReportsResponse = buildPagableResponse(
 );
 export const ListReportsResponse = buildPagableResponse(schemas.ReportItemView);
 export const ListSearchResponse = buildPagableResponse(schemas.SearchItem);
+export const ListPersonLikedResponse = ListPersonContentResponse;

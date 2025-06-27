@@ -298,6 +298,11 @@ export default class ThreadiverseClient implements BaseClient {
     return client.listPersonContent(...params);
   }
 
+  async listPersonLiked(...params: Parameters<BaseClient["listPersonLiked"]>) {
+    const client = await this.ensureClient();
+    return client.listPersonLiked(...params);
+  }
+
   async listPersonSaved(...params: Parameters<BaseClient["listPersonSaved"]>) {
     const client = await this.ensureClient();
     return client.listPersonSaved(...params);

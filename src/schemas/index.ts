@@ -25,7 +25,6 @@ export * from "./GetSiteResponse";
 export * from "./GetUnreadCountResponse";
 export * from "./Instance";
 export * from "./InstanceWithFederationState";
-export * from "./list";
 export * from "./ListingType";
 export * from "./LoginResponse";
 export * from "./Notification";
@@ -49,3 +48,6 @@ export * from "./SearchItem";
 export * from "./SiteAggregates";
 export * from "./SubscribedType";
 export * from "./UploadImageResponse";
+
+// Should be last (can't access lexical declaration 'PersonView' before initialization)
+export * from "./list";

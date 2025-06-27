@@ -65,6 +65,9 @@ export type ListNotificationsResponse = z.infer<
 export type ListPersonContentResponse = z.infer<
   typeof schemas.ListPersonContentResponse
 >;
+export type ListPersonLikedResponse = z.infer<
+  typeof schemas.ListPersonLikedResponse
+>;
 export type ListPersonMentionsResponse = z.infer<
   typeof schemas.ListPersonMentionsResponse
 >;
@@ -154,6 +157,7 @@ export type * from "./GetPost";
 export type * from "./GetPosts";
 export type * from "./GetPrivateMessages";
 export type * from "./GetReplies";
+export type * from "./LikeType";
 export type * from "./ListCommunities";
 export type * from "./ListPersonContent";
 export type * from "./ListReports";

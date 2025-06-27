@@ -278,6 +278,13 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
       return ListPersonContentResponse.parse(response);
     }
 
+    async listPersonLiked(
+      ...params: Parameters<BaseClient["listPersonLiked"]>
+    ) {
+      const response = await super.listPersonLiked(...params);
+      return ListPersonContentResponse.parse(response);
+    }
+
     async listPersonSaved(
       ...params: Parameters<BaseClient["listPersonSaved"]>
     ) {

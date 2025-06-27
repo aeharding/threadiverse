@@ -13,8 +13,6 @@ export type Search = PageParams &
     community_id?: number;
     community_name?: string;
     creator_id?: number;
-    disliked_only?: boolean;
-    liked_only?: boolean;
     listing_type?: ListingType;
     post_url_only?: boolean;
     q: string;

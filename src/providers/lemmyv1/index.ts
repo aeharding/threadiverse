@@ -522,6 +522,29 @@ export class UnsafeLemmyV1Client implements BaseClient {
     };
   }
 
+  async listPersonLiked(
+    payload: Parameters<BaseClient["listPersonLiked"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["listPersonLiked"]> {
+    const response = await this.#client.listPersonLiked(
+      compatLemmyPageParams(payload),
+      options,
+    );
+
+    return {
+      data: response.liked.map((item) => {
+        switch (item.type_) {
+          case "Comment":
+            return compatLemmyCommentView(item);
+          case "Post":
+            return compatLemmyPostView(item);
+        }
+      }),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
+    };
+  }
+
   async listPersonSaved(
     payload: Parameters<BaseClient["listPersonSaved"]>[0],
     options?: RequestOptions,

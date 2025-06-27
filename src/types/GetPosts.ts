@@ -6,8 +6,6 @@ export type GetPosts = PageParams &
   PostSortType & {
     community_id?: number;
     community_name?: string;
-    disliked_only?: boolean;
-    liked_only?: boolean;
     saved_only?: boolean;
     show_hidden?: boolean;
     /**

@@ -130,7 +130,7 @@ export function compatLemmyPageResponse(params: PageParams): PagableResponse {
     );
 
   return {
-    next_page: (page_cursor ?? 0) + 1,
+    next_page: (page_cursor ?? 1) + 1,
   };
 }
 

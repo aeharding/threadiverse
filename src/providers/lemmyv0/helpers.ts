@@ -70,3 +70,18 @@ export function getPostCommentItemCreatedDate(
   if ("comment" in item) return Date.parse(item.comment.published);
   return Date.parse(item.post.published);
 }
+
+const getPublishedDate = (item: CommentView | PostView) => {
+  if ("comment" in item) {
+    return item.comment.published;
+  } else {
+    return item.post.published;
+  }
+};
+
+export function sortPostCommentByPublished(
+  a: CommentView | PostView,
+  b: CommentView | PostView,
+): number {
+  return getPublishedDate(b).localeCompare(getPublishedDate(a));
+}
