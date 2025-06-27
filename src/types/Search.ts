@@ -16,7 +16,6 @@ export type Search = PageParams &
     listing_type?: ListingType;
     post_url_only?: boolean;
     q: string;
-    saved_only?: boolean;
     title_only?: boolean;
     type_?: SearchType;
   };

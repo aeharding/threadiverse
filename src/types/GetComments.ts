@@ -8,6 +8,5 @@ export type GetComments = CommentSortType &
     max_depth?: number;
     parent_id?: number;
     post_id?: number;
-    saved_only?: boolean;
     type_?: ListingType;
   };

@@ -6,7 +6,6 @@ export type GetPosts = PageParams &
   PostSortType & {
     community_id?: number;
     community_name?: string;
-    saved_only?: boolean;
     show_hidden?: boolean;
     /**
      * If true, then show the nsfw posts (even if your user setting is to hide them)
