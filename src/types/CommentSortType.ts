@@ -7,7 +7,9 @@ export type CommentSortType =
   | CommentSortTypeByMode[keyof CommentSortTypeByMode]
   | {
       mode?: never;
-      sort?: never;
+      sort?: CommentSortTypeByMode["lemmyv0"]["sort"] &
+        CommentSortTypeByMode["lemmyv1"]["sort"] &
+        CommentSortTypeByMode["piefed"]["sort"];
     };
 
 export type CommentSortTypeByMode = {

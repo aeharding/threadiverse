@@ -7,7 +7,9 @@ export type SearchSortType =
   | SearchSortTypeByMode[keyof SearchSortTypeByMode]
   | {
       mode?: never;
-      sort?: never;
+      sort?: SearchSortTypeByMode["lemmyv0"]["sort"] &
+        SearchSortTypeByMode["lemmyv1"]["sort"] &
+        SearchSortTypeByMode["piefed"]["sort"];
     };
 
 export type SearchSortTypeByMode = {

@@ -7,7 +7,9 @@ export type PostSortType =
   | PostSortTypeByMode[keyof PostSortTypeByMode]
   | {
       mode?: never;
-      sort?: never;
+      sort?: PostSortTypeByMode["lemmyv0"]["sort"] &
+        PostSortTypeByMode["lemmyv1"]["sort"] &
+        PostSortTypeByMode["piefed"]["sort"];
     };
 
 export type PostSortTypeByMode = {

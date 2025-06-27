@@ -7,7 +7,9 @@ export type CommunitySortType =
   | CommunitySortTypeByMode[keyof CommunitySortTypeByMode]
   | {
       mode?: never;
-      sort?: never;
+      sort?: CommunitySortTypeByMode["lemmyv0"]["sort"] &
+        CommunitySortTypeByMode["lemmyv1"]["sort"] &
+        CommunitySortTypeByMode["piefed"]["sort"];
     };
 
 export type CommunitySortTypeByMode = {
