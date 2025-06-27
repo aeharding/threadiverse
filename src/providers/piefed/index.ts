@@ -28,6 +28,7 @@ import {
   compatPiefedCommunityModeratorView,
   compatPiefedCommunityView,
   compatPiefedGetCommunityResponse,
+  compatPiefedLocalSite,
   compatPiefedPageParams,
   compatPiefedPageResponse,
   compatPiefedPerson,
@@ -527,11 +528,7 @@ export class UnsafePiefedClient implements BaseClient {
           }
         : undefined,
       site_view: {
-        local_site: {
-          captcha_enabled: false,
-          registration_mode: response.data!.site.registration_mode!,
-          require_email_verification: false,
-        },
+        local_site: compatPiefedLocalSite(response.data!.site),
         site: response.data!.site,
       },
     };

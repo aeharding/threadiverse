@@ -81,6 +81,7 @@ export type ListPrivateMessagesResponse = z.infer<
 export type ListRepliesResponse = z.infer<typeof schemas.ListRepliesResponse>;
 export type ListReportsResponse = z.infer<typeof schemas.ListReportsResponse>;
 export type ListSearchResponse = z.infer<typeof schemas.ListSearchResponse>;
+export type LocalSite = z.infer<typeof schemas.LocalSite>;
 export type LoginResponse = z.infer<typeof schemas.LoginResponse>;
 export type ModAdd = z.infer<typeof schemas.ModAdd>;
 export type ModAddCommunity = z.infer<typeof schemas.ModAddCommunity>;

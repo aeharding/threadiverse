@@ -21,6 +21,7 @@ import {
   compatLemmyCommunityFollowerView,
   compatLemmyCommunityModeratorView,
   compatLemmyCommunityView,
+  compatLemmyLocalSite,
   compatLemmyMentionView,
   compatLemmyModlogView,
   compatLemmyPageParams,
@@ -421,6 +422,10 @@ export class UnsafeLemmyV0Client implements BaseClient {
             ...compatBlocks(site.my_user),
           }
         : undefined,
+      site_view: {
+        ...site.site_view,
+        local_site: compatLemmyLocalSite(site.site_view.local_site),
+      },
     };
   }
 
