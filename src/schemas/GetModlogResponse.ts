@@ -324,24 +324,20 @@ export const ModHideCommunityView = z.object({
 /**
  * The modlog fetch response.
  */
-export const GetModlogResponse = z.object({
-  modlog: z.array(
-    z.union([
-      ModRemovePostView,
-      ModLockPostView,
-      ModFeaturePostView,
-      ModRemoveCommentView,
-      ModRemoveCommunityView,
-      ModBanFromCommunityView,
-      ModBanView,
-      ModAddCommunityView,
-      ModTransferCommunityView,
-      ModAddView,
-      AdminPurgePersonView,
-      AdminPurgeCommunityView,
-      AdminPurgePostView,
-      AdminPurgeCommentView,
-      ModHideCommunityView,
-    ]),
-  ),
-});
+export const ModlogItem = z.union([
+  ModRemovePostView,
+  ModLockPostView,
+  ModFeaturePostView,
+  ModRemoveCommentView,
+  ModRemoveCommunityView,
+  ModBanFromCommunityView,
+  ModBanView,
+  ModAddCommunityView,
+  ModTransferCommunityView,
+  ModAddView,
+  AdminPurgePersonView,
+  AdminPurgeCommunityView,
+  AdminPurgePostView,
+  AdminPurgeCommentView,
+  ModHideCommunityView,
+]);

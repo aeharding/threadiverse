@@ -1,8 +1,8 @@
+import { PageParams } from "./PageParams";
+
 /**
  * Get mentions for your user.
  */
-export type GetPersonMentions = {
-  limit?: number;
-  page?: number;
+export type GetPersonMentions = PageParams & {
   unread_only?: boolean;
 };

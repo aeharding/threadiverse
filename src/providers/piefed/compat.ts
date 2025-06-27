@@ -1,5 +1,12 @@
-import { PostView } from "../../types";
+import * as types from "../../types";
+import {
+  compatLemmyPageParams,
+  compatLemmyPageResponse,
+} from "../lemmyv0/compat";
 import { components } from "./schema";
+
+export const compatPiefedPageResponse = compatLemmyPageResponse;
+export const compatPiefedPageParams = compatLemmyPageParams;
 
 export function compatPiefedComment(
   comment: components["schemas"]["Comment"],
@@ -7,7 +14,6 @@ export function compatPiefedComment(
 ) {
   return {
     ...comment,
-    // @ts-expect-error TODO: fix this
     content: comment.body,
     creator_id,
     distinguished: comment.distinguished ?? false,
@@ -105,8 +111,7 @@ export function compatPiefedPersonView(
 export function compatPiefedPost(post: components["schemas"]["Post"]) {
   return {
     ...post,
-    // @ts-expect-error TODO piefed types are wrong, this isn't being returned rn
-    creator_id: post.creator_id ?? post.user_id,
+    creator_id: post.user_id,
     featured_community: post.sticky,
     featured_local: false,
     name: post.title,
@@ -115,12 +120,12 @@ export function compatPiefedPost(post: components["schemas"]["Post"]) {
 
 export function compatPiefedPostView(
   post: components["schemas"]["PostView"],
-): PostView {
+): types.PostView {
   return {
     ...post,
     community: compatPiefedCommunity(post.community),
     creator: compatPiefedPerson(post.creator),
-    creator_blocked: post.creator_blocked ?? false, // TODO piefed types are wrong, this isn't being returned rn
+    creator_blocked: false, // TODO piefed does not return this
     post: compatPiefedPost(post.post),
   };
 }

@@ -125,7 +125,7 @@ export abstract class BaseClient {
   abstract getComments(
     payload: types.GetComments,
     options?: RequestOptions,
-  ): Promise<{ comments: types.CommentView[] }>;
+  ): Promise<types.ListCommentsResponse>;
 
   abstract getCommunity(
     payload: types.GetCommunity,
@@ -139,14 +139,12 @@ export abstract class BaseClient {
   abstract getModlog(
     payload: types.GetModlog,
     options?: RequestOptions,
-  ): Promise<types.GetModlogResponse>;
+  ): Promise<types.ListModlogResponse>;
 
   abstract getNotifications(
     payload: types.GetPersonMentions,
     options?: RequestOptions,
-  ): Promise<{
-    notifications: types.Notification[];
-  }>;
+  ): Promise<types.ListNotificationsResponse>;
 
   abstract getPersonDetails(
     payload: { person_id: number } | { username: string },
@@ -156,7 +154,7 @@ export abstract class BaseClient {
   abstract getPersonMentions(
     payload: types.GetPersonMentions,
     options?: RequestOptions,
-  ): Promise<{ mentions: types.PersonMentionView[] }>;
+  ): Promise<types.ListPersonMentionsResponse>;
 
   abstract getPost(
     payload: types.GetPost,
@@ -166,12 +164,12 @@ export abstract class BaseClient {
   abstract getPosts(
     payload: types.GetPosts,
     options?: RequestOptions,
-  ): Promise<{ next_page?: string; posts: types.PostView[] }>;
+  ): Promise<types.ListPostsResponse>;
 
   abstract getPrivateMessages(
     payload: types.GetPrivateMessages,
     options?: RequestOptions,
-  ): Promise<{ private_messages: types.PrivateMessageView[] }>;
+  ): Promise<types.ListPrivateMessagesResponse>;
 
   abstract getRandomCommunity(
     payload: { type_: types.ListingType },
@@ -181,7 +179,7 @@ export abstract class BaseClient {
   abstract getReplies(
     payload: types.GetReplies,
     options?: RequestOptions,
-  ): Promise<{ replies: types.CommentReplyView[] }>;
+  ): Promise<types.ListRepliesResponse>;
 
   abstract getSite(options?: RequestOptions): Promise<types.GetSiteResponse>;
 
@@ -205,14 +203,14 @@ export abstract class BaseClient {
   ): Promise<{ post_view: types.PostView }>;
 
   abstract listCommentReports(
-    payload: { limit: number; page: number; unresolved_only?: boolean },
+    payload: types.PageParams & { unresolved_only?: boolean },
     options?: RequestOptions,
-  ): Promise<{ comment_reports: types.CommentReportView[] }>;
+  ): Promise<types.ListCommentReportsResponse>;
 
   abstract listCommunities(
     payload: types.ListCommunities,
     options?: RequestOptions,
-  ): Promise<{ communities: types.CommunityView[] }>;
+  ): Promise<types.ListCommunitiesResponse>;
 
   abstract listPersonContent(
     payload: types.ListPersonContent,
@@ -220,18 +218,14 @@ export abstract class BaseClient {
   ): Promise<types.ListPersonContentResponse>;
 
   abstract listPersonSaved(
-    payload: {
-      limit: number;
-      page?: number;
-      person_id: number;
-    },
+    payload: types.PageParams & { person_id: number },
     options?: RequestOptions,
   ): Promise<types.ListPersonContentResponse>;
 
   abstract listPostReports(
-    payload: { limit: number; page: number; unresolved_only?: boolean },
+    payload: types.PageParams & { unresolved_only?: boolean },
     options?: RequestOptions,
-  ): Promise<{ post_reports: types.PostReportView[] }>;
+  ): Promise<types.ListPostReportsResponse>;
 
   abstract listReports(
     payload: types.ListReports,
@@ -326,12 +320,7 @@ export abstract class BaseClient {
   abstract search(
     payload: types.Search,
     options?: RequestOptions,
-  ): Promise<{
-    comments: types.CommentView[];
-    communities: types.CommunityView[];
-    posts: types.PostView[];
-    users: types.PersonView[];
-  }>;
+  ): Promise<types.ListSearchResponse>;
 
   abstract uploadImage(
     payload: { file: File },

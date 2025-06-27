@@ -1,32 +1,7 @@
 import type * as LemmyV1 from "lemmy-js-client-v1";
 
-import {
-  Comment,
-  CommentAggregates,
-  CommentReplyView,
-  CommentReportView,
-  CommentView,
-  Community,
-  CommunityAggregates,
-  CommunityModeratorView,
-  CommunityView,
-  FederatedInstances,
-  GetModlogResponse,
-  InstanceWithFederationState,
-  Notification,
-  Person,
-  PersonAggregates,
-  PersonMentionView,
-  PersonView,
-  Post,
-  PostAggregates,
-  PostReportView,
-  PostView,
-  PrivateMessageView,
-  Site,
-  SiteView,
-  SubscribedType,
-} from "../../types";
+import { InvalidPayloadError } from "../../errors";
+import * as types from "../../types";
 
 // TODO Temporary until we support other types
 export type LemmyV1PostCommentReportOnly =
@@ -35,7 +10,7 @@ export type LemmyV1PostCommentReportOnly =
 
 export function compatCommunityCounts(
   community: LemmyV1.Community,
-): CommunityAggregates {
+): types.CommunityAggregates {
   return {
     comments: community.comments,
     posts: community.posts,
@@ -50,7 +25,7 @@ export function compatCommunityCounts(
 
 export function compatLemmyCommentMentionView(
   personMentionView: LemmyV1.PersonCommentMentionView,
-): PersonMentionView {
+): types.PersonMentionView {
   return {
     ...personMentionView,
     banned_from_community:
@@ -77,7 +52,7 @@ export function compatLemmyCommentMentionView(
 
 export function compatLemmyCommentReplyView(
   commentReply: LemmyV1.CommentReplyView,
-): CommentReplyView {
+): types.CommentReplyView {
   return {
     ...commentReply,
     banned_from_community: !!commentReply.community_actions?.ban_expires_at,
@@ -99,7 +74,7 @@ export function compatLemmyCommentReplyView(
 
 export function compatLemmyCommentReportView(
   commentReport: LemmyV1.CommentReportView,
-): CommentReportView {
+): types.CommentReportView {
   return {
     ...commentReport,
     comment: compatComment(commentReport.comment),
@@ -129,7 +104,7 @@ export function compatLemmyCommentReportView(
 
 export function compatLemmyCommentView(
   commentView: LemmyV1.CommentView,
-): CommentView {
+): types.CommentView {
   return {
     ...commentView,
     banned_from_community: !!commentView.community_actions?.ban_expires_at,
@@ -145,7 +120,7 @@ export function compatLemmyCommentView(
 
 export function compatLemmyCommunityModeratorView(
   communityModerator: LemmyV1.CommunityModeratorView,
-): CommunityModeratorView {
+): types.CommunityModeratorView {
   return {
     ...communityModerator,
     community: compatCommunity(communityModerator.community),
@@ -155,7 +130,7 @@ export function compatLemmyCommunityModeratorView(
 
 export function compatLemmyCommunityView(
   communityView: LemmyV1.CommunityView,
-): CommunityView {
+): types.CommunityView {
   return {
     ...communityView,
     community: compatCommunity(communityView.community),
@@ -166,7 +141,7 @@ export function compatLemmyCommunityView(
 
 export function compatLemmyFederatedInstances(
   federatedInstances: LemmyV1.FederatedInstances,
-): FederatedInstances {
+): types.FederatedInstances {
   return {
     ...federatedInstances,
     allowed: federatedInstances.allowed.map(
@@ -183,7 +158,7 @@ export function compatLemmyFederatedInstances(
 
 export function compatLemmyInboxCombinedView(
   inboxItem: LemmyV1.InboxCombinedView,
-): Notification | undefined {
+): types.Notification | undefined {
   switch (inboxItem.type_) {
     case "CommentMention":
       return compatLemmyCommentMentionView(inboxItem);
@@ -198,7 +173,7 @@ export function compatLemmyInboxCombinedView(
 
 export function compatLemmyModlogView(
   modlog: LemmyV1.ModlogCombinedView,
-): GetModlogResponse["modlog"][0] | undefined {
+): types.ModlogItem | undefined {
   switch (modlog.type_) {
     case "AdminAllowInstance":
     case "AdminBlockInstance":
@@ -235,9 +210,21 @@ export function compatLemmyModlogView(
   }
 }
 
+export function compatLemmyPageParams<const T extends types.PageParams>(
+  params: T,
+): Omit<T, "page_cursor"> & { page_cursor?: string } {
+  if (typeof params.page_cursor === "number")
+    throw new InvalidPayloadError("page_cursor must be string in lemmyv1");
+
+  return {
+    ...params,
+    page_cursor: params.page_cursor,
+  };
+}
+
 export function compatLemmyPersonView(
   personView: LemmyV1.PersonView,
-): PersonView {
+): types.PersonView {
   return {
     ...personView,
     counts: compatPersonCounts(personView.person),
@@ -247,7 +234,7 @@ export function compatLemmyPersonView(
 
 export function compatLemmyPostReportView(
   postReport: LemmyV1.PostReportView,
-): PostReportView {
+): types.PostReportView {
   return {
     ...postReport,
     community: compatCommunity(postReport.community),
@@ -277,7 +264,9 @@ export function compatLemmyPostReportView(
   };
 }
 
-export function compatLemmyPostView(postView: LemmyV1.PostView): PostView {
+export function compatLemmyPostView(
+  postView: LemmyV1.PostView,
+): types.PostView {
   return {
     ...postView,
     banned_from_community: !!postView.community_actions?.ban_expires_at,
@@ -293,7 +282,7 @@ export function compatLemmyPostView(postView: LemmyV1.PostView): PostView {
 
 export function compatLemmyPrivateMessageView(
   privateMessage: LemmyV1.PrivateMessageView,
-): PrivateMessageView {
+): types.PrivateMessageView {
   return {
     ...privateMessage,
     creator: compatPerson(privateMessage.creator),
@@ -307,7 +296,7 @@ export function compatLemmyPrivateMessageView(
 
 export function compatLemmyReportView(
   report: LemmyV1PostCommentReportOnly,
-): CommentReportView | PostReportView {
+): types.CommentReportView | types.PostReportView {
   switch (report.type_) {
     case "Comment":
       return compatLemmyCommentReportView(report);
@@ -316,21 +305,42 @@ export function compatLemmyReportView(
   }
 }
 
-export function compatLemmySiteView(siteView: LemmyV1.SiteView): SiteView {
+export function compatLemmySearchItem(
+  item: LemmyV1.SearchCombinedView,
+): types.SearchItem | undefined {
+  switch (item.type_) {
+    case "Comment":
+      return compatLemmyCommentView(item);
+    case "Community":
+      return compatLemmyCommunityView(item);
+    case "MultiCommunity":
+      return; // Not supported
+    case "Person":
+      return compatLemmyPersonView(item);
+    case "Post":
+      return compatLemmyPostView(item);
+  }
+}
+
+export function compatLemmySiteView(
+  siteView: LemmyV1.SiteView,
+): types.SiteView {
   return {
     ...siteView,
     site: compatSite(siteView.site),
   };
 }
 
-function compatComment(comment: LemmyV1.Comment): Comment {
+function compatComment(comment: LemmyV1.Comment): types.Comment {
   return {
     ...comment,
     published: comment.published_at,
   };
 }
 
-function compatCommentCounts(comment: LemmyV1.Comment): CommentAggregates {
+function compatCommentCounts(
+  comment: LemmyV1.Comment,
+): types.CommentAggregates {
   return {
     child_count: comment.child_count,
     comment_id: comment.id,
@@ -343,14 +353,14 @@ function compatCommentCounts(comment: LemmyV1.Comment): CommentAggregates {
 
 function compatCommentViewActions(
   commentActions: LemmyV1.CommentActions | undefined,
-): Pick<CommentView, "my_vote" | "saved"> {
+): Pick<types.CommentView, "my_vote" | "saved"> {
   return {
     my_vote: commentActions?.like_score,
     saved: !!commentActions?.saved_at,
   };
 }
 
-function compatCommunity(community: LemmyV1.Community): Community {
+function compatCommunity(community: LemmyV1.Community): types.Community {
   return {
     ...community,
     actor_id: community.ap_id,
@@ -361,7 +371,7 @@ function compatCommunity(community: LemmyV1.Community): Community {
 
 function compatCommunityViewUserActions(
   userActions: LemmyV1.CommunityActions | undefined,
-): Pick<CommunityView, "blocked" | "subscribed"> {
+): Pick<types.CommunityView, "blocked" | "subscribed"> {
   return {
     blocked: !!userActions?.blocked_at,
     subscribed: compatFollowState(userActions?.follow_state),
@@ -370,7 +380,7 @@ function compatCommunityViewUserActions(
 
 function compatFollowState(
   followState: LemmyV1.CommunityFollowerState | undefined,
-): SubscribedType {
+): types.SubscribedType {
   switch (followState) {
     case "Accepted":
       return "Subscribed";
@@ -384,7 +394,7 @@ function compatFollowState(
 
 function compatLemmyAdminPurgeCommentView(
   adminPurgeComment: LemmyV1.AdminPurgeCommentView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...adminPurgeComment,
     admin: adminPurgeComment.admin
@@ -400,7 +410,7 @@ function compatLemmyAdminPurgeCommentView(
 
 function compatLemmyAdminPurgeCommunityView(
   adminPurgeCommunity: LemmyV1.AdminPurgeCommunityView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...adminPurgeCommunity,
     admin: adminPurgeCommunity.admin
@@ -415,7 +425,7 @@ function compatLemmyAdminPurgeCommunityView(
 
 function compatLemmyAdminPurgePersonView(
   adminPurgePerson: LemmyV1.AdminPurgePersonView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...adminPurgePerson,
     admin: adminPurgePerson.admin
@@ -430,7 +440,7 @@ function compatLemmyAdminPurgePersonView(
 
 function compatLemmyAdminPurgePostView(
   adminPurgePost: LemmyV1.AdminPurgePostView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...adminPurgePost,
     admin: adminPurgePost.admin
@@ -446,7 +456,7 @@ function compatLemmyAdminPurgePostView(
 
 function compatLemmyInstanceWithFederationState(
   instance: LemmyV1.InstanceWithFederationState,
-): InstanceWithFederationState {
+): types.InstanceWithFederationState {
   return {
     ...instance,
     published: instance.published_at,
@@ -455,7 +465,7 @@ function compatLemmyInstanceWithFederationState(
 
 function compatLemmyModAddCommunityView(
   modAddCommunity: LemmyV1.ModAddCommunityView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...modAddCommunity,
     community: compatCommunity(modAddCommunity.community),
@@ -470,9 +480,7 @@ function compatLemmyModAddCommunityView(
   };
 }
 
-function compatLemmyModAddView(
-  modAdd: LemmyV1.ModAddView,
-): GetModlogResponse["modlog"][0] {
+function compatLemmyModAddView(modAdd: LemmyV1.ModAddView): types.ModlogItem {
   return {
     ...modAdd,
     mod_add: {
@@ -486,7 +494,7 @@ function compatLemmyModAddView(
 
 function compatLemmyModBanFromCommunityView(
   modBanFromCommunity: LemmyV1.ModBanFromCommunityView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...modBanFromCommunity,
     banned_person: compatPerson(modBanFromCommunity.other_person),
@@ -501,9 +509,7 @@ function compatLemmyModBanFromCommunityView(
   };
 }
 
-function compatLemmyModBanView(
-  modBan: LemmyV1.ModBanView,
-): GetModlogResponse["modlog"][0] {
+function compatLemmyModBanView(modBan: LemmyV1.ModBanView): types.ModlogItem {
   return {
     ...modBan,
     banned_person: compatPerson(modBan.other_person),
@@ -517,7 +523,7 @@ function compatLemmyModBanView(
 
 function compatLemmyModFeaturePostView(
   modFeaturePost: LemmyV1.ModFeaturePostView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...modFeaturePost,
     community: compatCommunity(modFeaturePost.community),
@@ -534,7 +540,7 @@ function compatLemmyModFeaturePostView(
 
 function compatLemmyModLockPostView(
   modLockPost: LemmyV1.ModLockPostView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...modLockPost,
     community: compatCommunity(modLockPost.community),
@@ -551,7 +557,7 @@ function compatLemmyModLockPostView(
 
 function compatLemmyModRemoveCommentView(
   modRemoveComment: LemmyV1.ModRemoveCommentView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...modRemoveComment,
     comment: compatComment(modRemoveComment.comment),
@@ -570,7 +576,7 @@ function compatLemmyModRemoveCommentView(
 
 function compatLemmyModRemoveCommunityView(
   modRemoveCommunity: LemmyV1.ModRemoveCommunityView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...modRemoveCommunity,
     community: compatCommunity(modRemoveCommunity.community),
@@ -586,7 +592,7 @@ function compatLemmyModRemoveCommunityView(
 
 function compatLemmyModRemovePostView(
   modRemovePost: LemmyV1.ModRemovePostView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...modRemovePost,
     community: compatCommunity(modRemovePost.community),
@@ -603,7 +609,7 @@ function compatLemmyModRemovePostView(
 
 function compatLemmyModTransferCommunityView(
   modTransferCommunity: LemmyV1.ModTransferCommunityView,
-): GetModlogResponse["modlog"][0] {
+): types.ModlogItem {
   return {
     ...modTransferCommunity,
     community: compatCommunity(modTransferCommunity.community),
@@ -618,7 +624,7 @@ function compatLemmyModTransferCommunityView(
   };
 }
 
-function compatPerson(person: LemmyV1.Person): Person {
+function compatPerson(person: LemmyV1.Person): types.Person {
   return {
     ...person,
     actor_id: person.ap_id,
@@ -626,21 +632,21 @@ function compatPerson(person: LemmyV1.Person): Person {
   };
 }
 
-function compatPersonCounts(person: LemmyV1.Person): PersonAggregates {
+function compatPersonCounts(person: LemmyV1.Person): types.PersonAggregates {
   return {
     comment_count: person.comment_count,
     post_count: person.post_count,
   };
 }
 
-function compatPost(post: LemmyV1.Post): Post {
+function compatPost(post: LemmyV1.Post): types.Post {
   return {
     ...post,
     published: post.published_at,
   };
 }
 
-function compatPostCounts(post: LemmyV1.Post): PostAggregates {
+function compatPostCounts(post: LemmyV1.Post): types.PostAggregates {
   return {
     comments: post.comments,
     downvotes: post.downvotes,
@@ -654,7 +660,7 @@ function compatPostCounts(post: LemmyV1.Post): PostAggregates {
 function compatPostViewUserActions(
   postActions: LemmyV1.PostActions | undefined,
   totalComments: number,
-): Pick<PostView, "hidden" | "read" | "saved" | "unread_comments"> {
+): Pick<types.PostView, "hidden" | "read" | "saved" | "unread_comments"> {
   return {
     hidden: !!postActions?.hidden_at,
     read: !!postActions?.read_at,
@@ -665,7 +671,7 @@ function compatPostViewUserActions(
   };
 }
 
-function compatSite(site: LemmyV1.Site): Site {
+function compatSite(site: LemmyV1.Site): types.Site {
   return {
     ...site,
     actor_id: site.ap_id,

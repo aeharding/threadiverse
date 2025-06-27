@@ -4,25 +4,30 @@ import type { UnsafePiefedClient } from "./providers/piefed";
 import { UnsafeLemmyV0Client } from "./providers/lemmyv0";
 import { UnsafeLemmyV1Client } from "./providers/lemmyv1";
 import {
-  CommentReplyView,
-  CommentReportView,
   CommentView,
   CommunityView,
   FederatedInstances,
   GetCaptchaResponse,
   GetCommunityResponse,
-  GetModlogResponse,
   GetPersonDetailsResponse,
   GetSiteMetadataResponse,
   GetSiteResponse,
   GetUnreadCountResponse,
+  ListCommentReportsResponse,
+  ListCommentsResponse,
+  ListCommunitiesResponse,
+  ListModlogResponse,
+  ListNotificationsResponse,
   ListPersonContentResponse,
+  ListPersonMentionsResponse,
+  ListPostReportsResponse,
+  ListPostsResponse,
+  ListPrivateMessagesResponse,
+  ListRepliesResponse,
   ListReportsResponse,
+  ListSearchResponse,
   LoginResponse,
-  Notification,
-  PersonMentionView,
   PersonView,
-  PostReportView,
   PostView,
   PrivateMessageView,
   ResolveObjectResponse,
@@ -149,12 +154,7 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
 
     async getComments(...params: Parameters<BaseClient["getComments"]>) {
       const response = await super.getComments(...params);
-      return {
-        ...response,
-        comments: response.comments.map((comment) =>
-          CommentView.parse(comment),
-        ),
-      };
+      return ListCommentsResponse.parse(response);
     }
 
     async getCommunity(...params: Parameters<BaseClient["getCommunity"]>) {
@@ -177,18 +177,14 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
 
     async getModlog(...params: Parameters<BaseClient["getModlog"]>) {
       const response = await super.getModlog(...params);
-      return GetModlogResponse.parse(response);
+      return ListModlogResponse.parse(response);
     }
 
     async getNotifications(
       ...params: Parameters<BaseClient["getNotifications"]>
     ) {
-      const { notifications } = await super.getNotifications(...params);
-      return {
-        notifications: notifications.map((notification) =>
-          Notification.parse(notification),
-        ),
-      };
+      const response = await super.getNotifications(...params);
+      return ListNotificationsResponse.parse(response);
     }
 
     async getPersonDetails(
@@ -201,10 +197,8 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
     async getPersonMentions(
       ...params: Parameters<BaseClient["getPersonMentions"]>
     ) {
-      const { mentions } = await super.getPersonMentions(...params);
-      return {
-        mentions: mentions.map((mention) => PersonMentionView.parse(mention)),
-      };
+      const response = await super.getPersonMentions(...params);
+      return ListPersonMentionsResponse.parse(response);
     }
 
     async getPost(...params: Parameters<BaseClient["getPost"]>) {
@@ -214,21 +208,14 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
 
     async getPosts(...params: Parameters<BaseClient["getPosts"]>) {
       const response = await super.getPosts(...params);
-      return {
-        ...response,
-        posts: response.posts.map((post) => PostView.parse(post)),
-      };
+      return ListPostsResponse.parse(response);
     }
 
     async getPrivateMessages(
       ...params: Parameters<BaseClient["getPrivateMessages"]>
     ) {
-      const { private_messages } = await super.getPrivateMessages(...params);
-      return {
-        private_messages: private_messages.map((message) =>
-          PrivateMessageView.parse(message),
-        ),
-      };
+      const response = await super.getPrivateMessages(...params);
+      return ListPrivateMessagesResponse.parse(response);
     }
 
     async getRandomCommunity(
@@ -239,10 +226,8 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
     }
 
     async getReplies(...params: Parameters<BaseClient["getReplies"]>) {
-      const { replies } = await super.getReplies(...params);
-      return {
-        replies: replies.map((reply) => CommentReplyView.parse(reply)),
-      };
+      const response = await super.getReplies(...params);
+      return ListRepliesResponse.parse(response);
     }
 
     async getSite(...params: Parameters<BaseClient["getSite"]>) {
@@ -275,23 +260,15 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
     async listCommentReports(
       ...params: Parameters<BaseClient["listCommentReports"]>
     ) {
-      const { comment_reports } = await super.listCommentReports(...params);
-      return {
-        comment_reports: comment_reports.map((report) =>
-          CommentReportView.parse(report),
-        ),
-      };
+      const response = await super.listCommentReports(...params);
+      return ListCommentReportsResponse.parse(response);
     }
 
     async listCommunities(
       ...params: Parameters<BaseClient["listCommunities"]>
     ) {
-      const { communities } = await super.listCommunities(...params);
-      return {
-        communities: communities.map((community) =>
-          CommunityView.parse(community),
-        ),
-      };
+      const response = await super.listCommunities(...params);
+      return ListCommunitiesResponse.parse(response);
     }
 
     async listPersonContent(
@@ -311,12 +288,8 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
     async listPostReports(
       ...params: Parameters<BaseClient["listPostReports"]>
     ) {
-      const { post_reports } = await super.listPostReports(...params);
-      return {
-        post_reports: post_reports.map((report) =>
-          PostReportView.parse(report),
-        ),
-      };
+      const response = await super.listPostReports(...params);
+      return ListPostReportsResponse.parse(response);
     }
 
     async listReports(...params: Parameters<BaseClient["listReports"]>) {
@@ -413,17 +386,8 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
     }
 
     async search(...params: Parameters<BaseClient["search"]>) {
-      const { comments, communities, posts, users } = await super.search(
-        ...params,
-      );
-      return {
-        comments: comments.map((comment) => CommentView.parse(comment)),
-        communities: communities.map((community) =>
-          CommunityView.parse(community),
-        ),
-        posts: posts.map((post) => PostView.parse(post)),
-        users: users.map((user) => PersonView.parse(user)),
-      };
+      const response = await super.search(...params);
+      return ListSearchResponse.parse(response);
     }
 
     async uploadImage(...params: Parameters<BaseClient["uploadImage"]>) {

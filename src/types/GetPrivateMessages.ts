@@ -1,9 +1,9 @@
+import { PageParams } from "./PageParams";
+
 /**
  * Get your private messages.
  */
-export type GetPrivateMessages = {
+export type GetPrivateMessages = PageParams & {
   creator_id?: number;
-  limit?: number;
-  page?: number;
   unread_only?: boolean;
 };

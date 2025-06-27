@@ -6,17 +6,19 @@ import { components } from "../providers/piefed/schema";
 export type CommentSortType =
   | CommentSortTypeByMode[keyof CommentSortTypeByMode]
   | {
-      mode?: undefined;
+      mode?: never;
+      sort?: never;
     };
 
 export type CommentSortTypeByMode = {
-  lemmyv0: Pick<LemmyV0GetComments, "sort"> & {
+  lemmyv0: Required<Pick<LemmyV0GetComments, "sort">> & {
     mode: "lemmyv0";
   };
-  lemmyv1: Pick<LemmyV1GetComments, "sort" | "time_range_seconds"> & {
-    mode: "lemmyv1";
-  };
-  piefed: Pick<components["schemas"]["GetComments"], "sort"> & {
+  lemmyv1: Pick<LemmyV1GetComments, "time_range_seconds"> &
+    Required<Pick<LemmyV1GetComments, "sort">> & {
+      mode: "lemmyv1";
+    };
+  piefed: Required<Pick<components["schemas"]["GetComments"], "sort">> & {
     mode: "piefed";
   };
 };
