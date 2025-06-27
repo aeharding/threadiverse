@@ -89,6 +89,20 @@ export function compatPiefedGetCommunityResponse(
   };
 }
 
+export function compatPiefedLocalSite(
+  site: components["schemas"]["Site"],
+): types.LocalSite {
+  return {
+    captcha_enabled: false,
+    comment_downvotes: "All",
+    comment_upvotes: "All",
+    post_downvotes: "All",
+    post_upvotes: "All",
+    registration_mode: site.registration_mode!,
+    require_email_verification: false,
+  };
+}
+
 export function compatPiefedPerson(person: components["schemas"]["Person"]) {
   return {
     ...person,

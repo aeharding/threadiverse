@@ -25,13 +25,31 @@ export const MyUserInfo = z.object({
   person_blocks: z.array(Person),
 });
 
+export const FederationMode = z.enum(["All", "Local", "Disable"]);
+
 export const LocalSite = z.object({
   /**
    * An optional registration application questionnaire in markdown.
    */
   application_question: z.optional(z.string()),
   captcha_enabled: z.boolean(),
+  /**
+   * What kind of comment downvotes your site allows.
+   */
+  comment_downvotes: FederationMode,
+  /**
+   * What kind of comment upvotes your site allows.
+   */
+  comment_upvotes: FederationMode,
   legal_information: z.optional(z.string()),
+  /**
+   * What kind of post downvotes your site allows.
+   */
+  post_downvotes: FederationMode,
+  /**
+   * What kind of post upvotes your site allows.
+   */
+  post_upvotes: FederationMode,
   registration_mode: RegistrationMode,
   require_email_verification: z.boolean(),
 });

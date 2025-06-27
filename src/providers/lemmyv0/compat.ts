@@ -1,13 +1,7 @@
 import type * as LemmyV0 from "lemmy-js-client";
 
 import { InvalidPayloadError } from "../../errors";
-import {
-  CommunityVisibility,
-  ModlogItem,
-  MyUserInfo,
-  PagableResponse,
-  PageParams,
-} from "../../types";
+import * as types from "../../types";
 
 /**
  * This is a total hack, because the lemmy-js-client types are incorrect for lemmy v0
@@ -17,7 +11,10 @@ export function compatBlocks(
     LemmyV0.MyUserInfo,
     "community_blocks" | "instance_blocks" | "person_blocks"
   >,
-): Pick<MyUserInfo, "community_blocks" | "instance_blocks" | "person_blocks"> {
+): Pick<
+  types.MyUserInfo,
+  "community_blocks" | "instance_blocks" | "person_blocks"
+> {
   return {
     community_blocks: blocks.community_blocks
       .map((t) => ("community" in t ? (t.community as LemmyV0.Community) : t))
@@ -79,6 +76,23 @@ export function compatLemmyCommunityView(communityView: LemmyV0.CommunityView) {
   };
 }
 
+export function compatLemmyLocalSite(
+  localSite: LemmyV0.LocalSite,
+): types.LocalSite {
+  // @ts-expect-error - lemmy-js-client-v0 types are incorrect for this property
+  const downvotes_disabled = localSite.enable_downvotes === false;
+
+  const downvotesMode = downvotes_disabled ? "Disable" : "All";
+
+  return {
+    ...localSite,
+    comment_downvotes: downvotesMode,
+    comment_upvotes: "All",
+    post_downvotes: downvotesMode,
+    post_upvotes: "All",
+  };
+}
+
 export function compatLemmyMentionView(
   personMention: LemmyV0.PersonMentionView,
 ) {
@@ -90,7 +104,7 @@ export function compatLemmyMentionView(
 
 export function compatLemmyModlogView(
   modlog: LemmyV0.GetModlogResponse[keyof LemmyV0.GetModlogResponse][number],
-): ModlogItem {
+): types.ModlogItem {
   if ("community" in modlog) {
     return {
       ...modlog,
@@ -101,7 +115,7 @@ export function compatLemmyModlogView(
   return modlog;
 }
 
-export function compatLemmyPageParams<const T extends PageParams>(
+export function compatLemmyPageParams<const T extends types.PageParams>(
   params: T,
 ): Omit<T, "page_cursor"> & { limit?: number; page?: number } {
   const result: T = { ...params };
@@ -121,7 +135,9 @@ export function compatLemmyPageParams<const T extends PageParams>(
   };
 }
 
-export function compatLemmyPageResponse(params: PageParams): PagableResponse {
+export function compatLemmyPageResponse(
+  params: types.PageParams,
+): types.PagableResponse {
   const page_cursor = params.page_cursor;
 
   if (typeof page_cursor === "string")
@@ -157,6 +173,6 @@ export function compatLemmyReplyView(personMention: LemmyV0.CommentReplyView) {
 
 function compatCommunityVisibility(
   visibility: LemmyV0.CommunityVisibility,
-): CommunityVisibility {
+): types.CommunityVisibility {
   return visibility === "LocalOnly" ? "LocalOnlyPublic" : visibility;
 }
