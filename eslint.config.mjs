@@ -17,6 +17,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ["dist"],
+    ignores: ["dist", "src/providers/piefed/schema.ts"],
   },
 );

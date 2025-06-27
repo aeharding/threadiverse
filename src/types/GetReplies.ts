@@ -1,8 +1,8 @@
+import { PageParams } from "./PageParams";
+
 /**
  * Get comment replies.
  */
-export type GetReplies = {
-  limit?: number;
-  page?: number;
+export type GetReplies = PageParams & {
   unread_only?: boolean;
 };

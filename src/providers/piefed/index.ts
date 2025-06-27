@@ -13,7 +13,6 @@ import {
 import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
 import {
-  CommunityView,
   ListPersonContent,
   ListPersonContentResponse,
   PostView,
@@ -29,6 +28,8 @@ import {
   compatPiefedCommunityModeratorView,
   compatPiefedCommunityView,
   compatPiefedGetCommunityResponse,
+  compatPiefedPageParams,
+  compatPiefedPageResponse,
   compatPiefedPerson,
   compatPiefedPersonView,
   compatPiefedPostView,
@@ -311,7 +312,7 @@ export class UnsafePiefedClient implements BaseClient {
       );
 
     const query = cleanThreadiverseParams(
-      payload,
+      compatPiefedPageParams(payload),
     ) satisfies components["schemas"]["GetComments"];
 
     const response = await this.#client.GET("/comment/list", {
@@ -321,7 +322,8 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      comments: response.data!.comments.map(compatPiefedCommentView),
+      ...compatPiefedPageResponse(payload),
+      data: response.data!.comments.map(compatPiefedCommentView),
     };
   }
 
@@ -361,10 +363,10 @@ export class UnsafePiefedClient implements BaseClient {
       this.getPrivateMessages(...params),
     ]);
 
-    const notifications = [
-      ...replies.replies,
-      ...mentions.mentions,
-      ...privateMessages.private_messages,
+    const data = [
+      ...replies.data,
+      ...mentions.data,
+      ...privateMessages.data,
     ].sort(
       (a, b) =>
         Date.parse(getInboxItemPublished(b)) -
@@ -372,7 +374,8 @@ export class UnsafePiefedClient implements BaseClient {
     );
 
     return {
-      notifications,
+      ...compatPiefedPageResponse(params[0]),
+      data,
     };
   }
 
@@ -399,7 +402,7 @@ export class UnsafePiefedClient implements BaseClient {
     _payload: Parameters<BaseClient["getPersonMentions"]>[0],
     _options?: RequestOptions,
   ): ReturnType<BaseClient["getPersonMentions"]> {
-    return { mentions: [] }; // TODO: implement this
+    return { data: [] }; // TODO: implement this
   }
 
   async getPost(
@@ -429,7 +432,7 @@ export class UnsafePiefedClient implements BaseClient {
       );
 
     const query = cleanThreadiverseParams(
-      payload,
+      compatPiefedPageParams(payload),
     ) satisfies components["schemas"]["GetPosts"];
 
     const response = await this.#client.GET("/post/list", {
@@ -439,7 +442,8 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      posts: response.data!.posts.map(compatPiefedPostView),
+      ...compatPiefedPageResponse(payload),
+      data: response.data!.posts.map(compatPiefedPostView),
     };
   }
 
@@ -450,13 +454,12 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.GET("/private_message/list", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: payload },
+      params: { query: compatPiefedPageParams(payload) },
     });
 
     return {
-      private_messages: response.data!.private_messages.map(
-        compatPiefedPrivateMessageView,
-      ),
+      ...compatPiefedPageResponse(payload),
+      data: response.data!.private_messages.map(compatPiefedPrivateMessageView),
     };
   }
 
@@ -475,11 +478,12 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.GET("/user/replies", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: payload },
+      params: { query: compatPiefedPageParams(payload) },
     });
 
     return {
-      replies: response.data!.replies.map(compatPiefedCommentReplyView),
+      ...compatPiefedPageResponse(payload),
+      data: response.data!.replies.map(compatPiefedCommentReplyView),
     };
   }
 
@@ -590,15 +594,16 @@ export class UnsafePiefedClient implements BaseClient {
   async listCommunities(
     payload: Parameters<BaseClient["listCommunities"]>[0],
     options?: RequestOptions,
-  ): Promise<{ communities: CommunityView[] }> {
+  ): ReturnType<BaseClient["listCommunities"]> {
     const response = await this.#client.GET("/community/list", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: payload },
+      params: { query: compatPiefedPageParams(payload) },
     });
 
     return {
-      communities: response.data!.communities.map(compatPiefedCommunityView),
+      ...compatPiefedPageResponse(payload),
+      data: response.data!.communities.map(compatPiefedCommunityView),
     };
   }
 
@@ -608,39 +613,48 @@ export class UnsafePiefedClient implements BaseClient {
   ): Promise<ListPersonContentResponse> {
     switch (payload.type) {
       case "All":
-      case undefined:
-        return {
-          content: await Promise.all([
-            this.#listPersonPosts(payload, options),
-            this.#listPersonComments(payload, options),
-          ]).then(([posts, comments]) =>
-            [...posts, ...comments].sort(
-              (a, b) =>
-                getPostCommentItemCreatedDate(b) -
-                getPostCommentItemCreatedDate(a),
-            ),
+      case undefined: {
+        const response = await Promise.all([
+          this.#listPersonPosts(payload, options),
+          this.#listPersonComments(payload, options),
+        ]).then(([posts, comments]) =>
+          [...posts.data, ...comments.data].sort(
+            (a, b) =>
+              getPostCommentItemCreatedDate(b) -
+              getPostCommentItemCreatedDate(a),
           ),
+        );
+
+        return {
+          ...compatPiefedPageResponse(payload),
+          data: response,
         };
+      }
       case "Comments":
-        return { content: await this.#listPersonComments(payload, options) };
+        return this.#listPersonComments(payload, options);
       case "Posts":
-        return { content: await this.#listPersonPosts(payload, options) };
+        return this.#listPersonPosts(payload, options);
     }
   }
 
+  async listPersonLiked(
+    ..._params: Parameters<BaseClient["listPersonLiked"]>
+  ): ReturnType<BaseClient["listPersonLiked"]> {
+    throw new UnsupportedError("List person liked is not supported by piefed");
+  }
+
   async listPersonSaved(
-    ..._params: Parameters<BaseClient["listPersonSaved"]>
+    payload: Parameters<BaseClient["listPersonSaved"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonSaved"]> {
-    // TODO: https://codeberg.org/rimu/pyfedi/issues/925
-    throw new UnsupportedError("List person saved is not supported by piefed");
-    // return this.listPersonContent(
-    //   {
-    //     ...payload,
-    //     // @ts-expect-error TODO: fix this
-    //     saved_only: true,
-    //   },
-    //   options,
-    // );
+    return this.listPersonContent(
+      {
+        ...payload,
+        // @ts-expect-error TODO: fix this
+        saved_only: true,
+      },
+      options,
+    );
   }
 
   async listPostReports(
@@ -842,14 +856,16 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.GET("/search", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: payload },
+      params: { query: compatPiefedPageParams(payload) },
     });
 
     return {
-      comments: [],
-      communities: response.data!.communities.map(compatPiefedCommunityView),
-      posts: response.data!.posts.map(compatPiefedPostView),
-      users: response.data!.users.map(compatPiefedPersonView),
+      ...compatPiefedPageResponse(payload),
+      data: [
+        ...response.data!.communities.map(compatPiefedCommunityView),
+        ...response.data!.posts.map(compatPiefedPostView),
+        ...response.data!.users.map(compatPiefedPersonView),
+      ],
     };
   }
 
@@ -878,10 +894,13 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.GET("/comment/list", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: payload },
+      params: { query: compatPiefedPageParams(payload) },
     });
 
-    return response.data!.comments.map(compatPiefedCommentView);
+    return {
+      ...compatPiefedPageResponse(payload),
+      data: response.data!.comments.map(compatPiefedCommentView),
+    };
   }
 
   async #listPersonPosts(
@@ -891,10 +910,13 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.GET("/post/list", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: payload },
+      params: { query: compatPiefedPageParams(payload) },
     });
 
-    return response.data!.posts.map(compatPiefedPostView);
+    return {
+      ...compatPiefedPageResponse(payload),
+      data: response.data!.posts.map(compatPiefedPostView),
+    };
   }
 }
 

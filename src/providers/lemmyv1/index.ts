@@ -25,11 +25,13 @@ import {
   compatLemmyFederatedInstances,
   compatLemmyInboxCombinedView,
   compatLemmyModlogView,
+  compatLemmyPageParams,
   compatLemmyPersonView,
   compatLemmyPostReportView,
   compatLemmyPostView,
   compatLemmyPrivateMessageView,
   compatLemmyReportView,
+  compatLemmySearchItem,
   compatLemmySiteView,
 } from "./compat";
 import { isPostCommentReport } from "./helpers";
@@ -218,12 +220,17 @@ export class UnsafeLemmyV1Client implements BaseClient {
   }
 
   async getComments(
-    ...params: Parameters<BaseClient["getComments"]>
+    payload: Parameters<BaseClient["getComments"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getComments"]> {
-    const response = await this.#client.getComments(...params);
+    const response = await this.#client.getComments(
+      compatLemmyPageParams(payload),
+      options,
+    );
 
     return {
-      comments: response.comments.map(compatLemmyCommentView),
+      ...response,
+      data: response.comments.map(compatLemmyCommentView),
     };
   }
 
@@ -252,24 +259,33 @@ export class UnsafeLemmyV1Client implements BaseClient {
   }
 
   async getModlog(
-    ...params: Parameters<BaseClient["getModlog"]>
+    payload: Parameters<BaseClient["getModlog"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getModlog"]> {
-    const response = await this.#client.getModlog(...params);
+    const response = await this.#client.getModlog(
+      compatLemmyPageParams(payload),
+      options,
+    );
 
     return {
-      modlog: response.modlog.map(compatLemmyModlogView).filter((m) => !!m),
+      ...response,
+      data: response.modlog.map(compatLemmyModlogView).filter((m) => !!m),
     };
   }
 
   async getNotifications(
-    ...params: Parameters<BaseClient["getNotifications"]>
+    payload: Parameters<BaseClient["getNotifications"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getNotifications"]> {
-    const response = await this.#client.listInbox(...params);
+    const response = await this.#client.listInbox(
+      compatLemmyPageParams(payload),
+      options,
+    );
 
     return {
-      notifications: response.inbox
-        .map(compatLemmyInboxCombinedView)
-        .filter((r) => !!r),
+      data: response.inbox.map(compatLemmyInboxCombinedView).filter((r) => !!r),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
     };
   }
 
@@ -291,7 +307,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
   ): ReturnType<BaseClient["getPersonMentions"]> {
     const response = await this.#client.listInbox(
       {
-        ...payload,
+        ...compatLemmyPageParams(payload),
         type_: "CommentMention",
       },
       options,
@@ -299,9 +315,11 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
     return {
       // Type set to CommentMention in request, so safe to cast
-      mentions: (response.inbox as LemmyV1PersonCommentMentionView[]).map(
+      data: (response.inbox as LemmyV1PersonCommentMentionView[]).map(
         compatLemmyCommentMentionView,
       ),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
     };
   }
 
@@ -325,13 +343,13 @@ export class UnsafeLemmyV1Client implements BaseClient {
       );
 
     const response = await this.#client.getPosts(
-      cleanThreadiverseParams(payload),
+      cleanThreadiverseParams(compatLemmyPageParams(payload)),
       options,
     );
 
     return {
       ...response,
-      posts: response.posts.map(compatLemmyPostView),
+      data: response.posts.map(compatLemmyPostView),
     };
   }
 
@@ -341,7 +359,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
   ): ReturnType<BaseClient["getPrivateMessages"]> {
     const response = await this.#client.listInbox(
       {
-        ...payload,
+        ...compatLemmyPageParams(payload),
         type_: "PrivateMessage",
       },
       options,
@@ -349,9 +367,11 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
     return {
       // Type set to PrivateMessage in request, so safe to cast
-      private_messages: (response.inbox as LemmyV1PrivateMessageView[]).map(
+      data: (response.inbox as LemmyV1PrivateMessageView[]).map(
         compatLemmyPrivateMessageView,
       ),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
     };
   }
 
@@ -369,16 +389,18 @@ export class UnsafeLemmyV1Client implements BaseClient {
   ): ReturnType<BaseClient["getReplies"]> {
     const response = await this.#client.listInbox(
       {
-        ...payload,
+        ...compatLemmyPageParams(payload),
         type_: "CommentReply",
       },
       options,
     );
 
     return {
-      replies: (response.inbox as LemmyV1CommentReplyView[]).map(
+      data: (response.inbox as LemmyV1CommentReplyView[]).map(
         compatLemmyCommentReplyView,
       ),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
     };
   }
 
@@ -444,7 +466,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
   ): ReturnType<BaseClient["listCommentReports"]> {
     const response = await this.#client.listReports(
       {
-        ...payload,
+        ...compatLemmyPageParams(payload),
         type_: "Comments",
       },
       options,
@@ -452,9 +474,11 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
     return {
       // Type set to Comments in request, so safe to cast
-      comment_reports: (response.reports as LemmyV1CommentReportView[]).map(
+      data: (response.reports as LemmyV1CommentReportView[]).map(
         compatLemmyCommentReportView,
       ),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
     };
   }
 
@@ -468,12 +492,14 @@ export class UnsafeLemmyV1Client implements BaseClient {
       );
 
     const response = await this.#client.listCommunities(
-      cleanThreadiverseParams(payload),
+      cleanThreadiverseParams(compatLemmyPageParams(payload)),
       options,
     );
 
     return {
-      communities: response.communities.map(compatLemmyCommunityView),
+      data: response.communities.map(compatLemmyCommunityView),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
     };
   }
 
@@ -481,13 +507,41 @@ export class UnsafeLemmyV1Client implements BaseClient {
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonContent"]> {
-    const response = await this.#client.listPersonContent(payload, options);
+    const response = await this.#client.listPersonContent(
+      compatLemmyPageParams(payload),
+      options,
+    );
 
     return {
-      content: response.content.map((item) => {
+      data: response.content.map((item) => {
         if (item.type_ === "Comment") return compatLemmyCommentView(item);
         return compatLemmyPostView(item);
       }),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
+    };
+  }
+
+  async listPersonLiked(
+    payload: Parameters<BaseClient["listPersonLiked"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["listPersonLiked"]> {
+    const response = await this.#client.listPersonLiked(
+      compatLemmyPageParams(payload),
+      options,
+    );
+
+    return {
+      data: response.liked.map((item) => {
+        switch (item.type_) {
+          case "Comment":
+            return compatLemmyCommentView(item);
+          case "Post":
+            return compatLemmyPostView(item);
+        }
+      }),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
     };
   }
 
@@ -495,14 +549,18 @@ export class UnsafeLemmyV1Client implements BaseClient {
     payload: Parameters<BaseClient["listPersonSaved"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonSaved"]> {
-    const response = await this.#client.listPersonSaved(payload, options);
+    const response = await this.#client.listPersonSaved(
+      compatLemmyPageParams(payload),
+      options,
+    );
 
     return {
-      ...response,
-      content: response.saved.map((item) => {
+      data: response.saved.map((item) => {
         if (item.type_ === "Comment") return compatLemmyCommentView(item);
         return compatLemmyPostView(item);
       }),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
     };
   }
 
@@ -512,7 +570,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
   ): ReturnType<BaseClient["listPostReports"]> {
     const response = await this.#client.listReports(
       {
-        ...payload,
+        ...compatLemmyPageParams(payload),
         type_: "Posts",
       },
       options,
@@ -520,9 +578,11 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
     return {
       // Type set to Posts in request, so safe to cast
-      post_reports: (response.reports as LemmyV1PostReportView[]).map(
+      data: (response.reports as LemmyV1PostReportView[]).map(
         compatLemmyPostReportView,
       ),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
     };
   }
 
@@ -530,12 +590,17 @@ export class UnsafeLemmyV1Client implements BaseClient {
     payload: Parameters<BaseClient["listReports"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["listReports"]> {
-    const response = await this.#client.listReports(payload, options);
+    const response = await this.#client.listReports(
+      compatLemmyPageParams(payload),
+      options,
+    );
 
     return {
-      reports: response.reports
+      data: response.reports
         .filter(isPostCommentReport)
         .map(compatLemmyReportView),
+      next_page: response.next_page,
+      prev_page: response.prev_page,
     };
   }
 
@@ -700,35 +765,15 @@ export class UnsafeLemmyV1Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const response = await this.#client.search(
-      cleanThreadiverseParams(payload),
+    const result = await this.#client.search(
+      cleanThreadiverseParams(compatLemmyPageParams(payload)),
       options,
     );
 
-    const compatResponse: Awaited<ReturnType<BaseClient["search"]>> = {
-      comments: [],
-      communities: [],
-      posts: [],
-      users: [],
+    return {
+      ...result,
+      data: result.results.map(compatLemmySearchItem).filter((item) => !!item),
     };
-
-    for (const result of response.results) {
-      switch (result.type_) {
-        case "Comment":
-          compatResponse.comments.push(compatLemmyCommentView(result));
-          break;
-        case "Community":
-          compatResponse.communities.push(compatLemmyCommunityView(result));
-          break;
-        case "Post":
-          compatResponse.posts.push(compatLemmyPostView(result));
-          break;
-        case "Person":
-          compatResponse.users.push(compatLemmyPersonView(result));
-      }
-    }
-
-    return compatResponse;
   }
 
   async uploadImage(

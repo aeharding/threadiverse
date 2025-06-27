@@ -6,17 +6,21 @@ import { components } from "../providers/piefed/schema";
 export type SearchSortType =
   | SearchSortTypeByMode[keyof SearchSortTypeByMode]
   | {
-      mode?: undefined;
+      mode?: never;
+      sort?: SearchSortTypeByMode["lemmyv0"]["sort"] &
+        SearchSortTypeByMode["lemmyv1"]["sort"] &
+        SearchSortTypeByMode["piefed"]["sort"];
     };
 
 export type SearchSortTypeByMode = {
-  lemmyv0: Pick<LemmyV0Search, "sort"> & {
+  lemmyv0: Required<Pick<LemmyV0Search, "sort">> & {
     mode: "lemmyv0";
   };
-  lemmyv1: Pick<LemmyV1Search, "sort" | "time_range_seconds"> & {
-    mode: "lemmyv1";
-  };
-  piefed: Pick<components["schemas"]["Search"], "sort"> & {
+  lemmyv1: Pick<LemmyV1Search, "time_range_seconds"> &
+    Required<Pick<LemmyV1Search, "sort">> & {
+      mode: "lemmyv1";
+    };
+  piefed: Required<Pick<components["schemas"]["Search"], "sort">> & {
     mode: "piefed";
   };
 };

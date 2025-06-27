@@ -34,7 +34,6 @@ export type CommunityVisibility = z.infer<typeof schemas.CommunityVisibility>;
 export type FederatedInstances = z.infer<typeof schemas.FederatedInstances>;
 export type GetCaptchaResponse = z.infer<typeof schemas.GetCaptchaResponse>;
 export type GetCommunityResponse = z.infer<typeof schemas.GetCommunityResponse>;
-export type GetModlogResponse = z.infer<typeof schemas.GetModlogResponse>;
 export type GetPersonDetailsResponse = z.infer<
   typeof schemas.GetPersonDetailsResponse
 >;
@@ -51,11 +50,37 @@ export type InstanceWithFederationState = z.infer<
   typeof schemas.InstanceWithFederationState
 >;
 export type LinkMetadata = z.infer<typeof schemas.LinkMetadata>;
+export type ListCommentReportsResponse = z.infer<
+  typeof schemas.ListCommentReportsResponse
+>;
+export type ListCommentsResponse = z.infer<typeof schemas.ListCommentsResponse>;
+export type ListCommunitiesResponse = z.infer<
+  typeof schemas.ListCommunitiesResponse
+>;
 export type ListingType = z.infer<typeof schemas.ListingType>;
+export type ListModlogResponse = z.infer<typeof schemas.ListModlogResponse>;
+export type ListNotificationsResponse = z.infer<
+  typeof schemas.ListNotificationsResponse
+>;
 export type ListPersonContentResponse = z.infer<
   typeof schemas.ListPersonContentResponse
 >;
+export type ListPersonLikedResponse = z.infer<
+  typeof schemas.ListPersonLikedResponse
+>;
+export type ListPersonMentionsResponse = z.infer<
+  typeof schemas.ListPersonMentionsResponse
+>;
+export type ListPostReportsResponse = z.infer<
+  typeof schemas.ListPostReportsResponse
+>;
+export type ListPostsResponse = z.infer<typeof schemas.ListPostsResponse>;
+export type ListPrivateMessagesResponse = z.infer<
+  typeof schemas.ListPrivateMessagesResponse
+>;
+export type ListRepliesResponse = z.infer<typeof schemas.ListRepliesResponse>;
 export type ListReportsResponse = z.infer<typeof schemas.ListReportsResponse>;
+export type ListSearchResponse = z.infer<typeof schemas.ListSearchResponse>;
 export type LoginResponse = z.infer<typeof schemas.LoginResponse>;
 export type ModAdd = z.infer<typeof schemas.ModAdd>;
 export type ModAddCommunity = z.infer<typeof schemas.ModAddCommunity>;
@@ -73,6 +98,7 @@ export type ModHideCommunity = z.infer<typeof schemas.ModHideCommunity>;
 export type ModHideCommunityView = z.infer<typeof schemas.ModHideCommunityView>;
 export type ModLockPost = z.infer<typeof schemas.ModLockPost>;
 export type ModLockPostView = z.infer<typeof schemas.ModLockPostView>;
+export type ModlogItem = z.infer<typeof schemas.ModlogItem>;
 export type ModRemoveComment = z.infer<typeof schemas.ModRemoveComment>;
 export type ModRemoveCommentView = z.infer<typeof schemas.ModRemoveCommentView>;
 export type ModRemoveCommunity = z.infer<typeof schemas.ModRemoveCommunity>;
@@ -87,8 +113,11 @@ export type ModTransferCommunityView = z.infer<
 >;
 export type MyUserInfo = z.infer<typeof schemas.MyUserInfo>;
 export type Notification = z.infer<typeof schemas.Notification>;
+export type PagableResponse = z.infer<typeof schemas.PagableResponse>;
+export type PageCursor = z.infer<typeof schemas.PageCursor>;
 export type Person = z.infer<typeof schemas.Person>;
 export type PersonAggregates = z.infer<typeof schemas.PersonAggregates>;
+export type PersonContentItem = z.infer<typeof schemas.PersonContentItem>;
 export type PersonMention = z.infer<typeof schemas.PersonMention>;
 export type PersonMentionView = z.infer<typeof schemas.PersonMentionView>;
 export type PersonView = z.infer<typeof schemas.PersonView>;
@@ -102,6 +131,7 @@ export type RegistrationMode = z.infer<typeof schemas.RegistrationMode>;
 export type ResolveObjectResponse = z.infer<
   typeof schemas.ResolveObjectResponse
 >;
+export type SearchItem = z.infer<typeof schemas.SearchItem>;
 export type Site = z.infer<typeof schemas.Site>;
 export type SiteAggregates = z.infer<typeof schemas.SiteAggregates>;
 export type SiteView = z.infer<typeof schemas.SiteView>;
@@ -127,9 +157,11 @@ export type * from "./GetPost";
 export type * from "./GetPosts";
 export type * from "./GetPrivateMessages";
 export type * from "./GetReplies";
+export type * from "./LikeType";
 export type * from "./ListCommunities";
 export type * from "./ListPersonContent";
 export type * from "./ListReports";
+export type * from "./PageParams";
 export type * from "./PostSortType";
 export type * from "./Register";
 export type * from "./Search";

@@ -2,7 +2,7 @@ import {
   CommentReplyView,
   CommentReportView,
   CommentView,
-  GetModlogResponse,
+  ModlogItem,
   PersonMentionView,
   PostReportView,
   PostView,
@@ -23,7 +23,7 @@ export function getInboxItemPublished(
   return item.person_mention.published;
 }
 
-export function getLogDate(item: GetModlogResponse["modlog"][number]): string {
+export function getLogDate(item: ModlogItem): string {
   switch (true) {
     case "mod_remove_comment" in item:
       return item.mod_remove_comment.when_;
@@ -69,4 +69,19 @@ export function getPostCommentItemCreatedDate(
 ): number {
   if ("comment" in item) return Date.parse(item.comment.published);
   return Date.parse(item.post.published);
+}
+
+const getPublishedDate = (item: CommentView | PostView) => {
+  if ("comment" in item) {
+    return item.comment.published;
+  } else {
+    return item.post.published;
+  }
+};
+
+export function sortPostCommentByPublished(
+  a: CommentView | PostView,
+  b: CommentView | PostView,
+): number {
+  return getPublishedDate(b).localeCompare(getPublishedDate(a));
 }

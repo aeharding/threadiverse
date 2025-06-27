@@ -26,11 +26,12 @@ export * from "./GetUnreadCountResponse";
 export * from "./Instance";
 export * from "./InstanceWithFederationState";
 export * from "./ListingType";
-export * from "./ListPersonContentResponse";
-export * from "./ListReportsResponse";
 export * from "./LoginResponse";
 export * from "./Notification";
+export * from "./PagableResponse";
 export * from "./Person";
+export * from "./PersonContentItem";
+export * from "./PersonContentItem";
 export * from "./PersonMention";
 export * from "./PersonMentionView";
 export * from "./Post";
@@ -41,7 +42,12 @@ export * from "./PrivateMessage";
 export * from "./PrivateMessageView";
 export * from "./ReadableFederationState";
 export * from "./RegistrationMode";
+export * from "./ReportItemView";
 export * from "./ResolveObjectResponse";
+export * from "./SearchItem";
 export * from "./SiteAggregates";
 export * from "./SubscribedType";
 export * from "./UploadImageResponse";
+
+// Should be last (can't access lexical declaration 'PersonView' before initialization)
+export * from "./list";

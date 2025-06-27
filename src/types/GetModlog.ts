@@ -1,15 +1,15 @@
+import { PageParams } from "./PageParams";
+
 /**
  * Fetches the modlog.
  */
-export type GetModlog = {
+export type GetModlog = PageParams & {
   comment_id?: number;
   community_id?: number;
-  limit?: number;
   mod_person_id?: number;
   // TODO: Expose this when lemmy v0 is dropped?
   // type_?: ModlogActionType;
   other_person_id?: number;
-  page?: number;
   post_id?: number;
 };
 

@@ -6,17 +6,21 @@ import { components } from "../providers/piefed/schema";
 export type PostSortType =
   | PostSortTypeByMode[keyof PostSortTypeByMode]
   | {
-      mode?: undefined;
+      mode?: never;
+      sort?: PostSortTypeByMode["lemmyv0"]["sort"] &
+        PostSortTypeByMode["lemmyv1"]["sort"] &
+        PostSortTypeByMode["piefed"]["sort"];
     };
 
 export type PostSortTypeByMode = {
-  lemmyv0: Pick<LemmyV0GetPosts, "sort"> & {
+  lemmyv0: Required<Pick<LemmyV0GetPosts, "sort">> & {
     mode: "lemmyv0";
   };
-  lemmyv1: Pick<LemmyV1GetPosts, "sort" | "time_range_seconds"> & {
-    mode: "lemmyv1";
-  };
-  piefed: Pick<components["schemas"]["GetPosts"], "sort"> & {
+  lemmyv1: Pick<LemmyV1GetPosts, "time_range_seconds"> &
+    Required<Pick<LemmyV1GetPosts, "sort">> & {
+      mode: "lemmyv1";
+    };
+  piefed: Required<Pick<components["schemas"]["GetPosts"], "sort">> & {
     mode: "piefed";
   };
 };

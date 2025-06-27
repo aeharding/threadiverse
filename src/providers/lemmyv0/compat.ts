@@ -1,9 +1,12 @@
 import type * as LemmyV0 from "lemmy-js-client";
 
+import { InvalidPayloadError } from "../../errors";
 import {
   CommunityVisibility,
-  GetModlogResponse,
+  ModlogItem,
   MyUserInfo,
+  PagableResponse,
+  PageParams,
 } from "../../types";
 
 /**
@@ -87,7 +90,7 @@ export function compatLemmyMentionView(
 
 export function compatLemmyModlogView(
   modlog: LemmyV0.GetModlogResponse[keyof LemmyV0.GetModlogResponse][number],
-): GetModlogResponse["modlog"][number] {
+): ModlogItem {
   if ("community" in modlog) {
     return {
       ...modlog,
@@ -96,6 +99,39 @@ export function compatLemmyModlogView(
   }
 
   return modlog;
+}
+
+export function compatLemmyPageParams<const T extends PageParams>(
+  params: T,
+): Omit<T, "page_cursor"> & { limit?: number; page?: number } {
+  const result: T = { ...params };
+
+  const page_cursor = result.page_cursor;
+  delete result.page_cursor;
+
+  if (typeof page_cursor === "string")
+    throw new InvalidPayloadError(
+      "lemmyv0 does not support string page_cursor",
+    );
+
+  return {
+    ...(result as Omit<T, "page_cursor">),
+    limit: params.limit,
+    page: page_cursor ? Number(page_cursor) : undefined,
+  };
+}
+
+export function compatLemmyPageResponse(params: PageParams): PagableResponse {
+  const page_cursor = params.page_cursor;
+
+  if (typeof page_cursor === "string")
+    throw new InvalidPayloadError(
+      "lemmyv0 does not support string page_cursor",
+    );
+
+  return {
+    next_page: (page_cursor ?? 1) + 1,
+  };
 }
 
 export function compatLemmyPostReportView(postReport: LemmyV0.PostReportView) {
