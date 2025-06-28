@@ -5,11 +5,7 @@ import {
   BaseClientOptions,
   RequestOptions,
 } from "../../BaseClient";
-import {
-  InvalidPayloadError,
-  PiefedResponseError,
-  UnsupportedError,
-} from "../../errors";
+import { InvalidPayloadError, UnsupportedError } from "../../errors";
 import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
 import {
@@ -39,12 +35,17 @@ import {
 import { components, paths } from "./schema";
 
 const piefedMiddleware: Middleware = {
-  async onError({ error }) {
-    return new PiefedResponseError("Fetch failed", { cause: error });
-  },
   async onResponse({ response }) {
-    if (response.status < 200 || response.status >= 300)
-      throw new PiefedResponseError(`Bad request: ${response.status}`);
+    if (!response.ok) {
+      const data = await response.json();
+      if ("error" in data && typeof data.error === "string") {
+        // This is how lemmy-js-client does it, mock that for now until
+        // threadiverse supports error handling
+        throw new Error(data.error);
+      }
+
+      throw new Error(`Bad request: ${response.status}`);
+    }
   },
 };
 
@@ -178,11 +179,19 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async createPrivateMessage(
-    ..._params: Parameters<BaseClient["createPrivateMessage"]>
+    payload: Parameters<BaseClient["createPrivateMessage"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["createPrivateMessage"]> {
-    throw new UnsupportedError(
-      "Create private message is not supported by piefed",
-    );
+    const response = await this.#client.POST("/private_message", {
+      ...options,
+      body: { ...payload },
+    });
+
+    return {
+      private_message_view: compatPiefedPrivateMessageView(
+        response.data!.private_message_view,
+      ),
+    };
   }
 
   async createPrivateMessageReport(
