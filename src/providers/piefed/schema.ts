@@ -1936,6 +1936,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/private_message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a private message. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreatePrivateMessage"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PrivateMessageResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/user": {
         parameters: {
             query?: never;
@@ -3125,6 +3165,13 @@ export interface components {
             /** GetPrivateMessages.creator_id */
             creator_id?: number;
         };
+        /** CreatePrivateMessage */
+        CreatePrivateMessage: {
+            /** CreatePrivateMessage.content */
+            content: string;
+            /** CreatePrivateMessage.recipient_id */
+            recipient_id: number;
+        };
         /** GetPersonDetails */
         GetPersonDetails: {
             /** GetPersonDetails.person_id */
@@ -3357,6 +3404,11 @@ export interface components {
         PrivateMessagesResponse: {
             /** PrivateMessagesResponse.private_messages */
             private_messages: components["schemas"]["PrivateMessageView"][];
+        };
+        /** PrivateMessageResponse */
+        PrivateMessageResponse: {
+            /** PrivateMessageResponse.private_message_view */
+            private_message_view: components["schemas"]["PrivateMessageView"];
         };
         /** GetPersonDetailsResponse */
         GetPersonDetailsResponse: {
