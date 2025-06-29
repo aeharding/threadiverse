@@ -17,21 +17,7 @@ import {
   getInboxItemPublished,
   getPostCommentItemCreatedDate,
 } from "../lemmyv0/helpers";
-import {
-  compatPiefedCommentReplyView,
-  compatPiefedCommentView,
-  compatPiefedCommunity,
-  compatPiefedCommunityModeratorView,
-  compatPiefedCommunityView,
-  compatPiefedGetCommunityResponse,
-  compatPiefedLocalSite,
-  compatPiefedPageParams,
-  compatPiefedPageResponse,
-  compatPiefedPerson,
-  compatPiefedPersonView,
-  compatPiefedPostView,
-  compatPiefedPrivateMessageView,
-} from "./compat";
+import * as compat from "./compat";
 import { components, paths } from "./schema";
 
 const piefedMiddleware: Middleware = {
@@ -95,7 +81,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      community_view: compatPiefedCommunityView(response.data!.community_view),
+      community_view: compat.toCommunityView(response.data!.community_view),
     };
   }
 
@@ -120,7 +106,7 @@ export class UnsafePiefedClient implements BaseClient {
 
     return {
       ...response.data!,
-      person_view: compatPiefedPersonView(response.data!.person_view),
+      person_view: compat.toPersonView(response.data!.person_view),
     };
   }
 
@@ -137,7 +123,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      comment_view: compatPiefedCommentView(response.data!.comment_view),
+      comment_view: compat.toCommentView(response.data!.comment_view),
     };
   }
 
@@ -164,7 +150,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      post_view: compatPiefedPostView(response.data!.post_view),
+      post_view: compat.toPostView(response.data!.post_view),
     };
   }
 
@@ -188,7 +174,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      private_message_view: compatPiefedPrivateMessageView(
+      private_message_view: compat.toPrivateMessageView(
         response.data!.private_message_view,
       ),
     };
@@ -212,7 +198,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      comment_view: compatPiefedCommentView(response.data!.comment_view),
+      comment_view: compat.toCommentView(response.data!.comment_view),
     };
   }
 
@@ -232,7 +218,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      post_view: compatPiefedPostView(response.data!.post_view),
+      post_view: compat.toPostView(response.data!.post_view),
     };
   }
 
@@ -257,7 +243,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      comment_view: compatPiefedCommentView(response.data!.comment_view),
+      comment_view: compat.toCommentView(response.data!.comment_view),
     };
   }
 
@@ -274,7 +260,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      post_view: compatPiefedPostView(response.data!.post_view),
+      post_view: compat.toPostView(response.data!.post_view),
     };
   }
 
@@ -288,7 +274,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      post_view: compatPiefedPostView(response.data!.post_view),
+      post_view: compat.toPostView(response.data!.post_view),
     };
   }
 
@@ -302,7 +288,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      community_view: compatPiefedCommunityView(response.data!.community_view),
+      community_view: compat.toCommunityView(response.data!.community_view),
     };
   }
 
@@ -322,7 +308,7 @@ export class UnsafePiefedClient implements BaseClient {
       );
 
     const query = cleanThreadiverseParams(
-      compatPiefedPageParams(payload),
+      compat.fromPageParams(payload),
     ) satisfies components["schemas"]["GetComments"];
 
     const response = await this.#client.GET("/comment/list", {
@@ -332,8 +318,8 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      ...compatPiefedPageResponse(payload),
-      data: response.data!.comments.map(compatPiefedCommentView),
+      ...compat.toPageResponse(payload),
+      data: response.data!.comments.map(compat.toCommentView),
     };
   }
 
@@ -347,7 +333,7 @@ export class UnsafePiefedClient implements BaseClient {
       params: { query: payload },
     });
 
-    return compatPiefedGetCommunityResponse(response.data!);
+    return compat.toGetCommunityResponse(response.data!);
   }
 
   async getFederatedInstances(
@@ -384,7 +370,7 @@ export class UnsafePiefedClient implements BaseClient {
     );
 
     return {
-      ...compatPiefedPageResponse(params[0]),
+      ...compat.toPageResponse(params[0]),
       data,
     };
   }
@@ -401,10 +387,8 @@ export class UnsafePiefedClient implements BaseClient {
 
     return {
       ...response.data!,
-      moderates: response.data!.moderates.map(
-        compatPiefedCommunityModeratorView,
-      ),
-      person_view: compatPiefedPersonView(response.data!.person_view),
+      moderates: response.data!.moderates.map(compat.toCommunityModeratorView),
+      person_view: compat.toPersonView(response.data!.person_view),
     };
   }
 
@@ -428,7 +412,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      post_view: compatPiefedPostView(response.data!.post_view),
+      post_view: compat.toPostView(response.data!.post_view),
     };
   }
 
@@ -442,7 +426,7 @@ export class UnsafePiefedClient implements BaseClient {
       );
 
     const query = cleanThreadiverseParams(
-      compatPiefedPageParams(payload),
+      compat.fromPageParams(payload),
     ) satisfies components["schemas"]["GetPosts"];
 
     const response = await this.#client.GET("/post/list", {
@@ -452,8 +436,8 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      ...compatPiefedPageResponse(payload),
-      data: response.data!.posts.map(compatPiefedPostView),
+      ...compat.toPageResponse(payload),
+      data: response.data!.posts.map(compat.toPostView),
     };
   }
 
@@ -464,12 +448,12 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.GET("/private_message/list", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: compatPiefedPageParams(payload) },
+      params: { query: compat.fromPageParams(payload) },
     });
 
     return {
-      ...compatPiefedPageResponse(payload),
-      data: response.data!.private_messages.map(compatPiefedPrivateMessageView),
+      ...compat.toPageResponse(payload),
+      data: response.data!.private_messages.map(compat.toPrivateMessageView),
     };
   }
 
@@ -488,12 +472,12 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.GET("/user/replies", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: compatPiefedPageParams(payload) },
+      params: { query: compat.fromPageParams(payload) },
     });
 
     return {
-      ...compatPiefedPageResponse(payload),
-      data: response.data!.replies.map(compatPiefedCommentReplyView),
+      ...compat.toPageResponse(payload),
+      data: response.data!.replies.map(compat.toCommentReplyView),
     };
   }
 
@@ -503,16 +487,16 @@ export class UnsafePiefedClient implements BaseClient {
     return {
       ...response.data!,
       // TODO: piefed.ca is missing admins in the response for some reason????
-      admins: (response.data!.admins ?? []).map(compatPiefedPersonView),
+      admins: (response.data!.admins ?? []).map(compat.toPersonView),
       my_user: response.data!.my_user
         ? {
             ...response.data!.my_user,
             community_blocks: response.data!.my_user?.community_blocks.map(
-              ({ community }) => compatPiefedCommunity(community),
+              ({ community }) => compat.toCommunity(community),
             ),
             follows: response.data!.my_user.follows.map((f) => ({
-              community: compatPiefedCommunity(f.community),
-              follower: compatPiefedPerson(f.follower),
+              community: compat.toCommunity(f.community),
+              follower: compat.toPerson(f.follower),
             })),
             instance_blocks: response.data!.my_user?.instance_blocks.map(
               ({ instance }) => instance,
@@ -524,20 +508,20 @@ export class UnsafePiefedClient implements BaseClient {
                 show_nsfw:
                   response.data!.my_user.local_user_view.local_user.show_nsfw,
               },
-              person: compatPiefedPerson(
+              person: compat.toPerson(
                 response.data!.my_user.local_user_view.person,
               ),
             },
             moderates: response.data!.my_user.moderates.map(
-              compatPiefedCommunityModeratorView,
+              compat.toCommunityModeratorView,
             ),
             person_blocks: response.data!.my_user?.person_blocks.map(
-              ({ person }) => compatPiefedPerson(person),
+              ({ person }) => compat.toPerson(person),
             ),
           }
         : undefined,
       site_view: {
-        local_site: compatPiefedLocalSite(response.data!.site),
+        local_site: compat.toLocalSite(response.data!.site),
         site: response.data!.site,
       },
     };
@@ -569,7 +553,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      comment_view: compatPiefedCommentView(response.data!.comment_view),
+      comment_view: compat.toCommentView(response.data!.comment_view),
     };
   }
 
@@ -585,7 +569,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      post_view: compatPiefedPostView(response.data!.post_view),
+      post_view: compat.toPostView(response.data!.post_view),
     };
   }
 
@@ -604,12 +588,12 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.GET("/community/list", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: compatPiefedPageParams(payload) },
+      params: { query: compat.fromPageParams(payload) },
     });
 
     return {
-      ...compatPiefedPageResponse(payload),
-      data: response.data!.communities.map(compatPiefedCommunityView),
+      ...compat.toPageResponse(payload),
+      data: response.data!.communities.map(compat.toCommunityView),
     };
   }
 
@@ -632,7 +616,7 @@ export class UnsafePiefedClient implements BaseClient {
         );
 
         return {
-          ...compatPiefedPageResponse(payload),
+          ...compat.toPageResponse(payload),
           data: response,
         };
       }
@@ -685,7 +669,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      post_view: compatPiefedPostView(response.data!.post_view),
+      post_view: compat.toPostView(response.data!.post_view),
     };
   }
 
@@ -761,7 +745,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      comment_view: compatPiefedCommentView(response.data!.comment_view),
+      comment_view: compat.toCommentView(response.data!.comment_view),
     };
   }
 
@@ -775,7 +759,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      post_view: compatPiefedPostView(response.data!.post_view),
+      post_view: compat.toPostView(response.data!.post_view),
     };
   }
 
@@ -803,16 +787,16 @@ export class UnsafePiefedClient implements BaseClient {
     return {
       ...response.data,
       comment: response.data.comment
-        ? compatPiefedCommentView(response.data.comment)
+        ? compat.toCommentView(response.data.comment)
         : undefined,
       community: response.data.community
-        ? compatPiefedCommunityView(response.data.community)
+        ? compat.toCommunityView(response.data.community)
         : undefined,
       person: response.data.person
-        ? compatPiefedPersonView(response.data!.person)
+        ? compat.toPersonView(response.data!.person)
         : undefined,
       post: response.data.post
-        ? compatPiefedPostView(response.data!.post)
+        ? compat.toPostView(response.data!.post)
         : undefined,
     };
   }
@@ -841,7 +825,7 @@ export class UnsafePiefedClient implements BaseClient {
     });
 
     return {
-      post_view: compatPiefedPostView(response.data!.post_view),
+      post_view: compat.toPostView(response.data!.post_view),
     };
   }
 
@@ -862,15 +846,15 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.GET("/search", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: compatPiefedPageParams(payload) },
+      params: { query: compat.fromPageParams(payload) },
     });
 
     return {
-      ...compatPiefedPageResponse(payload),
+      ...compat.toPageResponse(payload),
       data: [
-        ...response.data!.communities.map(compatPiefedCommunityView),
-        ...response.data!.posts.map(compatPiefedPostView),
-        ...response.data!.users.map(compatPiefedPersonView),
+        ...response.data!.communities.map(compat.toCommunityView),
+        ...response.data!.posts.map(compat.toPostView),
+        ...response.data!.users.map(compat.toPersonView),
       ],
     };
   }
@@ -900,12 +884,12 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.GET("/comment/list", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: compatPiefedPageParams(payload) },
+      params: { query: compat.fromPageParams(payload) },
     });
 
     return {
-      ...compatPiefedPageResponse(payload),
-      data: response.data!.comments.map(compatPiefedCommentView),
+      ...compat.toPageResponse(payload),
+      data: response.data!.comments.map(compat.toCommentView),
     };
   }
 
@@ -916,12 +900,12 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.GET("/post/list", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: compatPiefedPageParams(payload) },
+      params: { query: compat.fromPageParams(payload) },
     });
 
     return {
-      ...compatPiefedPageResponse(payload),
-      data: response.data!.posts.map(compatPiefedPostView),
+      ...compat.toPageResponse(payload),
+      data: response.data!.posts.map(compat.toPostView),
     };
   }
 }

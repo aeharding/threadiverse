@@ -1,5 +1,4 @@
-import { LemmyHttp } from "lemmy-js-client";
-import * as LemmyV0 from "lemmy-js-client";
+import * as LemmyV0 from "lemmy-js-client-v0";
 
 import {
   BaseClient,
@@ -14,22 +13,7 @@ import {
 import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
 import { ListPersonLikedResponse } from "../../types";
-import {
-  compatBlocks,
-  compatLemmyCommentReportView,
-  compatLemmyCommentView,
-  compatLemmyCommunityFollowerView,
-  compatLemmyCommunityModeratorView,
-  compatLemmyCommunityView,
-  compatLemmyLocalSite,
-  compatLemmyMentionView,
-  compatLemmyModlogView,
-  compatLemmyPageParams,
-  compatLemmyPageResponse,
-  compatLemmyPostReportView,
-  compatLemmyPostView,
-  compatLemmyReplyView,
-} from "./compat";
+import * as compat from "./compat";
 import {
   getInboxItemPublished,
   getLogDate,
@@ -44,10 +28,10 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   static softwareVersionRange = ">=0.19.5";
 
-  #client: LemmyHttp;
+  #client: LemmyV0.LemmyHttp;
 
   constructor(hostname: string, options: BaseClientOptions) {
-    this.#client = new LemmyHttp(hostname, options);
+    this.#client = new LemmyV0.LemmyHttp(hostname, options);
   }
 
   async banFromCommunity(
@@ -63,7 +47,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
     return {
       ...response,
-      community_view: compatLemmyCommunityView(response.community_view),
+      community_view: compat.toCommunityView(response.community_view),
     };
   }
 
@@ -85,7 +69,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.createComment(...params);
 
     return {
-      comment_view: compatLemmyCommentView(response.comment_view),
+      comment_view: compat.toCommentView(response.comment_view),
     };
   }
 
@@ -101,7 +85,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.createPost(...params);
 
     return {
-      post_view: compatLemmyPostView(response.post_view),
+      post_view: compat.toPostView(response.post_view),
     };
   }
 
@@ -129,7 +113,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.deleteComment(...params);
 
     return {
-      comment_view: compatLemmyCommentView(response.comment_view),
+      comment_view: compat.toCommentView(response.comment_view),
     };
   }
 
@@ -149,7 +133,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.deletePost(...params);
 
     return {
-      post_view: compatLemmyPostView(response.post_view),
+      post_view: compat.toPostView(response.post_view),
     };
   }
 
@@ -159,7 +143,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.distinguishComment(...params);
 
     return {
-      comment_view: compatLemmyCommentView(response.comment_view),
+      comment_view: compat.toCommentView(response.comment_view),
     };
   }
 
@@ -169,7 +153,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.editComment(...params);
 
     return {
-      comment_view: compatLemmyCommentView(response.comment_view),
+      comment_view: compat.toCommentView(response.comment_view),
     };
   }
 
@@ -179,7 +163,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.editPost(...params);
 
     return {
-      post_view: compatLemmyPostView(response.post_view),
+      post_view: compat.toPostView(response.post_view),
     };
   }
 
@@ -189,7 +173,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.featurePost(...params);
 
     return {
-      post_view: compatLemmyPostView(response.post_view),
+      post_view: compat.toPostView(response.post_view),
     };
   }
 
@@ -200,7 +184,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
     return {
       ...response,
-      community_view: compatLemmyCommunityView(response.community_view),
+      community_view: compat.toCommunityView(response.community_view),
     };
   }
 
@@ -220,13 +204,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
       );
 
     const response = await this.#client.getComments(
-      cleanThreadiverseParams(compatLemmyPageParams(payload)),
+      cleanThreadiverseParams(compat.fromPageParams(payload)),
       options,
     );
 
     return {
-      ...compatLemmyPageResponse(payload),
-      data: response.comments.map(compatLemmyCommentView),
+      ...compat.toPageResponse(payload),
+      data: response.comments.map(compat.toCommentView),
     };
   }
 
@@ -238,9 +222,9 @@ export class UnsafeLemmyV0Client implements BaseClient {
     return {
       ...response,
       community_view: {
-        ...compatLemmyCommunityView(response.community_view),
+        ...compat.toCommunityView(response.community_view),
       },
-      moderators: response.moderators.map(compatLemmyCommunityModeratorView),
+      moderators: response.moderators.map(compat.toCommunityModeratorView),
     };
   }
 
@@ -255,15 +239,15 @@ export class UnsafeLemmyV0Client implements BaseClient {
     options?: RequestOptions,
   ): ReturnType<BaseClient["getModlog"]> {
     const response = await this.#client.getModlog(
-      compatLemmyPageParams(payload),
+      compat.fromPageParams(payload),
       options,
     );
 
     return {
-      ...compatLemmyPageResponse(payload),
+      ...compat.toPageResponse(payload),
       data: Object.values(response)
         .flat()
-        .map(compatLemmyModlogView)
+        .map(compat.toModlogView)
         .sort((a, b) => Date.parse(getLogDate(b)) - Date.parse(getLogDate(a))),
     };
   }
@@ -272,7 +256,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     payload: Parameters<BaseClient["getNotifications"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["getNotifications"]> {
-    const params = compatLemmyPageParams(payload);
+    const params = compat.fromPageParams(payload);
 
     const [replies, mentions, privateMessages] = await Promise.all([
       this.getReplies(params, options),
@@ -291,7 +275,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     );
 
     return {
-      ...compatLemmyPageResponse(payload),
+      ...compat.toPageResponse(payload),
       data,
     };
   }
@@ -310,7 +294,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
     return {
       ...response,
-      moderates: response.moderates.map(compatLemmyCommunityModeratorView),
+      moderates: response.moderates.map(compat.toCommunityModeratorView),
     };
   }
 
@@ -324,8 +308,8 @@ export class UnsafeLemmyV0Client implements BaseClient {
     );
 
     return {
-      ...compatLemmyPageResponse(payload),
-      data: response.mentions.map(compatLemmyMentionView),
+      ...compat.toPageResponse(payload),
+      data: response.mentions.map(compat.toMentionView),
     };
   }
 
@@ -335,7 +319,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.getPost(...params);
 
     return {
-      post_view: compatLemmyPostView(response.post_view),
+      post_view: compat.toPostView(response.post_view),
     };
   }
 
@@ -353,12 +337,15 @@ export class UnsafeLemmyV0Client implements BaseClient {
       throw new InvalidPayloadError("page_cursor must be string");
 
     const response = await this.#client.getPosts(
-      { ...cleanThreadiverseParams(payload), page_cursor },
+      {
+        ...cleanThreadiverseParams(compat.fromPageParams(payload)),
+        page_cursor,
+      },
       options,
     );
 
     return {
-      data: response.posts.map(compatLemmyPostView),
+      data: response.posts.map(compat.toPostView),
       next_page: response.next_page,
     };
   }
@@ -372,12 +359,12 @@ export class UnsafeLemmyV0Client implements BaseClient {
     options?: RequestOptions,
   ): ReturnType<BaseClient["getPrivateMessages"]> {
     const response = await this.#client.getPrivateMessages(
-      compatLemmyPageParams(payload),
+      compat.fromPageParams(payload),
       options,
     );
 
     return {
-      ...compatLemmyPageResponse(payload),
+      ...compat.toPageResponse(payload),
       data: response.private_messages,
     };
   }
@@ -395,13 +382,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
     options?: RequestOptions,
   ): ReturnType<BaseClient["getReplies"]> {
     const response = await this.#client.getReplies(
-      compatLemmyPageParams({ ...payload, sort: "New" }),
+      compat.fromPageParams({ ...payload, sort: "New" }),
       options,
     );
 
     return {
-      ...compatLemmyPageResponse(payload),
-      data: response.replies.map(compatLemmyReplyView),
+      ...compat.toPageResponse(payload),
+      data: response.replies.map(compat.toReplyView),
     };
   }
 
@@ -415,16 +402,16 @@ export class UnsafeLemmyV0Client implements BaseClient {
       my_user: site.my_user
         ? {
             ...site.my_user,
-            follows: site.my_user.follows.map(compatLemmyCommunityFollowerView),
+            follows: site.my_user.follows.map(compat.toCommunityFollowerView),
             moderates: site.my_user.moderates.map(
-              compatLemmyCommunityModeratorView,
+              compat.toCommunityModeratorView,
             ),
-            ...compatBlocks(site.my_user),
+            ...compat.toBlocks(site.my_user),
           }
         : undefined,
       site_view: {
         ...site.site_view,
-        local_site: compatLemmyLocalSite(site.site_view.local_site),
+        local_site: compat.toLocalSite(site.site_view.local_site),
       },
     };
   }
@@ -447,7 +434,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.likeComment(...params);
 
     return {
-      comment_view: compatLemmyCommentView(response.comment_view),
+      comment_view: compat.toCommentView(response.comment_view),
     };
   }
 
@@ -457,7 +444,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.likePost(...params);
 
     return {
-      post_view: compatLemmyPostView(response.post_view),
+      post_view: compat.toPostView(response.post_view),
     };
   }
 
@@ -466,13 +453,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
     options?: RequestOptions,
   ): ReturnType<BaseClient["listCommentReports"]> {
     const response = await this.#client.listCommentReports(
-      compatLemmyPageParams(payload),
+      compat.fromPageParams(payload),
       options,
     );
 
     return {
-      ...compatLemmyPageResponse(payload),
-      data: response.comment_reports.map(compatLemmyCommentReportView),
+      ...compat.toPageResponse(payload),
+      data: response.comment_reports.map(compat.toCommentReportView),
     };
   }
 
@@ -486,13 +473,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
       );
 
     const response = await this.#client.listCommunities(
-      cleanThreadiverseParams(compatLemmyPageParams(payload)),
+      cleanThreadiverseParams(compat.fromPageParams(payload)),
       options,
     );
 
     return {
-      ...compatLemmyPageResponse(payload),
-      data: response.communities.map(compatLemmyCommunityView),
+      ...compat.toPageResponse(payload),
+      data: response.communities.map(compat.toCommunityView),
     };
   }
 
@@ -501,7 +488,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonContent"]> {
     const response = await this.#client.getPersonDetails(
-      compatLemmyPageParams(payload),
+      compat.fromPageParams(payload),
       options,
     );
 
@@ -510,22 +497,22 @@ export class UnsafeLemmyV0Client implements BaseClient {
         case "All":
         case undefined:
           return [
-            ...response.posts.map(compatLemmyPostView),
-            ...response.comments.map(compatLemmyCommentView),
+            ...response.posts.map(compat.toPostView),
+            ...response.comments.map(compat.toCommentView),
           ].sort(
             (a, b) =>
               getPostCommentItemCreatedDate(b) -
               getPostCommentItemCreatedDate(a),
           );
         case "Comments":
-          return response.comments.map(compatLemmyCommentView);
+          return response.comments.map(compat.toCommentView);
         case "Posts":
-          return response.posts.map(compatLemmyPostView);
+          return response.posts.map(compat.toPostView);
       }
     })();
 
     return {
-      ...compatLemmyPageResponse(payload),
+      ...compat.toPageResponse(payload),
       data,
     };
   }
@@ -535,7 +522,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     options?: RequestOptions,
   ): Promise<ListPersonLikedResponse> {
     const v0Payload: LemmyV0.GetComments & LemmyV0.GetPosts = {
-      ...compatLemmyPageParams(payload),
+      ...compat.fromPageParams(payload),
       disliked_only: type === "Downvoted",
       liked_only: type === "Upvoted",
       show_read: true,
@@ -548,10 +535,10 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
     return {
       data: [
-        ...comments.map(compatLemmyCommentView),
-        ...posts.map(compatLemmyPostView),
+        ...comments.map(compat.toCommentView),
+        ...posts.map(compat.toPostView),
       ].sort(sortPostCommentByPublished),
-      ...compatLemmyPageResponse(payload),
+      ...compat.toPageResponse(payload),
     };
   }
 
@@ -574,13 +561,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
     options?: RequestOptions,
   ): ReturnType<BaseClient["listPostReports"]> {
     const response = await this.#client.listPostReports(
-      compatLemmyPageParams(payload),
+      compat.fromPageParams(payload),
       options,
     );
 
     return {
-      ...compatLemmyPageResponse(payload),
-      data: response.post_reports.map(compatLemmyPostReportView),
+      ...compat.toPageResponse(payload),
+      data: response.post_reports.map(compat.toPostReportView),
     };
   }
 
@@ -588,7 +575,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     payload: Parameters<BaseClient["listReports"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["listReports"]> {
-    const params = compatLemmyPageParams(payload);
+    const params = compat.fromPageParams(payload);
 
     const [{ comment_reports }, { post_reports }] = await Promise.all([
       this.#client.listCommentReports(params, options),
@@ -596,10 +583,10 @@ export class UnsafeLemmyV0Client implements BaseClient {
     ]);
 
     return {
-      ...compatLemmyPageResponse(payload),
+      ...compat.toPageResponse(payload),
       data: [
-        ...comment_reports.map(compatLemmyCommentReportView),
-        ...post_reports.map(compatLemmyPostReportView),
+        ...comment_reports.map(compat.toCommentReportView),
+        ...post_reports.map(compat.toPostReportView),
       ].sort(
         (a, b) =>
           getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a),
@@ -613,7 +600,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.lockPost(...params);
 
     return {
-      post_view: compatLemmyPostView(response.post_view),
+      post_view: compat.toPostView(response.post_view),
     };
   }
 
@@ -671,7 +658,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.removeComment(...params);
 
     return {
-      comment_view: compatLemmyCommentView(response.comment_view),
+      comment_view: compat.toCommentView(response.comment_view),
     };
   }
 
@@ -681,7 +668,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.removePost(...params);
 
     return {
-      post_view: compatLemmyPostView(response.post_view),
+      post_view: compat.toPostView(response.post_view),
     };
   }
 
@@ -700,12 +687,12 @@ export class UnsafeLemmyV0Client implements BaseClient {
     return {
       ...response,
       comment: response.comment
-        ? compatLemmyCommentView(response.comment)
+        ? compat.toCommentView(response.comment)
         : undefined,
       community: response.community
-        ? compatLemmyCommunityView(response.community)
+        ? compat.toCommunityView(response.community)
         : undefined,
-      post: response.post ? compatLemmyPostView(response.post) : undefined,
+      post: response.post ? compat.toPostView(response.post) : undefined,
     };
   }
 
@@ -721,7 +708,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.saveComment(...params);
 
     return {
-      comment_view: compatLemmyCommentView(response.comment_view),
+      comment_view: compat.toCommentView(response.comment_view),
     };
   }
 
@@ -731,7 +718,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.savePost(...params);
 
     return {
-      post_view: compatLemmyPostView(response.post_view),
+      post_view: compat.toPostView(response.post_view),
     };
   }
 
@@ -751,16 +738,16 @@ export class UnsafeLemmyV0Client implements BaseClient {
       );
 
     const response = await this.#client.search(
-      cleanThreadiverseParams(compatLemmyPageParams(payload)),
+      cleanThreadiverseParams(compat.fromPageParams(payload)),
       options,
     );
 
     return {
-      ...compatLemmyPageResponse(payload),
+      ...compat.toPageResponse(payload),
       data: [
-        ...response.comments.map(compatLemmyCommentView),
-        ...response.posts.map(compatLemmyPostView),
-        ...response.communities.map(compatLemmyCommunityView),
+        ...response.comments.map(compat.toCommentView),
+        ...response.posts.map(compat.toPostView),
+        ...response.communities.map(compat.toCommunityView),
         ...response.users,
       ],
     };

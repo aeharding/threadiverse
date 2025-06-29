@@ -1,4 +1,4 @@
-import { GetPosts as LemmyV0GetPosts } from "lemmy-js-client";
+import { GetPosts as LemmyV0GetPosts } from "lemmy-js-client-v0";
 import { GetPosts as LemmyV1GetPosts } from "lemmy-js-client-v1";
 
 import { components } from "../providers/piefed/schema";

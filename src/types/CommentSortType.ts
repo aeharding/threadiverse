@@ -1,4 +1,4 @@
-import { GetComments as LemmyV0GetComments } from "lemmy-js-client";
+import { GetComments as LemmyV0GetComments } from "lemmy-js-client-v0";
 import { GetComments as LemmyV1GetComments } from "lemmy-js-client-v1";
 
 import { components } from "../providers/piefed/schema";

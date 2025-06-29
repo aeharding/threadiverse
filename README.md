@@ -8,18 +8,18 @@
 Unified typescript client for threadiverse APIs (Lemmy, Piefed, Mbin etc)
 </p>
 
-> [!WARNING]
-> **Early Development Stage**: This project is under active development and may undergo significant API changes between versions. While v0, this project's design decisions will be guided by [Voyager](https://github.com/aeharding/voyager)'s usage.
+> [!WARNING] > **Early Development Stage**: This project is under active development and may undergo significant API changes between versions. While v0, this project's design decisions will be guided by [Voyager](https://github.com/aeharding/voyager)'s usage.
 
 ## Features
 
 - 🧙‍♂️ Automagic software detection via `.well-known`
-- 📦 Supported threadiverse APIs:
-  - ✅ Lemmy - full suppport (soon!)
-  - ⚠️ Piefed - partial, uber-experimental support
-  - ❌ Mbin/Kbin - no support yet (PRs welcome!)
+- 📦 API support:
+  - ✅ Lemmy v0
+  - ⚠️ Lemmy v1 - in development
+  - ⚠️ Piefed - partial, experimental
+  - ❌ Mbin - no support yet (PRs welcome!)
+- 🛑 Guaranteed response types via runtime Zod schema validation
 - 🛡️ Strongly typed internally: Uses official software types (Swagger from Piefed, `lemmy-js-client` from Lemmy) to enforce compat layer type correctness
-- 💭 Potential future feature: Compat layer for breaking changes in threadiverse APIs
 
 ## Example
 
