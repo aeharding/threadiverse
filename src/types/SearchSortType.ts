@@ -1,4 +1,4 @@
-import { Search as LemmyV0Search } from "lemmy-js-client";
+import { Search as LemmyV0Search } from "lemmy-js-client-v0";
 import { Search as LemmyV1Search } from "lemmy-js-client-v1";
 
 import { components } from "../providers/piefed/schema";

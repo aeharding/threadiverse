@@ -170,4 +170,4 @@ export type * from "./SearchSortType";
 export type * from "./SearchType";
 
 // TODO: unified error handling in threadiverse project
-export type { LemmyErrorType } from "lemmy-js-client";
+export type { LemmyErrorType } from "lemmy-js-client-v0";

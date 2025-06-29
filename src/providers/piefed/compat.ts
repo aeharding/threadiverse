@@ -1,14 +1,11 @@
 import * as types from "../../types";
-import {
-  compatLemmyPageParams,
-  compatLemmyPageResponse,
-} from "../lemmyv0/compat";
+import * as lemmyCompat from "../lemmyv0/compat";
 import { components } from "./schema";
 
-export const compatPiefedPageResponse = compatLemmyPageResponse;
-export const compatPiefedPageParams = compatLemmyPageParams;
+export const toPageResponse = lemmyCompat.toPageResponse;
+export const fromPageParams = lemmyCompat.fromPageParams;
 
-export function compatPiefedComment(
+export function toComment(
   comment: components["schemas"]["Comment"],
   creator_id: number, // TODO piefed types are wrong, this isn't being returned rn
 ) {
@@ -20,35 +17,31 @@ export function compatPiefedComment(
   };
 }
 
-export function compatPiefedCommentReplyView(
+export function toCommentReplyView(
   reply: components["schemas"]["CommentReplyView"],
 ) {
   return {
     ...reply,
     banned_from_community: reply.banned_from_community ?? false, // TODO piefed types are wrong, this isn't being returned rn
-    comment: compatPiefedComment(reply.comment, reply.creator.id),
-    community: compatPiefedCommunity(reply.community),
-    creator: compatPiefedPerson(reply.creator),
-    post: compatPiefedPost(reply.post),
-    recipient: compatPiefedPerson(reply.recipient),
+    comment: toComment(reply.comment, reply.creator.id),
+    community: toCommunity(reply.community),
+    creator: toPerson(reply.creator),
+    post: toPost(reply.post),
+    recipient: toPerson(reply.recipient),
   };
 }
 
-export function compatPiefedCommentView(
-  comment: components["schemas"]["CommentView"],
-) {
+export function toCommentView(comment: components["schemas"]["CommentView"]) {
   return {
     ...comment,
-    comment: compatPiefedComment(comment.comment, comment.creator.id),
-    community: compatPiefedCommunity(comment.community),
-    creator: compatPiefedPerson(comment.creator),
-    post: compatPiefedPost(comment.post),
+    comment: toComment(comment.comment, comment.creator.id),
+    community: toCommunity(comment.community),
+    creator: toPerson(comment.creator),
+    post: toPost(comment.post),
   };
 }
 
-export function compatPiefedCommunity(
-  community: components["schemas"]["Community"],
-) {
+export function toCommunity(community: components["schemas"]["Community"]) {
   return {
     ...community,
     posting_restricted_to_mods: community.restricted_to_mods,
@@ -56,22 +49,22 @@ export function compatPiefedCommunity(
   };
 }
 
-export function compatPiefedCommunityModeratorView(
+export function toCommunityModeratorView(
   view: components["schemas"]["CommunityModeratorView"],
 ) {
   return {
     ...view,
-    community: compatPiefedCommunity(view.community),
-    moderator: compatPiefedPerson(view.moderator),
+    community: toCommunity(view.community),
+    moderator: toPerson(view.moderator),
   };
 }
 
-export function compatPiefedCommunityView(
+export function toCommunityView(
   community: components["schemas"]["CommunityView"],
 ) {
   return {
     ...community,
-    community: compatPiefedCommunity(community.community),
+    community: toCommunity(community.community),
     counts: {
       comments: community.counts.post_reply_count,
       posts: community.counts.post_count,
@@ -80,16 +73,16 @@ export function compatPiefedCommunityView(
   };
 }
 
-export function compatPiefedGetCommunityResponse(
+export function toGetCommunityResponse(
   response: components["schemas"]["GetCommunityResponse"],
 ) {
   return {
-    community_view: compatPiefedCommunityView(response.community_view),
-    moderators: response.moderators.map(compatPiefedCommunityModeratorView),
+    community_view: toCommunityView(response.community_view),
+    moderators: response.moderators.map(toCommunityModeratorView),
   };
 }
 
-export function compatPiefedLocalSite(
+export function toLocalSite(
   site: components["schemas"]["Site"],
 ): types.LocalSite {
   return {
@@ -103,7 +96,7 @@ export function compatPiefedLocalSite(
   };
 }
 
-export function compatPiefedPerson(person: components["schemas"]["Person"]) {
+export function toPerson(person: components["schemas"]["Person"]) {
   return {
     ...person,
     avatar: person.avatar ?? undefined, // TODO piefed types are wrong, this is returned as null if not set
@@ -113,16 +106,14 @@ export function compatPiefedPerson(person: components["schemas"]["Person"]) {
   };
 }
 
-export function compatPiefedPersonView(
-  personView: components["schemas"]["PersonView"],
-) {
+export function toPersonView(personView: components["schemas"]["PersonView"]) {
   return {
     ...personView,
-    person: compatPiefedPerson(personView.person),
+    person: toPerson(personView.person),
   };
 }
 
-export function compatPiefedPost(post: components["schemas"]["Post"]) {
+export function toPost(post: components["schemas"]["Post"]) {
   return {
     ...post,
     creator_id: post.user_id,
@@ -132,24 +123,24 @@ export function compatPiefedPost(post: components["schemas"]["Post"]) {
   };
 }
 
-export function compatPiefedPostView(
+export function toPostView(
   post: components["schemas"]["PostView"],
 ): types.PostView {
   return {
     ...post,
-    community: compatPiefedCommunity(post.community),
-    creator: compatPiefedPerson(post.creator),
+    community: toCommunity(post.community),
+    creator: toPerson(post.creator),
     creator_blocked: false, // TODO piefed does not return this
-    post: compatPiefedPost(post.post),
+    post: toPost(post.post),
   };
 }
 
-export function compatPiefedPrivateMessageView(
+export function toPrivateMessageView(
   message: components["schemas"]["PrivateMessageView"],
 ) {
   return {
     ...message,
-    creator: compatPiefedPerson(message.creator),
-    recipient: compatPiefedPerson(message.recipient),
+    creator: toPerson(message.creator),
+    recipient: toPerson(message.recipient),
   };
 }

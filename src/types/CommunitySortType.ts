@@ -1,4 +1,4 @@
-import { ListCommunities as LemmyV0ListCommunities } from "lemmy-js-client";
+import { ListCommunities as LemmyV0ListCommunities } from "lemmy-js-client-v0";
 import { ListCommunities as LemmyV1ListCommunities } from "lemmy-js-client-v1";
 
 import { components } from "../providers/piefed/schema";
