@@ -58,6 +58,7 @@ export function toCommentReportView(commentReport: LemmyV0.CommentReportView) {
 export function toCommentView(comment: LemmyV0.CommentView) {
   return {
     ...comment,
+    banned_from_community: comment.banned_from_community ?? false, // v0.13.3
     community: toCommunity(comment.community),
   };
 }
@@ -65,6 +66,7 @@ export function toCommentView(comment: LemmyV0.CommentView) {
 export function toCommunity(community: LemmyV0.Community) {
   return {
     ...community,
+    hidden: community.hidden ?? false, // v0.13.3
     visibility: compatCommunityVisibility(community.visibility),
   };
 }
@@ -154,7 +156,9 @@ export function toPostReportView(postReport: LemmyV0.PostReportView) {
 export function toPostView(post: LemmyV0.PostView) {
   return {
     ...post,
+    banned_from_community: post.banned_from_community ?? false, // v0.13.3
     community: toCommunity(post.community),
+    hidden: post.hidden ?? false, // v0.13.3
   };
 }
 
@@ -168,5 +172,7 @@ export function toReplyView(personMention: LemmyV0.CommentReplyView) {
 function compatCommunityVisibility(
   visibility: LemmyV0.CommunityVisibility,
 ): types.CommunityVisibility {
-  return visibility === "LocalOnly" ? "LocalOnlyPublic" : visibility;
+  return visibility === "LocalOnly"
+    ? "LocalOnlyPublic"
+    : visibility ?? "Public";
 }

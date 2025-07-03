@@ -43,14 +43,14 @@ export async function resolveSoftware(
     return nodeinfoData.software;
   }
 
-  throw new Error(
-    "No supported nodeinfo (http://nodeinfo.diaspora.software/ns/schema/2.1) found",
-  );
+  throw new Error("No supported nodeinfo (2.1 or 2.0) found");
 }
 
 // {"links":[{"rel":"http://nodeinfo.diaspora.software/ns/schema/2.1","href":"https://lemmy.zip/nodeinfo/2.1"}]}
 function resolveNodeinfoLink(data: NodeinfoLinksPayload): string | undefined {
-  return data.links.find(
-    (link) => link.rel === "http://nodeinfo.diaspora.software/ns/schema/2.1",
+  return data.links.find((link) =>
+    link.rel.match(
+      /^http:\/\/nodeinfo\.diaspora\.software\/ns\/schema\/2\.\d+$/,
+    ),
   )?.href;
 }
