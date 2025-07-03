@@ -122,7 +122,10 @@ export class UnsafeLemmyV0Client implements BaseClient {
     options?: RequestOptions,
   ): ReturnType<BaseClient["deleteImage"]> {
     await this.#client.deleteImage(
-      { filename: payload.url, token: payload.delete_token },
+      {
+        filename: new URL(payload.url).pathname.split("/").pop()!,
+        token: payload.delete_token,
+      },
       options,
     );
   }
