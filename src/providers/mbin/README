@@ -1,0 +1,1 @@
+npx openapi-typescript https://docs.joinmbin.org/redocusaurus/plugin-redoc-0.yaml --output src/providers/mbin/schema.ts
