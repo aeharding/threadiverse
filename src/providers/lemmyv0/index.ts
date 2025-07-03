@@ -26,7 +26,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   static softwareName = "lemmy" as const;
 
-  static softwareVersionRange = ">=0.19.5";
+  static softwareVersionRange = ">=0.19.0";
 
   #client: LemmyV0.LemmyHttp;
 
