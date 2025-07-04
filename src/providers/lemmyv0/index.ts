@@ -341,7 +341,9 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
     const response = await this.#client.getPosts(
       {
-        ...cleanThreadiverseParams(compat.fromPageParams(payload)),
+        // Only endpoint in lemmy v0 that supports page_cursor
+        // Do not call fromPageParams here!
+        ...cleanThreadiverseParams(payload),
         page_cursor,
       },
       options,
