@@ -516,7 +516,7 @@ export class UnsafePiefedClient implements BaseClient {
               compat.toCommunityModeratorView,
             ),
             person_blocks: response.data!.my_user?.person_blocks.map(
-              ({ person }) => compat.toPerson(person),
+              ({ target }) => compat.toPerson(target),
             ),
           }
         : undefined,
