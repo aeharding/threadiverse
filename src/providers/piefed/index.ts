@@ -393,10 +393,19 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async getPersonMentions(
-    _payload: Parameters<BaseClient["getPersonMentions"]>[0],
-    _options?: RequestOptions,
+    payload: Parameters<BaseClient["getPersonMentions"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getPersonMentions"]> {
-    return { data: [] }; // TODO: implement this
+    const response = await this.#client.GET("/user/mentions", {
+      ...options,
+      // @ts-expect-error TODO: fix this
+      params: { query: compat.fromPageParams(payload) },
+    });
+
+    return {
+      ...compat.toPageResponse(payload),
+      data: response.data!.replies.map(compat.toPersonMentionView),
+    };
   }
 
   async getPost(
@@ -696,7 +705,6 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["markCommentReplyAsRead"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["markCommentReplyAsRead"]> {
-    // @ts-expect-error TODO fix piefed api docs
     await this.#client.POST("/comment/mark_as_read", {
       ...options,
       body: payload,

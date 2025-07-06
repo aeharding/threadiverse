@@ -1367,7 +1367,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["SuccessResponse-2"];
+                    };
                 };
             };
         };
@@ -1625,6 +1627,55 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["CommentResponse"];
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comment/mark_as_read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark a comment reply as read. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["MarkReplyAsRead"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CommentReplyResponse-2"];
                     };
                 };
                 /** @description Bad request */
@@ -2031,6 +2082,53 @@ export interface paths {
             cookie?: never;
         };
         /** Get comment replies. */
+        get: {
+            parameters: {
+                query?: {
+                    GetReplies?: components["schemas"]["GetReplies"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetRepliesResponse"];
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/mentions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get mentions of your account made in comments. */
         get: {
             parameters: {
                 query?: {
@@ -3063,7 +3161,7 @@ export interface components {
         /** CreateComment */
         CreateComment: {
             /** CreateComment.content */
-            content: string;
+            body: string;
             /** CreateComment.post_id */
             post_id: number;
             /** CreateComment.parent_id */
@@ -3076,7 +3174,7 @@ export interface components {
             /** EditComment.comment_id */
             comment_id: number;
             /** EditComment.content */
-            content?: string;
+            body?: string;
             /** EditComment.language_id */
             language_id?: number;
         };
@@ -3117,6 +3215,12 @@ export interface components {
             /** DeleteComment.deleted */
             deleted: boolean;
         };
+        /** MarkReplyAsRead */
+        MarkReplyAsRead: {
+            /** MarkReplyAsRead.comment_reply_id */
+            comment_reply_id: number;
+            read: boolean;
+        };
         /** RemoveComment */
         RemoveComment: {
             /** RemoveComment.comment_id */
@@ -3140,7 +3244,7 @@ export interface components {
             /** SaveComment.save */
             save: boolean;
         };
-        /** SaveComment */
+        /** SubscribeComment */
         SubscribeComment: {
             /** SubscribeComment.comment_id */
             comment_id: number;
@@ -3232,6 +3336,7 @@ export interface components {
             /** SubscribePerson.subscribe */
             subscribe: boolean;
         };
+        /** SaveUserSettings */
         SaveUserSettings: {
             /** SaveUserSettings.show_nsfw */
             show_nsfw?: boolean;
@@ -3260,6 +3365,10 @@ export interface components {
         ImageUpload: {
             /** Format: binary */
             file: string;
+        };
+        /** SuccessResponse */
+        SuccessResponse: {
+            success: boolean;
         };
         BadRequest: {
             /** @example An error occurred */
@@ -3647,6 +3756,11 @@ export interface components {
              */
             thumbnail_url?: string;
             /**
+             * Post.small_thumbnail_url
+             * Format: url
+             */
+            small_thumbnail_url?: string;
+            /**
              * Post.ap_id
              * Format: url
              */
@@ -3823,6 +3937,8 @@ export interface components {
              * Format: url
              */
             banner?: string;
+            /** Person.about */
+            about?: string;
             /** Person.bot */
             bot: boolean;
             /** Person.deleted */
@@ -3875,7 +3991,7 @@ export interface components {
             /** MyUserInfo.person_blocks */
             person_blocks: components["schemas"]["PersonBlockView"][];
         };
-        /** FederatedInstances */
+        /** FederatedInstancesView */
         FederatedInstancesView: {
             /** FederatedInstances.linked */
             linked: components["schemas"]["InstanceWithoutFederationState"][];
@@ -4124,8 +4240,6 @@ export interface components {
             counts: components["schemas"]["CommentAggregates"];
             /** CommentReplyView.creator_banned_from_community */
             creator_banned_from_community: boolean;
-            /** CommentReplyView.banned_from_community */
-            banned_from_community: boolean;
             /** CommentReplyView.creator_is_moderator */
             creator_is_moderator: boolean;
             /** CommentReplyView.creator_is_admin */
@@ -4138,6 +4252,11 @@ export interface components {
             creator_blocked: boolean;
             /** CommentReplyView.my_vote */
             my_vote?: number;
+        };
+        /** CommentReplyResponse */
+        CommentReplyResponse: {
+            /** CommentResponse.comment_reply_view */
+            comment_reply_view: components["schemas"]["CommentReplyView"];
         };
         /** PrivateMessageView */
         PrivateMessageView: {
@@ -4547,10 +4666,16 @@ export interface components {
         };
         /** CommunityAggregates */
         CommunityAggregates: {
+            /** CommunityAggregates.active_6monthly */
+            active_6monthly: number;
+            /** CommunityAggregates.active_daily */
+            active_daily: number;
+            /** CommunityAggregates.active_monthly */
+            active_monthly: number;
+            /** CommunityAggregates.active_weekly */
+            active_weekly: number;
             /** CommunityAggregates.community_id */
             id: number;
-            /** CommunityAggregates.subscriptions_count */
-            subscriptions_count: number;
             /** CommunityAggregates.post_count */
             post_count: number;
             /** CommunityAggregates.post_reply_count */
@@ -4560,7 +4685,13 @@ export interface components {
              * Format: date-time
              */
             published: string;
+            /** CommunityAggregates.subscriptions_count */
+            subscriptions_count: number;
+            /** CommunityAggregates.total_subscriptions_count */
+            total_subscriptions_count: number;
         };
+        "SuccessResponse-2": unknown;
+        "CommentReplyResponse-2": unknown;
     };
     responses: never;
     parameters: never;

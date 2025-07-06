@@ -22,7 +22,7 @@ export function toCommentReplyView(
 ) {
   return {
     ...reply,
-    banned_from_community: reply.banned_from_community ?? false, // TODO piefed types are wrong, this isn't being returned rn
+    banned_from_community: false, // TODO this isn't being returned rn
     comment: toComment(reply.comment, reply.creator.id),
     community: toCommunity(reply.community),
     creator: toPerson(reply.creator),
@@ -61,7 +61,7 @@ export function toCommunityModeratorView(
 
 export function toCommunityView(
   community: components["schemas"]["CommunityView"],
-) {
+): types.CommunityView {
   return {
     ...community,
     community: toCommunity(community.community),
@@ -69,6 +69,10 @@ export function toCommunityView(
       comments: community.counts.post_reply_count,
       posts: community.counts.post_count,
       subscribers: community.counts.subscriptions_count,
+      users_active_day: community.counts.active_6monthly,
+      users_active_half_year: community.counts.active_6monthly,
+      users_active_month: community.counts.active_monthly,
+      users_active_week: community.counts.active_weekly,
     },
   };
 }
@@ -103,6 +107,21 @@ export function toPerson(person: components["schemas"]["Person"]) {
     bot_account: person.bot,
     display_name: person.title ?? undefined, // TODO piefed types are wrong, this is returned as null if not set
     name: person.user_name!,
+  };
+}
+
+export function toPersonMentionView(
+  mention: components["schemas"]["CommentReplyView"],
+): types.PersonMentionView {
+  return {
+    ...mention,
+    banned_from_community: false, // TODO isn't being returned rn
+    comment: toComment(mention.comment, mention.creator.id),
+    community: toCommunity(mention.community),
+    creator: toPerson(mention.creator),
+    person_mention: mention.comment_reply,
+    post: toPost(mention.post),
+    recipient: toPerson(mention.recipient),
   };
 }
 
