@@ -722,15 +722,20 @@ export class UnsafePiefedClient implements BaseClient {
     });
   }
 
-  async markPostAsRead(..._params: Parameters<BaseClient["markPostAsRead"]>) {
-    throw new UnsupportedError("Mark post as read is not supported by piefed");
+  async markPostAsRead(
+    payload: Parameters<BaseClient["markPostAsRead"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["markPostAsRead"]> {
+    await this.#client.POST("/post/mark_as_read", {
+      ...options,
+      body: payload,
+    });
   }
 
   async markPrivateMessageAsRead(
     payload: Parameters<BaseClient["markPrivateMessageAsRead"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["markPrivateMessageAsRead"]> {
-    // @ts-expect-error TODO fix piefed api docs
     await this.#client.POST("/private_message/mark_as_read", {
       ...options,
       body: payload,

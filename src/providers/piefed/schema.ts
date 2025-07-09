@@ -2027,6 +2027,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/private_message/mark_as_read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark a private message as read. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["MarkPrivateMessageAsRead"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PrivateMessageResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/user": {
         parameters: {
             query?: never;
@@ -2371,6 +2411,55 @@ export interface paths {
             };
         };
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/set_flair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set your flair for a community */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SetPersonFlair"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PersonResponse"];
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -3276,6 +3365,13 @@ export interface components {
             /** CreatePrivateMessage.recipient_id */
             recipient_id: number;
         };
+        /** MarkPrivateMessageAsRead */
+        MarkPrivateMessageAsRead: {
+            /** MarkPrivateMessageAsRead.private_message_id */
+            private_message_id: number;
+            /** MarkPrivateMessageAsRead.read */
+            read: boolean;
+        };
         /** GetPersonDetails */
         GetPersonDetails: {
             /** GetPersonDetails.person_id */
@@ -3335,6 +3431,13 @@ export interface components {
             person_id: number;
             /** SubscribePerson.subscribe */
             subscribe: boolean;
+        };
+        /** SetPersonFlair */
+        SetPersonFlair: {
+            /** SetPersonFlair.community_id */
+            community_id: number;
+            /** SetPersonFlair.flair_text */
+            flair_text: string;
         };
         /** SaveUserSettings */
         SaveUserSettings: {
@@ -3698,6 +3801,8 @@ export interface components {
             name: string;
             /** Community.nsfw */
             nsfw: boolean;
+            /** Community.posting_warning */
+            posting_warning?: string;
             /**
              * Community.published
              * Format: date-time
@@ -3943,6 +4048,8 @@ export interface components {
             bot: boolean;
             /** Person.deleted */
             deleted: boolean;
+            /** Person.flair */
+            flair?: string;
             /** Person.id */
             id: number;
             /** Person.instance_id */
