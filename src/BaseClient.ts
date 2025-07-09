@@ -6,19 +6,19 @@ export interface BaseClientOptions {
 }
 
 export interface ProviderInfo {
-  name: "lemmy" | "piefed";
+  name: "lemmy" | "mbin" | "piefed";
   version: string;
 }
 
 export type RequestOptions = Pick<RequestInit, "signal">;
 
-export type ThreadiverseMode = "lemmyv0" | "lemmyv1" | "piefed";
+export type ThreadiverseMode = "lemmyv0" | "lemmyv1" | "mbin" | "piefed";
 
 // Abstract base class that all providers should extend
 export abstract class BaseClient {
   static mode: ThreadiverseMode;
 
-  static softwareName: "lemmy" | "piefed";
+  static softwareName: ProviderInfo["name"];
   /**
    * NPM semver range, e.g. ">=1.0.0 <2.0.0"
    */
