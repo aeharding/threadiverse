@@ -8,7 +8,7 @@ export const PagableResponse = z.object({
 });
 
 export function buildPagableResponse<
-  S extends z.ZodMiniObject | z.ZodMiniUnion,
+  S extends z.ZodMiniObject | z.ZodMiniType | z.ZodMiniUnion,
 >(schema: S) {
   return z.extend(PagableResponse, {
     data: z.array(schema),

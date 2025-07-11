@@ -16,7 +16,7 @@ import {
 import {
   getInboxItemPublished,
   getPostCommentItemCreatedDate,
-} from "../lemmyv0/helpers";
+} from "../lemmy/v0/helpers";
 import * as compat from "./compat";
 import { components, paths } from "./schema";
 

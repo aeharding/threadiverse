@@ -4,6 +4,7 @@
 export * from "./PersonView";
 
 export * from "./Comment";
+export * from "./CommentNode";
 export * from "./CommentReply";
 export * from "./CommentReplyView";
 export * from "./CommentReport";

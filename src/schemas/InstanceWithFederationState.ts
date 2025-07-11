@@ -9,8 +9,8 @@ export const InstanceWithFederationState = z.object({
    * instance
    */
   federation_state: z.optional(ReadableFederationState),
-  id: z.number(),
-  published: z.string(),
+  id: z.optional(z.number()),
+  published: z.optional(z.string()),
   software: z.optional(z.string()),
   updated: z.optional(z.string()),
   version: z.optional(z.string()),

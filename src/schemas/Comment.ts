@@ -11,6 +11,7 @@ export const Comment = z.object({
    * Whether the comment has been deleted by its creator.
    */
   deleted: z.boolean(),
+  depth: z.number(),
   /**
    * Whether the comment has been distinguished(speaking officially) by a mod.
    */
@@ -21,16 +22,14 @@ export const Comment = z.object({
    * Whether the comment is local.
    */
   local: z.boolean(),
-  /**
-   * The path / tree location of a comment, separated by dots, ending with the comment's id. Ex:
-   * 0.24.27
-   */
-  path: z.string(),
+  parentId: z.optional(z.number()),
   post_id: z.number(),
   published: z.string(),
+
   /**
    * Whether the comment has been removed.
    */
   removed: z.boolean(),
+  rootId: z.number(),
   updated: z.optional(z.string()),
 });

@@ -1,7 +1,8 @@
 import type * as LemmyV0 from "lemmy-js-client-v0";
 
-import { InvalidPayloadError } from "../../errors";
-import * as types from "../../types";
+import { InvalidPayloadError } from "../../../errors";
+import * as types from "../../../types";
+import * as lemmyCompat from "../compat";
 
 export function fromPageParams<const T extends types.PageParams>(
   params: T,
@@ -48,6 +49,15 @@ export function toBlocks(
   };
 }
 
+export function toComment(comment: LemmyV0.Comment): types.Comment {
+  return {
+    ...comment,
+    depth: lemmyCompat.getDepthFromComment(comment),
+    parentId: lemmyCompat.getLemmyCommentParentId(comment),
+    rootId: lemmyCompat.getLemmyCommentRootId(comment),
+  };
+}
+
 export function toCommentReportView(commentReport: LemmyV0.CommentReportView) {
   return {
     ...commentReport,
@@ -59,6 +69,7 @@ export function toCommentView(comment: LemmyV0.CommentView) {
   return {
     ...comment,
     banned_from_community: comment.banned_from_community ?? false, // v0.13.3
+    comment: toComment(comment.comment),
     community: toCommunity(comment.community),
   };
 }

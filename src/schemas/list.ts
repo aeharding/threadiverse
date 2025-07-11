@@ -2,7 +2,7 @@ import * as schemas from ".";
 import { buildPagableResponse } from "./PagableResponse";
 
 export const ListPostsResponse = buildPagableResponse(schemas.PostView);
-export const ListCommentsResponse = buildPagableResponse(schemas.CommentView);
+export const ListCommentsResponse = buildPagableResponse(schemas.CommentNode);
 export const ListModlogResponse = buildPagableResponse(schemas.ModlogItem);
 export const ListNotificationsResponse = buildPagableResponse(
   schemas.Notification,

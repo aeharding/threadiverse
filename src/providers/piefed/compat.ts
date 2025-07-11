@@ -1,5 +1,5 @@
 import * as types from "../../types";
-import * as lemmyCompat from "../lemmyv0/compat";
+import * as lemmyCompat from "../lemmy/v0/compat";
 import { components } from "./schema";
 
 export const toPageResponse = lemmyCompat.toPageResponse;

@@ -1,7 +1,7 @@
 import type * as LemmyV1 from "lemmy-js-client-v1";
 
-import { InvalidPayloadError } from "../../errors";
-import * as types from "../../types";
+import { InvalidPayloadError } from "../../../errors";
+import * as types from "../../../types";
 
 // TODO Temporary until we support other types
 export type LemmyV1PostCommentReportOnly =

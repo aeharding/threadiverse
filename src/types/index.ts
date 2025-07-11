@@ -16,6 +16,7 @@ export type AdminPurgePost = z.infer<typeof schemas.AdminPurgePost>;
 export type AdminPurgePostView = z.infer<typeof schemas.AdminPurgePostView>;
 export type Comment = z.infer<typeof schemas.Comment>;
 export type CommentAggregates = z.infer<typeof schemas.CommentAggregates>;
+export type CommentNode = z.infer<typeof schemas.CommentNode>;
 export type CommentReply = z.infer<typeof schemas.CommentReply>;
 export type CommentReplyView = z.infer<typeof schemas.CommentReplyView>;
 export type CommentReport = z.infer<typeof schemas.CommentReport>;

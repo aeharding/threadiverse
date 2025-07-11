@@ -73,10 +73,24 @@ export class UnsafeMbinClient implements BaseClient {
     );
   }
 
-  getFederatedInstances(
-    _options?: RequestOptions,
+  async getFederatedInstances(
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getFederatedInstances"]> {
-    throw new UnsupportedError("getFederatedInstances is not supported");
+    const response = await this.#client.GET("/api/federated", {
+      ...options,
+    });
+
+    return {
+      federated_instances: {
+        allowed: [],
+        blocked: [],
+        linked: response.data!.instances.map((i) => ({
+          domain: i.domain,
+          software: i.software ?? undefined,
+          version: i.version ?? undefined,
+        })),
+      },
+    };
   }
 
   async getPosts(
