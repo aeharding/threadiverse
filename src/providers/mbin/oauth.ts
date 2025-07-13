@@ -1,8 +1,9 @@
 import { Middleware } from "openapi-fetch";
 import * as oauthClient from "openid-client";
 
+import { BaseClientOptions } from "../..";
+
 const OAUTH_REFRESH_LOCK = "MBIN_OAUTH_REFRESH_LOCK";
-const MBIN_OAUTH_DATA = "MBIN_OAUTH_DATA";
 
 export const MBIN_SCOPES = [
   "read",
@@ -17,77 +18,62 @@ export const MBIN_SCOPES = [
   "bookmark_list",
 ] as const;
 
-interface Tokens {
-  accessToken: string;
-  refreshToken: string;
-}
-
 export function buildMbinAuthMiddleware({
   getOauthConfig,
-  handle,
-  initialRefreshToken,
-  onUpdatedRefreshToken,
-}: {
+  getTokens,
+  setTokens,
+}: NonNullable<BaseClientOptions["oauth"]> & {
   getOauthConfig: () => Promise<oauthClient.Configuration>;
-  handle: string | undefined;
-  initialRefreshToken: string | undefined;
-  onUpdatedRefreshToken: (refreshToken: string) => void;
 }): Middleware {
   return {
     async onRequest({ request }) {
-      // If not authenticated, do nothing
-      if (!handle || !initialRefreshToken) return;
-
       // Get most recent tokens from local storage
-      let tokens = getTokens(handle);
+      let tokens = getTokens();
 
-      // If the refresh token has changed, update the refresh token
-      if (tokens && tokens?.refreshToken !== initialRefreshToken) {
-        onUpdatedRefreshToken(initialRefreshToken);
-      }
+      console.log("middleware tokens", tokens);
+
+      // If not authenticated, do nothing
+      if (!tokens) return;
 
       // If the token is (soon) invalid, refresh the token
-      if (!tokens || isTokenExpiringSoon(tokens.accessToken)) {
+      if (!tokens.accessToken || isTokenExpiringSoon(tokens.accessToken)) {
         tokens = await navigator.locks.request(OAUTH_REFRESH_LOCK, async () => {
-          const potentialUpdatedTokens = getTokens(handle);
+          const potentialUpdatedTokens = getTokens();
 
-          // If updated during a lock, use the updated token
+          // Expired/logged out after lock aquired
+          if (!potentialUpdatedTokens) return;
+
+          // Updated after lock aquired
           if (
-            potentialUpdatedTokens &&
-            tokens?.accessToken !== potentialUpdatedTokens.accessToken
+            tokens?.accessToken &&
+            potentialUpdatedTokens.accessToken &&
+            tokens.accessToken !== potentialUpdatedTokens.accessToken
           ) {
-            onUpdatedRefreshToken(potentialUpdatedTokens.refreshToken);
             return potentialUpdatedTokens;
           }
 
           // Otherwise, refresh the token
           const config = await getOauthConfig();
 
-          let updatedTokens;
-          try {
-            const _updatedTokens = await oauthClient.refreshTokenGrant(
-              config,
-              tokens?.refreshToken ?? initialRefreshToken,
-            );
+          const refreshResponse = await oauthClient.refreshTokenGrant(
+            config,
+            potentialUpdatedTokens.refreshToken,
+          );
 
-            updatedTokens = {
-              accessToken: _updatedTokens.access_token,
-              refreshToken: _updatedTokens.refresh_token!,
-            };
-          } finally {
-            setTokens(handle, undefined);
-          }
+          const updatedTokens = {
+            accessToken: refreshResponse.access_token,
+            refreshToken: refreshResponse.refresh_token!,
+          };
 
-          setTokens(handle, updatedTokens);
-
-          // Notify the app that the tokens have been updated
-          onUpdatedRefreshToken(updatedTokens.refreshToken);
+          setTokens(updatedTokens);
 
           return updatedTokens;
         });
       }
 
-      request.headers.set("Authorization", `Bearer ${tokens!.accessToken}`);
+      if (!tokens) return;
+
+      request.headers.set("Authorization", `Bearer ${tokens.accessToken}`);
       return request;
     },
   };
@@ -98,37 +84,8 @@ export function jwtDecode(accessToken: string): { exp: number; sub: string } {
   return JSON.parse(atob(payload!));
 }
 
-function getMbinOauthData(): Record<string, Tokens> {
-  const stored = localStorage.getItem(MBIN_OAUTH_DATA);
-  return stored ? JSON.parse(stored) : {};
-}
-
-function getTokens(handle: string) {
-  const data = getMbinOauthData();
-  return data[handle];
-}
-
 function isTokenExpiringSoon(accessToken: string) {
   const decoded = jwtDecode(accessToken);
   // within 5 minutes
   return decoded.exp - Date.now() / 1000 < 300;
-}
-
-function setMbinOauthData(data: Record<string, Tokens>) {
-  localStorage.setItem(MBIN_OAUTH_DATA, JSON.stringify(data));
-}
-
-/**
- * Maps refresh token to access token
- */
-function setTokens(handle: string, tokens: Tokens | undefined) {
-  const data = getMbinOauthData();
-
-  if (tokens) {
-    data[handle] = tokens;
-  } else {
-    delete data[handle];
-  }
-
-  setMbinOauthData(data);
 }

@@ -20,6 +20,10 @@ export type CommunitySortTypeByMode = {
     Required<Pick<LemmyV1ListCommunities, "sort">> & {
       mode: "lemmyv1";
     };
+  mbin: {
+    mode: "mbin";
+    sort: "Active" | "Hot" | "New";
+  };
   piefed: Required<Pick<components["schemas"]["ListCommunities"], "sort">> & {
     mode: "piefed";
   };

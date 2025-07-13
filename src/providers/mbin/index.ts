@@ -53,14 +53,15 @@ export class UnsafeMbinClient implements BaseClient {
     });
 
     this.#client.use(mbinMiddleware);
-    this.#client.use(
-      buildMbinAuthMiddleware({
-        getOauthConfig: () => this.#getOauthConfig(),
-        handle: options.handle,
-        initialRefreshToken: options.jwt,
-        onUpdatedRefreshToken: options.onUpdatedJwt,
-      }),
-    );
+
+    if (options.oauth) {
+      this.#client.use(
+        buildMbinAuthMiddleware({
+          ...options.oauth,
+          getOauthConfig: () => this.#getOauthConfig(),
+        }),
+      );
+    }
   }
 
   async banFromCommunity(
@@ -239,7 +240,10 @@ export class UnsafeMbinClient implements BaseClient {
       },
     );
 
-    this.#options.onUpdatedJwt(response.refresh_token!);
+    this.#options.oauth?.setTokens({
+      accessToken: response.access_token,
+      refreshToken: response.refresh_token!,
+    });
 
     return {
       accessToken: response.access_token,

@@ -3,14 +3,24 @@ import type * as types from "./types";
 export interface BaseClientOptions {
   fetchFunction: typeof fetch;
   getClientId: () => Promise<string>;
-  handle: string | undefined;
   headers: Record<string, string>;
   /**
-   * Refresh token for mbin, auth token for lemmy/piefed
+   * auth token for lemmy/piefed
    */
   jwt?: string;
 
-  onUpdatedJwt: (jwt: string) => void;
+  /**
+   * Required for mbin, optional for lemmy/piefed
+   */
+  oauth?: {
+    getTokens: () => OauthTokens | undefined;
+    setTokens: (tokens: OauthTokens | undefined) => void;
+  };
+}
+
+export interface OauthTokens {
+  accessToken?: string;
+  refreshToken: string;
 }
 
 export interface ProviderInfo {

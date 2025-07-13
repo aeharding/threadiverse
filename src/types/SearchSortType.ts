@@ -20,6 +20,10 @@ export type SearchSortTypeByMode = {
     Required<Pick<LemmyV1Search, "sort">> & {
       mode: "lemmyv1";
     };
+  mbin: {
+    mode: "mbin";
+    sort: "New";
+  };
   piefed: Required<Pick<components["schemas"]["Search"], "sort">> & {
     mode: "piefed";
   };
