@@ -32,7 +32,15 @@ export class UnsafeLemmyV0Client implements BaseClient {
   #client: LemmyV0.LemmyHttp;
 
   constructor(hostname: string, options: BaseClientOptions) {
-    this.#client = new LemmyV0.LemmyHttp(hostname, options);
+    this.#client = new LemmyV0.LemmyHttp(hostname, {
+      ...options,
+      headers: options.jwt
+        ? {
+            ...options.headers,
+            Authorization: `Bearer ${options.jwt}`,
+          }
+        : options.headers,
+    });
   }
 
   async banFromCommunity(

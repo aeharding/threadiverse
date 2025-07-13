@@ -1,4 +1,5 @@
 import createClient, { Middleware } from "openapi-fetch";
+import * as oauthClient from "openid-client";
 
 import {
   BaseClient,
@@ -10,6 +11,7 @@ import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
 import { GetSiteResponse } from "../../types";
 import * as compat from "./compat";
+import { buildMbinAuthMiddleware, MBIN_SCOPES } from "./oauth";
 import { paths } from "./schema";
 
 const mbinMiddleware: Middleware = {
@@ -39,21 +41,26 @@ export class UnsafeMbinClient implements BaseClient {
 
   #client: ReturnType<typeof createClient<paths>>;
 
+  #options: BaseClientOptions;
+
   constructor(url: string, options: BaseClientOptions) {
     this.url = url;
+    this.#options = options;
 
     this.#client = createClient({
       baseUrl: url,
       fetch: options.fetchFunction,
-      // TODO
-      headers: options.headers.Authorization
-        ? {
-            Authorization: options.headers.Authorization,
-          }
-        : undefined,
     });
 
     this.#client.use(mbinMiddleware);
+    this.#client.use(
+      buildMbinAuthMiddleware({
+        getOauthConfig: () => this.#getOauthConfig(),
+        handle: options.handle,
+        initialRefreshToken: options.jwt,
+        onUpdatedRefreshToken: options.onUpdatedJwt,
+      }),
+    );
   }
 
   async banFromCommunity(
@@ -122,6 +129,8 @@ export class UnsafeMbinClient implements BaseClient {
       throw new InvalidPayloadError("page_cursor must be number in mbin");
     }
 
+    console.log("fetching posts", endpoint);
+
     const response = await this.#client.GET(endpoint, {
       ...options,
       params: {
@@ -136,7 +145,11 @@ export class UnsafeMbinClient implements BaseClient {
 
     return {
       data: response.data!.items!.map((p) => compat.toPostView(this.url, p)),
-      next_page: (response.data?.pagination?.currentPage ?? 0) + 1,
+      next_page:
+        response.data!.pagination?.maxPage !==
+        response.data?.pagination?.currentPage
+          ? (response.data?.pagination?.currentPage ?? 0) + 1
+          : undefined,
     };
   }
 
@@ -165,6 +178,110 @@ export class UnsafeMbinClient implements BaseClient {
       },
       version: "0.0.0",
     };
+  }
+
+  async logout() {
+    // TODO: Does mbin support logout?
+    return;
+  }
+
+  async oauthLogin(
+    payload: Parameters<BaseClient["oauthLogin"]>[0],
+  ): ReturnType<BaseClient["oauthLogin"]> {
+    // mbin doesn't support well-known oauth discovery endpoint
+    const serverMetadata: oauthClient.ServerMetadata = {
+      authorization_endpoint: `${this.url}/authorize`,
+      code_challenge_methods_supported: ["S256"],
+      issuer: this.url,
+      token_endpoint: `${this.url}/token`,
+    };
+
+    const oauthConfig = new oauthClient.Configuration(
+      serverMetadata,
+      payload.clientId,
+    );
+
+    oauthConfig[oauthClient.customFetch] = this.#options.fetchFunction;
+
+    /**
+     * PKCE: The following MUST be generated for every redirect to the
+     * authorization_endpoint. You must store the code_verifier and state in the
+     * end-user session such that it can be recovered as the user gets redirected
+     * from the authorization server back to your application.
+     */
+    const code_verifier: string = oauthClient.randomPKCECodeVerifier();
+    const code_challenge: string = await oauthClient.calculatePKCECodeChallenge(
+      code_verifier,
+    );
+
+    if (!oauthConfig.serverMetadata().supportsPKCE())
+      throw new Error("PKCE not supported");
+
+    return {
+      codeVerifier: code_verifier,
+      redirectTo: oauthClient.buildAuthorizationUrl(oauthConfig, {
+        code_challenge,
+        code_challenge_method: "S256",
+        redirect_uri: payload.redirectUri,
+        scope: (payload.scopes ?? MBIN_SCOPES).join(" "),
+      }),
+    };
+  }
+
+  async onOauthCallback(
+    payload: Parameters<BaseClient["onOauthCallback"]>[0],
+  ): ReturnType<BaseClient["onOauthCallback"]> {
+    const response = await oauthClient.authorizationCodeGrant(
+      await this.#getOauthConfig(),
+      new URL(payload.uri),
+      {
+        pkceCodeVerifier: payload.codeVerifier,
+      },
+    );
+
+    this.#options.onUpdatedJwt(response.refresh_token!);
+
+    return {
+      accessToken: response.access_token,
+      refreshToken: response.refresh_token!,
+    };
+  }
+
+  async registerClient(
+    payload: Parameters<BaseClient["registerClient"]>[0],
+  ): ReturnType<BaseClient["registerClient"]> {
+    const response = await this.#client.POST("/api/client", {
+      body: {
+        contactEmail: payload.contactEmail,
+        grants: ["authorization_code", "refresh_token"],
+        name: payload.name,
+        public: true,
+        redirectUris: payload.redirectUris,
+        // @ts-expect-error - TODO: fix this
+        scopes: payload.scopes ?? MBIN_SCOPES,
+      },
+    });
+
+    return response.data!;
+  }
+
+  async #getOauthConfig() {
+    // Reconstruct the OAuth configuration
+    const serverMetadata: oauthClient.ServerMetadata = {
+      authorization_endpoint: `${this.url}/authorize`,
+      code_challenge_methods_supported: ["S256"],
+      issuer: this.url,
+      token_endpoint: `${this.url}/token`,
+    };
+
+    const oauthConfig = new oauthClient.Configuration(
+      serverMetadata,
+      await this.#options.getClientId(),
+    );
+
+    oauthConfig[oauthClient.customFetch] = this.#options.fetchFunction;
+
+    return oauthConfig;
   }
 }
 

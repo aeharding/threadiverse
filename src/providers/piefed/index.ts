@@ -65,7 +65,12 @@ export class UnsafePiefedClient implements BaseClient {
       baseUrl: `${url}/api/alpha`,
       fetch: options.fetchFunction,
       // TODO: piefed doesn't allow CORS headers other than Authorization
-      headers,
+      headers: options.jwt
+        ? {
+            ...options.headers,
+            Authorization: `Bearer ${options.jwt}`,
+          }
+        : options.headers,
     });
 
     this.#client.use(piefedMiddleware);

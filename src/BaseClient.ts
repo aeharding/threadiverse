@@ -2,7 +2,15 @@ import type * as types from "./types";
 
 export interface BaseClientOptions {
   fetchFunction: typeof fetch;
+  getClientId: () => Promise<string>;
+  handle: string | undefined;
   headers: Record<string, string>;
+  /**
+   * Refresh token for mbin, auth token for lemmy/piefed
+   */
+  jwt?: string;
+
+  onUpdatedJwt: (jwt: string) => void;
 }
 
 export interface ProviderInfo {
@@ -19,10 +27,13 @@ export abstract class BaseClient {
   static mode: ThreadiverseMode;
 
   static softwareName: ProviderInfo["name"];
+
   /**
    * NPM semver range, e.g. ">=1.0.0 <2.0.0"
    */
   static softwareVersionRange: string;
+
+  abstract url: string;
 
   abstract banFromCommunity(
     payload: types.BanFromCommunity,
@@ -275,10 +286,35 @@ export abstract class BaseClient {
     options?: RequestOptions,
   ): Promise<void>;
 
+  abstract oauthLogin(params: {
+    clientId: string;
+    redirectUri: string;
+    scopes?: string[];
+  }): Promise<{ codeVerifier: string; redirectTo: URL }>;
+
+  abstract onOauthCallback(payload: {
+    clientId: string;
+    codeVerifier: string;
+    uri: string;
+  }): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }>;
+
   abstract register(
     payload: types.Register,
     options?: RequestOptions,
   ): Promise<types.LoginResponse>;
+
+  abstract registerClient(params: {
+    contactEmail: string;
+    name: string;
+    redirectUris: string[];
+    scopes?: string[];
+  }): Promise<{
+    identifier: string;
+    scopes: string[];
+  }>;
 
   abstract removeComment(
     payload: { comment_id: number; reason?: string; removed: boolean },

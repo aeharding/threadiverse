@@ -21,6 +21,8 @@ export default class ThreadiverseClient implements BaseClient {
       providers.MbinClient,
     ] as const;
   }
+
+  url: string;
   get software(): ProviderInfo {
     if (
       !this.delegateClient ||
@@ -36,17 +38,16 @@ export default class ThreadiverseClient implements BaseClient {
       version: this.discoveredSoftware.version,
     };
   }
+
   private delegateClient: BaseClient | undefined;
   private discoveredSoftware:
     | Awaited<ReturnType<typeof resolveSoftware>>
     | undefined;
 
-  private hostname: string;
-
   private options: BaseClientOptions;
 
   constructor(hostname: string, options: BaseClientOptions) {
-    this.hostname = hostname;
+    this.url = hostname;
     this.options = options;
   }
 
@@ -367,9 +368,24 @@ export default class ThreadiverseClient implements BaseClient {
     return client.markPrivateMessageAsRead(...params);
   }
 
+  async oauthLogin(...params: Parameters<BaseClient["oauthLogin"]>) {
+    const client = await this.ensureClient();
+    return client.oauthLogin(...params);
+  }
+
+  async onOauthCallback(...params: Parameters<BaseClient["onOauthCallback"]>) {
+    const client = await this.ensureClient();
+    return client.onOauthCallback(...params);
+  }
+
   async register(...params: Parameters<BaseClient["register"]>) {
     const client = await this.ensureClient();
     return client.register(...params);
+  }
+
+  async registerClient(...params: Parameters<BaseClient["registerClient"]>) {
+    const client = await this.ensureClient();
+    return client.registerClient(...params);
   }
 
   async removeComment(...params: Parameters<BaseClient["removeComment"]>) {
@@ -434,17 +450,17 @@ export default class ThreadiverseClient implements BaseClient {
     }
 
     if (!this.discoveredSoftware) {
-      if (!discoveryCache.has(this.hostname)) {
-        const resolver = resolveSoftware(this.hostname, this.options);
+      if (!discoveryCache.has(this.url)) {
+        const resolver = resolveSoftware(this.url, this.options);
 
-        discoveryCache.set(this.hostname, resolver);
+        discoveryCache.set(this.url, resolver);
 
         resolver.catch((e) => {
-          discoveryCache.delete(this.hostname);
+          discoveryCache.delete(this.url);
           throw e;
         });
       }
-      this.discoveredSoftware = await discoveryCache.get(this.hostname)!;
+      this.discoveredSoftware = await discoveryCache.get(this.url)!;
     }
 
     const delegateClient = (() => {
@@ -456,7 +472,7 @@ export default class ThreadiverseClient implements BaseClient {
         );
       }
 
-      return new Client(this.hostname, this.options);
+      return new Client(this.url, this.options);
     })();
 
     this.delegateClient = delegateClient;

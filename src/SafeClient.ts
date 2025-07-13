@@ -1,13 +1,15 @@
 import type { BaseClient } from "./BaseClient";
 import type { UnsafePiefedClient } from "./providers/piefed";
 
-import { UnsafeLemmyV0Client } from "./providers/lemmyv0";
-import { UnsafeLemmyV1Client } from "./providers/lemmyv1";
+import { UnsafeLemmyV0Client } from "./providers/lemmy/v0";
+import { UnsafeLemmyV1Client } from "./providers/lemmy/v1";
+import { UnsafeMbinClient } from "./providers/mbin";
 import * as schemas from "./schemas";
 
 type AnyClient =
   | typeof UnsafeLemmyV0Client
   | typeof UnsafeLemmyV1Client
+  | typeof UnsafeMbinClient
   | typeof UnsafePiefedClient;
 
 export default function buildSafeClient(_Client: AnyClient): AnyClient {
