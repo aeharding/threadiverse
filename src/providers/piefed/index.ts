@@ -20,18 +20,18 @@ import {
 import * as compat from "./compat";
 import { components, paths } from "./schema";
 
+async function validateResponse(response: Response) {
+  if (!response.ok) {
+    const data = await response.json();
+    if ("error" in data && typeof data.error === "string") {
+      throw new Error(data.error);
+    }
+  }
+}
+
 const piefedMiddleware: Middleware = {
   async onResponse({ response }) {
-    if (!response.ok) {
-      const data = await response.json();
-      if ("error" in data && typeof data.error === "string") {
-        // This is how lemmy-js-client does it, mock that for now until
-        // threadiverse supports error handling
-        throw new Error(data.error);
-      }
-
-      throw new Error(`Bad request: ${response.status}`);
-    }
+    await validateResponse(response);
   },
 };
 
@@ -45,16 +45,27 @@ export class UnsafePiefedClient implements BaseClient {
 
   #client: ReturnType<typeof createClient<paths>>;
 
+  #customFetch: typeof fetch;
+  #headers: Record<string, string> | undefined;
+  #url: string;
+
   constructor(url: string, options: BaseClientOptions) {
+    this.#customFetch = options.fetchFunction;
+    this.#url = url;
+
+    const headers = options.headers.Authorization
+      ? {
+          Authorization: options.headers.Authorization,
+        }
+      : undefined;
+
+    this.#headers = headers;
+
     this.#client = createClient({
       baseUrl: `${url}/api/alpha`,
       fetch: options.fetchFunction,
       // TODO: piefed doesn't allow CORS headers other than Authorization
-      headers: options.headers.Authorization
-        ? {
-            Authorization: options.headers.Authorization,
-          }
-        : undefined,
+      headers,
     });
 
     this.#client.use(piefedMiddleware);
@@ -879,14 +890,28 @@ export class UnsafePiefedClient implements BaseClient {
     const formData = new FormData();
     formData.append("file", payload.file);
 
-    const response = await this.#client.POST("/upload/image", {
-      ...options,
-      // @ts-expect-error TODO: fix this
-      body: formData,
-    });
+    // In Android, openapi-fetch internally calls new Request().
+    // This is usually ok, but causes content-type in the form body
+    // for each file to be application/octet-stream.
+    // We need to use a custom fetch function to pass the
+    // form data directly to capacitor's fetch.
+
+    const response = await this.#customFetch(
+      `${this.#url}/api/alpha/upload/image`,
+      {
+        ...options,
+        body: formData,
+        headers: this.#headers,
+        method: "POST",
+      },
+    );
+
+    await validateResponse(response);
+
+    const data = await response.json();
 
     return {
-      url: response.data!.url,
+      url: data.url,
     };
   }
 
