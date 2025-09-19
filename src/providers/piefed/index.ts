@@ -726,10 +726,12 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["markPersonMentionAsRead"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["markPersonMentionAsRead"]> {
-    // @ts-expect-error TODO fix piefed api docs
-    await this.#client.POST("/mention/mark_as_read", {
+    await this.#client.POST("/comment/mark_as_read", {
       ...options,
-      body: payload,
+      body: {
+        comment_reply_id: payload.person_mention_id,
+        read: payload.read,
+      },
     });
   }
 
