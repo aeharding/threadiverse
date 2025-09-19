@@ -49,6 +49,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/site/version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** (instances running PieFed v1.2 or later only) Gets version of PieFed. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK, */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetSiteVersionResponse"];
+                    };
+                };
+                /** @description Bad Request, */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/site/block": {
         parameters: {
             query?: never;
@@ -92,6 +137,98 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/instance_chooser": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** (instances running PieFed v1.2 or later only) Gets the site info for use by other instances in the Instance Chooser functionality. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetSiteInstanceChooserResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/instance_chooser_search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** (instances running PieFed v1.2 or later only) Search for other instances. */
+        get: {
+            parameters: {
+                query?: {
+                    InstanceChooserSearch?: components["schemas"]["InstanceChooserSearch"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetSiteInstanceChooserSearchResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1987,6 +2124,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/private_message/conversation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get / fetch private messages. */
+        get: {
+            parameters: {
+                query?: {
+                    GetPrivateMessagesConversation?: components["schemas"]["GetPrivateMessagesConversation"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PrivateMessagesResponse"];
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/private_message": {
         parameters: {
             query?: never;
@@ -1995,7 +2179,31 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put?: never;
+        /** Edit a private message. */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["EditPrivateMessage"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PrivateMessageResponse"];
+                    };
+                };
+            };
+        };
         /** Create a private message. */
         post: {
             parameters: {
@@ -2047,6 +2255,46 @@ export interface paths {
             requestBody?: {
                 content: {
                     "application/json": components["schemas"]["MarkPrivateMessageAsRead"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PrivateMessageResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/private_message/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete a private message. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["DeletePrivateMessage"];
                 };
             };
             responses: {
@@ -2735,6 +2983,100 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/feed/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get list of feeds */
+        get: {
+            parameters: {
+                query?: {
+                    FeedList?: components["schemas"]["FeedList"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FeedListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/topic/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get list of topics */
+        get: {
+            parameters: {
+                query?: {
+                    TopicList?: components["schemas"]["TopicList"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TopicListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BadRequest"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/upload/image": {
         parameters: {
             query?: never;
@@ -2916,6 +3258,26 @@ export interface components {
             instance_id: number;
             /** BlockInstance.block */
             block: boolean;
+        };
+        /** InstanceChooserSearch */
+        InstanceChooserSearch: {
+            /** InstanceChooserSearch.q */
+            q?: string;
+            /**
+             * InstanceChooserSearch.nsfw
+             * @example no
+             */
+            nsfw?: string;
+            /**
+             * InstanceChooserSearch.language
+             * @example en
+             */
+            language?: string;
+            /**
+             * InstanceChooserSearch.newbie
+             * @example yes
+             */
+            newbie?: string;
         };
         /** Search */
         Search: {
@@ -3355,8 +3717,15 @@ export interface components {
             page?: number;
             /** GetPrivateMessages.limit */
             limit?: number;
-            /** GetPrivateMessages.creator_id */
-            creator_id?: number;
+        };
+        /** GetPrivateMessagesConversation */
+        GetPrivateMessagesConversation: {
+            /** GetPrivateMessagesConversation.page */
+            page?: number;
+            /** GetPrivateMessagesConversation.limit */
+            limit?: number;
+            /** GetPrivateMessagesConversation.person_id */
+            person_id: number;
         };
         /** CreatePrivateMessage */
         CreatePrivateMessage: {
@@ -3365,12 +3734,26 @@ export interface components {
             /** CreatePrivateMessage.recipient_id */
             recipient_id: number;
         };
+        /** EditPrivateMessage */
+        EditPrivateMessage: {
+            /** EditPrivateMessage.private_message_id */
+            private_message_id: number;
+            /** EditPrivateMessage.content */
+            content: string;
+        };
         /** MarkPrivateMessageAsRead */
         MarkPrivateMessageAsRead: {
             /** MarkPrivateMessageAsRead.private_message_id */
             private_message_id: number;
             /** MarkPrivateMessageAsRead.read */
             read: boolean;
+        };
+        /** DeletePrivateMessage */
+        DeletePrivateMessage: {
+            /** DeletePrivateMessage.private_message_id */
+            private_message_id: number;
+            /** DeletePrivateMessage.deleted */
+            deleted: boolean;
         };
         /** GetPersonDetails */
         GetPersonDetails: {
@@ -3465,6 +3848,27 @@ export interface components {
             /** GetNotificationStatus.read_state */
             read_state?: boolean;
         };
+        /** FeedList */
+        FeedList: {
+            /**
+             * FeedList.include_communities
+             * @description include list of communities in each feed with result
+             */
+            include_communities?: boolean;
+            /**
+             * FeedList.mine_only
+             * @description only return feeds created by the authorized user
+             */
+            mine_only?: boolean;
+        };
+        /** TopicList */
+        TopicList: {
+            /**
+             * TopicList.include_communities
+             * @description include list of communities in each topic with result
+             */
+            include_communities?: boolean;
+        };
         ImageUpload: {
             /** Format: binary */
             file: string;
@@ -3488,10 +3892,51 @@ export interface components {
             /** GetSiteResponse.admins */
             admins: components["schemas"]["PersonView"][];
         };
+        /** GetSiteVersionResponse */
+        GetSiteVersionResponse: {
+            /** GetSiteVersionResponse.version */
+            version: string;
+        };
         /** BlockInstanceResponse */
         BlockInstanceResponse: {
             /** BlockInstanceResponse.blocked */
             blocked: boolean;
+        };
+        GetSiteInstanceChooserResponse: {
+            language: components["schemas"]["LanguageView"];
+            /** GetSiteInstanceChooserResponse.nsfw */
+            nsfw: boolean;
+            /** GetSiteInstanceChooserResponse.newbie_friendly */
+            newbie_friendly: boolean;
+            /** GetSiteInstanceChooserResponse.name */
+            name: string;
+            /** GetSiteInstanceChooserResponse.elevator_pitch */
+            elevator_pitch: string;
+            /** GetSiteInstanceChooserResponse.description */
+            description: string;
+            /** GetSiteInstanceChooserResponse.about */
+            about: string;
+            /** GetSiteInstanceChooserResponse.sidebar */
+            sidebar: string;
+            /** GetSiteInstanceChooserResponse.logo_url */
+            logo_url: string;
+            /** GetSiteInstanceChooserResponse.majority */
+            maturity: string;
+            /** GetSiteInstanceChooserResponse.tos_url */
+            tos_url: string;
+            /** GetSiteInstanceChooserResponse.mau */
+            mau: number;
+            /** GetSiteInstanceChooserResponse.can_make_communities */
+            can_make_communities: boolean;
+            /** GetSiteInstanceChooserResponse.defederation */
+            defederation: string[];
+            /** GetSiteInstanceChooserResponse.trusts */
+            trusts: string[];
+            /** GetSiteInstanceChooserResponse.registration_mode */
+            registration_mode: string;
+        };
+        GetSiteInstanceChooserSearchResponse: {
+            result: components["schemas"]["GetSiteInstanceChooserSearchResponseItem"][];
         };
         /** SearchResponse */
         SearchResponse: {
@@ -3696,8 +4141,18 @@ export interface components {
              */
             mark_all_notifications_as_read?: string;
         };
+        FeedListResponse: {
+            feeds: components["schemas"]["FeedView"][];
+        };
+        TopicListResponse: {
+            /** TopicListResponse.topics */
+            topics: components["schemas"]["TopicView"][];
+        };
         UploadResponse: {
-            /** @example https://preferred.social/static/media/image.png */
+            /**
+             * Format: url
+             * @example https://preferred.social/static/media/image.png
+             */
             url: string;
         };
         /** Site */
@@ -4098,6 +4553,46 @@ export interface components {
             /** MyUserInfo.person_blocks */
             person_blocks: components["schemas"]["PersonBlockView"][];
         };
+        GetSiteInstanceChooserSearchResponseItem: {
+            /** GetSiteInstanceChooserSearchResponseItem.id */
+            id: number;
+            /** GetSiteInstanceChooserSearchResponseItem.name */
+            name: string;
+            /** GetSiteInstanceChooserSearchResponseItem.domain */
+            domain: string;
+            /** GetSiteInstanceChooserSearchResponseItem.elevator_pitch */
+            elevator_pitch: string;
+            /** GetSiteInstanceChooserSearchResponseItem.description */
+            description: string;
+            /** GetSiteInstanceChooserSearchResponseItem.about */
+            about: string;
+            /** GetSiteInstanceChooserSearchResponseItem.sidebar */
+            sidebar: string;
+            /** GetSiteInstanceChooserSearchResponseItem.logo_url */
+            logo_url: string;
+            /** GetSiteInstanceChooserSearchResponseItem.maturity */
+            maturity: string;
+            /** GetSiteInstanceChooserSearchResponseItem.tos_url */
+            tos_url: string;
+            /** GetSiteInstanceChooserSearchResponseItem.uptime */
+            uptime: string;
+            /** GetSiteInstanceChooserSearchResponseItem.mau */
+            mau: number;
+            /** GetSiteInstanceChooserSearchResponseItem.can_make_communities */
+            can_make_communities: boolean;
+            /** GetSiteInstanceChooserSearchResponseItem.newbie_friendly */
+            newbie_friendly: boolean;
+            /** GetSiteInstanceChooserSearchResponseItem.defederation */
+            defederation: string[];
+            /** GetSiteInstanceChooserSearchResponseItem.trusts */
+            trusts: string[];
+            /** GetSiteInstanceChooserSearchResponseItem.registration_mode */
+            registration_mode: string;
+            /** GetSiteInstanceChooserSearchResponseItem.language */
+            language: string;
+            /** GetSiteInstanceChooserSearchResponseItem.monthsmonitored */
+            monthsmonitored: number;
+        };
         /** FederatedInstancesView */
         FederatedInstancesView: {
             /** FederatedInstances.linked */
@@ -4281,16 +4776,10 @@ export interface components {
             subscribed: components["schemas"]["SubscribedType"];
             /** PostReportView.saved */
             saved: boolean;
-            /** PostReportView.read */
-            read: boolean;
-            /** PostReportView.hidden */
-            hidden: boolean;
             /** PostReportView.creator_blocked */
             creator_blocked: boolean;
             /** PostReportView.my_vote */
             my_vote?: number;
-            /** PostReportView.unread_comments */
-            unread_comments: number;
             /** PostReportView.counts */
             counts: components["schemas"]["PostAggregates"];
             /** PostReportView.resolver */
@@ -4380,23 +4869,23 @@ export interface components {
              * CommunityModerationBanItem.reason
              * @example Violation of Rule 4
              */
-            reason?: string;
+            reason: string;
             /**
              * CommunityModerationBanItem.expiredAt
              * @example 2042-01-01T12:00:00
              */
-            expiredAt?: string;
+            expiredAt: string;
             /** CommunityModerationBanItem.community */
-            community?: components["schemas"]["CommunityView"];
+            community: components["schemas"]["Community"];
             /** CommunityModerationBanItem.bannedUser */
-            bannedUser?: components["schemas"]["Person"];
+            bannedUser: components["schemas"]["Person"];
             /** CommunityModerationBanItem.bannedBy */
-            bannedBy?: components["schemas"]["Person"];
+            bannedBy: components["schemas"]["Person"];
             /**
              * CommunityModerationBanItem.expired
              * @example false
              */
-            expired?: boolean;
+            expired: boolean;
         };
         /** NotificationsCountsView */
         NotificationsCountsView: {
@@ -4679,6 +5168,105 @@ export interface components {
              */
             notif_body?: string;
         };
+        FeedView: {
+            /**
+             * FeedView.actor_id
+             * Format: url
+             */
+            actor_id: string;
+            /** FeedView.ap_domain */
+            ap_domain: string;
+            /** FeedView.children */
+            children: components["schemas"]["FeedView"][];
+            /** FeedView.communities */
+            communities: components["schemas"]["Community"][];
+            /** FeedView.communities_count */
+            communities_count: number;
+            /** FeedView.id */
+            id: number;
+            /** FeedView.is_instance_feed */
+            is_instance_feed: boolean;
+            /** FeedView.local */
+            local: boolean;
+            /** FeedView.name */
+            name: string;
+            /** FeedView.nsfl */
+            nsfl: boolean;
+            /** FeedView.nsfw */
+            nsfw: boolean;
+            /**
+             * FeedView.owner
+             * @description Is the authorized user the creator of the feed?
+             */
+            owner: boolean;
+            /** FeedView.public */
+            public: boolean;
+            /**
+             * FeedView.published
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            published: string;
+            /** FeedView.show_posts_from_children */
+            show_posts_from_children: boolean;
+            /** FeedView.subscribed */
+            subscribed: boolean;
+            /** FeedView.subscriptions_count */
+            subscriptions_count: number;
+            /** FeedView.title */
+            title: string;
+            /**
+             * FeedView.updated
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            updated: string;
+            /**
+             * FeedView.user_id
+             * @description user_id of the feed creator/owner
+             */
+            user_id: number;
+            /**
+             * FeedView.banner
+             * Format: url
+             */
+            banner?: string;
+            /**
+             * FeedView.description
+             * Format: markdown
+             */
+            description?: string;
+            /**
+             * FeedView.description_html
+             * Format: html
+             */
+            description_html?: string;
+            /**
+             * FeedView.icon
+             * Format: url
+             */
+            icon?: string;
+            /** FeedView.parent_feed_id */
+            parent_feed_id?: number;
+        };
+        TopicView: {
+            /** TopicView.children */
+            children: components["schemas"]["TopicView"][];
+            /** TopicView.communities */
+            communities: components["schemas"]["Community"][];
+            /** TopicView.communities_count */
+            communities_count: number;
+            /** TopicView.id */
+            id: number;
+            /** TopicView.name */
+            name: string;
+            /** TopicView.show_posts_from_children */
+            show_posts_from_children: boolean;
+            /** TopicView.title */
+            title: string;
+            /** TopicView.parent_topic_id */
+            parent_topic_id?: number;
+        };
         /**
          * RegistrationMode
          * @enum {string}
@@ -4703,7 +5291,7 @@ export interface components {
          * SortType
          * @enum {string}
          */
-        SortType: "Active" | "Hot" | "New" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopDay" | "TopWeek" | "TopMonth" | "Scaled";
+        SortType: "Active" | "Hot" | "New" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopDay" | "TopWeek" | "TopMonth" | "TopThreeMonths" | "TopSixMonths" | "TopNineMonths" | "TopYear" | "TopAll" | "Scaled";
         /**
          * SubscribedType
          * @enum {string}
