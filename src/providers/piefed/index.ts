@@ -8,11 +8,7 @@ import {
 import { InvalidPayloadError, UnsupportedError } from "../../errors";
 import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
-import {
-  ListPersonContent,
-  ListPersonContentResponse,
-  PostView,
-} from "../../types";
+import { PostView } from "../../types";
 import {
   getInboxItemPublished,
   getPostCommentItemCreatedDate,
@@ -618,35 +614,39 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async listPersonContent(
-    payload: ListPersonContent,
+    payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions,
-  ): Promise<ListPersonContentResponse> {
-    switch (payload.type) {
-      case "All":
-      case undefined: {
-        const response = await Promise.all([
-          this.#listPersonPosts(payload, options),
-          this.#listPersonComments(payload, options),
-        ]).then(([posts, comments]) =>
-          [...posts.data, ...comments.data].sort(
+  ): ReturnType<BaseClient["listPersonContent"]> {
+    const response = await this.#client.GET("/user", {
+      ...options,
+      // @ts-expect-error TODO: fix this
+      params: { query: compat.fromPageParams(payload) },
+    });
+
+    const data = (() => {
+      switch (payload.type) {
+        case "All":
+        case undefined:
+          return [
+            ...response.data!.posts.map(compat.toPostView),
+            ...response.data!.comments.map(compat.toCommentView),
+          ].sort(
             (a, b) =>
               getPostCommentItemCreatedDate(b) -
               getPostCommentItemCreatedDate(a),
-          ),
-        );
-
-        return {
-          ...compat.toPageResponse(payload),
-          data: response,
-        };
+          );
+        case "Comments":
+          return response.data!.comments.map(compat.toCommentView);
+        case "Posts":
+          return response.data!.posts.map(compat.toPostView);
       }
-      case "Comments":
-        return this.#listPersonComments(payload, options);
-      case "Posts":
-        return this.#listPersonPosts(payload, options);
-    }
-  }
+    })();
 
+    return {
+      ...compat.toPageResponse(payload),
+      data,
+    };
+  }
   async listPersonLiked(
     ..._params: Parameters<BaseClient["listPersonLiked"]>
   ): ReturnType<BaseClient["listPersonLiked"]> {
@@ -834,9 +834,17 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async saveComment(
-    ..._params: Parameters<BaseClient["saveComment"]>
+    payload: Parameters<BaseClient["saveComment"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["saveComment"]> {
-    throw new UnsupportedError("Save comment is not supported by piefed");
+    const response = await this.#client.PUT("/comment/save", {
+      ...options,
+      body: { ...payload },
+    });
+
+    return {
+      comment_view: compat.toCommentView(response.data!.comment_view),
+    };
   }
 
   async savePost(
@@ -912,38 +920,6 @@ export class UnsafePiefedClient implements BaseClient {
 
     return {
       url: data.url,
-    };
-  }
-
-  async #listPersonComments(
-    payload: Parameters<BaseClient["listPersonContent"]>[0],
-    options?: RequestOptions,
-  ) {
-    const response = await this.#client.GET("/comment/list", {
-      ...options,
-      // @ts-expect-error TODO: fix this
-      params: { query: compat.fromPageParams(payload) },
-    });
-
-    return {
-      ...compat.toPageResponse(payload),
-      data: response.data!.comments.map(compat.toCommentView),
-    };
-  }
-
-  async #listPersonPosts(
-    payload: Parameters<BaseClient["listPersonContent"]>[0],
-    options?: RequestOptions,
-  ) {
-    const response = await this.#client.GET("/post/list", {
-      ...options,
-      // @ts-expect-error TODO: fix this
-      params: { query: compat.fromPageParams(payload) },
-    });
-
-    return {
-      ...compat.toPageResponse(payload),
-      data: response.data!.posts.map(compat.toPostView),
     };
   }
 }
