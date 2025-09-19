@@ -8,7 +8,11 @@ import {
 import { InvalidPayloadError, UnsupportedError } from "../../errors";
 import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
-import { PostView } from "../../types";
+import {
+  ListPersonContent,
+  ListPersonContentResponse,
+  PostView,
+} from "../../types";
 import {
   getInboxItemPublished,
   getPostCommentItemCreatedDate,
@@ -614,13 +618,55 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async listPersonContent(
+    payload: ListPersonContent,
+    options?: RequestOptions,
+  ): Promise<ListPersonContentResponse> {
+    switch (payload.type) {
+      case "All":
+      case undefined: {
+        const response = await Promise.all([
+          this.#listPersonPosts(payload, options),
+
+          this.#listPersonComments(payload, options),
+        ]).then(([posts, comments]) =>
+          [...posts.data, ...comments.data].sort(
+            (a, b) =>
+              getPostCommentItemCreatedDate(b) -
+              getPostCommentItemCreatedDate(a),
+          ),
+        );
+
+        return {
+          ...compat.toPageResponse(payload),
+
+          data: response,
+        };
+      }
+
+      case "Comments":
+        return this.#listPersonComments(payload, options);
+
+      case "Posts":
+        return this.#listPersonPosts(payload, options);
+    }
+  }
+
+  async listPersonLiked(
+    ..._params: Parameters<BaseClient["listPersonLiked"]>
+  ): ReturnType<BaseClient["listPersonLiked"]> {
+    throw new UnsupportedError("List person liked is not supported by piefed");
+  }
+
+  async listPersonSaved(
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonContent"]> {
     const response = await this.#client.GET("/user", {
       ...options,
-      // @ts-expect-error TODO: fix this
-      params: { query: compat.fromPageParams(payload) },
+      params: {
+        // @ts-expect-error TODO: fix this
+        query: { ...compat.fromPageParams(payload), saved_only: true },
+      },
     });
 
     const data = (() => {
@@ -646,25 +692,6 @@ export class UnsafePiefedClient implements BaseClient {
       ...compat.toPageResponse(payload),
       data,
     };
-  }
-  async listPersonLiked(
-    ..._params: Parameters<BaseClient["listPersonLiked"]>
-  ): ReturnType<BaseClient["listPersonLiked"]> {
-    throw new UnsupportedError("List person liked is not supported by piefed");
-  }
-
-  async listPersonSaved(
-    payload: Parameters<BaseClient["listPersonSaved"]>[0],
-    options?: RequestOptions,
-  ): ReturnType<BaseClient["listPersonSaved"]> {
-    return this.listPersonContent(
-      {
-        ...payload,
-        // @ts-expect-error TODO: fix this
-        saved_only: true,
-      },
-      options,
-    );
   }
 
   async listPostReports(
@@ -922,6 +949,38 @@ export class UnsafePiefedClient implements BaseClient {
 
     return {
       url: data.url,
+    };
+  }
+
+  async #listPersonComments(
+    payload: Parameters<BaseClient["listPersonContent"]>[0],
+    options?: RequestOptions,
+  ) {
+    const response = await this.#client.GET("/comment/list", {
+      ...options,
+      // @ts-expect-error TODO: fix this
+      params: { query: compat.fromPageParams(payload) },
+    });
+
+    return {
+      ...compat.toPageResponse(payload),
+      data: response.data!.comments.map(compat.toCommentView),
+    };
+  }
+
+  async #listPersonPosts(
+    payload: Parameters<BaseClient["listPersonContent"]>[0],
+    options?: RequestOptions,
+  ) {
+    const response = await this.#client.GET("/post/list", {
+      ...options,
+      // @ts-expect-error TODO: fix this
+      params: { query: compat.fromPageParams(payload) },
+    });
+
+    return {
+      ...compat.toPageResponse(payload),
+      data: response.data!.posts.map(compat.toPostView),
     };
   }
 }
