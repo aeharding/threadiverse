@@ -25,7 +25,7 @@ export default class ThreadiverseClient implements BaseClient {
       !this.discoveredSoftware
     )
       throw new Error(
-        "Client not initialized. Wait for getSoftware() or any other async method to resolve first",
+        "Client not initialized. Wait for getSoftware() or any other async method to resolve first"
       );
 
     return {
@@ -433,13 +433,14 @@ export default class ThreadiverseClient implements BaseClient {
     if (!this.discoveredSoftware) {
       if (!discoveryCache.has(this.hostname)) {
         const resolver = resolveSoftware(this.hostname, this.options);
-
         discoveryCache.set(this.hostname, resolver);
 
-        resolver.catch((e) => {
+        try {
+          await resolver;
+        } catch (e) {
           discoveryCache.delete(this.hostname);
           throw e;
-        });
+        }
       }
       this.discoveredSoftware = await discoveryCache.get(this.hostname)!;
     }
@@ -449,7 +450,7 @@ export default class ThreadiverseClient implements BaseClient {
 
       if (!Client) {
         throw new UnsupportedSoftwareError(
-          `${this.discoveredSoftware.name} v${this.discoveredSoftware.version} is not supported`,
+          `${this.discoveredSoftware.name} v${this.discoveredSoftware.version} is not supported`
         );
       }
 
