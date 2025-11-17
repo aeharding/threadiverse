@@ -1,7 +1,7 @@
 import { GetComments as LemmyV0GetComments } from "lemmy-js-client-v0";
 import { GetComments as LemmyV1GetComments } from "lemmy-js-client-v1";
 
-import { components } from "../providers/piefed/schema";
+import { paths } from "../providers/piefed/schema";
 
 export type CommentSortType =
   | CommentSortTypeByMode[keyof CommentSortTypeByMode]
@@ -20,7 +20,14 @@ export type CommentSortTypeByMode = {
     Required<Pick<LemmyV1GetComments, "sort">> & {
       mode: "lemmyv1";
     };
-  piefed: Required<Pick<components["schemas"]["GetComments"], "sort">> & {
+  piefed: Pick<
+    Required<
+      NonNullable<
+        paths["/api/alpha/comment/list"]["get"]["parameters"]["query"]
+      >
+    >,
+    "sort"
+  > & {
     mode: "piefed";
   };
 };

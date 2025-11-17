@@ -62,7 +62,7 @@ export class UnsafePiefedClient implements BaseClient {
     this.#headers = headers;
 
     this.#client = createClient({
-      baseUrl: `${url}/api/alpha`,
+      baseUrl: url,
       fetch: options.fetchFunction,
       // TODO: piefed doesn't allow CORS headers other than Authorization
       headers,
@@ -75,7 +75,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["banFromCommunity"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["banFromCommunity"]> {
-    await this.#client.POST("/community/moderate/ban", {
+    await this.#client.POST("/api/alpha/community/moderate/ban", {
       ...options,
       // @ts-expect-error TODO: fix this
       body: payload,
@@ -86,7 +86,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["blockCommunity"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["blockCommunity"]> {
-    const response = await this.#client.POST("/community/block", {
+    const response = await this.#client.POST("/api/alpha/community/block", {
       ...options,
       body: { ...payload },
     });
@@ -100,7 +100,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["blockInstance"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["blockInstance"]> {
-    await this.#client.POST("/site/block", {
+    await this.#client.POST("/api/alpha/site/block", {
       ...options,
       body: { ...payload },
     });
@@ -110,7 +110,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["blockPerson"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["blockPerson"]> {
-    const response = await this.#client.POST("/user/block", {
+    const response = await this.#client.POST("/api/alpha/user/block", {
       ...options,
       body: { ...payload },
     });
@@ -125,7 +125,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["createComment"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["createComment"]> {
-    const response = await this.#client.POST("/comment", {
+    const response = await this.#client.POST("/api/alpha/comment", {
       ...options,
       body: {
         ...payload,
@@ -142,9 +142,9 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["createCommentReport"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["createCommentReport"]> {
-    await this.#client.POST("/comment/report", {
+    await this.#client.POST("/api/alpha/comment/report", {
       ...options,
-      body: { ...payload },
+      body: { ...payload, report_remote: true },
     });
   }
 
@@ -152,7 +152,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["createPost"]>[0],
     options?: RequestOptions
   ) {
-    const response = await this.#client.POST("/post", {
+    const response = await this.#client.POST("/api/alpha/post", {
       ...options,
       body: {
         ...payload,
@@ -169,7 +169,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["createPostReport"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["createPostReport"]> {
-    await this.#client.POST("/post/report", {
+    await this.#client.POST("/api/alpha/post/report", {
       ...options,
       body: { ...payload },
     });
@@ -179,7 +179,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["createPrivateMessage"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["createPrivateMessage"]> {
-    const response = await this.#client.POST("/private_message", {
+    const response = await this.#client.POST("/api/alpha/private_message", {
       ...options,
       body: { ...payload },
     });
@@ -203,7 +203,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["deleteComment"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["deleteComment"]> {
-    const response = await this.#client.POST("/comment/delete", {
+    const response = await this.#client.POST("/api/alpha/comment/delete", {
       ...options,
       body: { ...payload },
     });
@@ -223,7 +223,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: { deleted: boolean; post_id: number },
     options?: RequestOptions
   ): Promise<{ post_view: PostView }> {
-    const response = await this.#client.POST("/post/delete", {
+    const response = await this.#client.POST("/api/alpha/post/delete", {
       ...options,
       body: { ...payload },
     });
@@ -245,11 +245,14 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["editComment"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["editComment"]> {
-    const response = await this.#client.PUT("/comment", {
+    const response = await this.#client.PUT("/api/alpha/comment", {
       ...options,
       body: {
         ...payload,
         body: payload.content,
+        // TODO: piefed types say this is required, but it's not
+      } as unknown as components["schemas"]["EditCommentRequest"] & {
+        distinguished: boolean;
       },
     });
 
@@ -262,7 +265,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["editPost"]>[0],
     options?: RequestOptions
   ) {
-    const response = await this.#client.PUT("/post", {
+    const response = await this.#client.PUT("/api/alpha/post", {
       ...options,
       body: {
         ...payload,
@@ -279,7 +282,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["featurePost"]>[0],
     options?: RequestOptions
   ): Promise<{ post_view: PostView }> {
-    const response = await this.#client.POST("/post/feature", {
+    const response = await this.#client.POST("/api/alpha/post/feature", {
       ...options,
       body: { ...payload },
     });
@@ -293,7 +296,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["followCommunity"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["followCommunity"]> {
-    const response = await this.#client.POST("/community/follow", {
+    const response = await this.#client.POST("/api/alpha/community/follow", {
       ...options,
       body: { ...payload },
     });
@@ -320,11 +323,10 @@ export class UnsafePiefedClient implements BaseClient {
 
     const query = cleanThreadiverseParams(
       compat.fromPageParams(payload)
-    ) satisfies components["schemas"]["GetComments"];
+    ) satisfies paths["/api/alpha/comment/list"]["get"]["parameters"]["query"];
 
-    const response = await this.#client.GET("/comment/list", {
+    const response = await this.#client.GET("/api/alpha/comment/list", {
       ...options,
-      // @ts-expect-error TODO: fix this
       params: { query },
     });
 
@@ -338,9 +340,8 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["getCommunity"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["getCommunity"]> {
-    const response = await this.#client.GET("/community", {
+    const response = await this.#client.GET("/api/alpha/community", {
       ...options,
-      // @ts-expect-error TODO: fix this
       params: { query: payload },
     });
 
@@ -350,7 +351,7 @@ export class UnsafePiefedClient implements BaseClient {
   async getFederatedInstances(
     ..._params: Parameters<BaseClient["getFederatedInstances"]>
   ): ReturnType<BaseClient["getFederatedInstances"]> {
-    const response = await this.#client.GET("/federated_instances");
+    const response = await this.#client.GET("/api/alpha/federated_instances");
 
     return response.data!;
   }
@@ -390,9 +391,8 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["getPersonDetails"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["getPersonDetails"]> {
-    const response = await this.#client.GET("/user", {
+    const response = await this.#client.GET("/api/alpha/user", {
       ...options,
-      // @ts-expect-error TODO: fix this
       params: { query: payload },
     });
 
@@ -407,9 +407,8 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["getPersonMentions"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["getPersonMentions"]> {
-    const response = await this.#client.GET("/user/mentions", {
+    const response = await this.#client.GET("/api/alpha/user/mentions", {
       ...options,
-      // @ts-expect-error TODO: fix this
       params: { query: compat.fromPageParams(payload) },
     });
 
@@ -423,11 +422,11 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["getPost"]>[0],
     options?: RequestOptions
   ) {
-    const query = payload satisfies components["schemas"]["GetPost"];
+    const query =
+      payload satisfies paths["/api/alpha/post"]["get"]["parameters"]["query"];
 
-    const response = await this.#client.GET("/post", {
+    const response = await this.#client.GET("/api/alpha/post", {
       ...options,
-      // @ts-expect-error TODO: fix this
       params: { query },
     });
 
@@ -447,11 +446,10 @@ export class UnsafePiefedClient implements BaseClient {
 
     const query = cleanThreadiverseParams(
       compat.fromPageParams(payload)
-    ) satisfies components["schemas"]["GetPosts"];
+    ) satisfies paths["/api/alpha/post/list"]["get"]["parameters"]["query"];
 
-    const response = await this.#client.GET("/post/list", {
+    const response = await this.#client.GET("/api/alpha/post/list", {
       ...options,
-      // @ts-expect-error TODO: fix this
       params: { query },
     });
 
@@ -465,9 +463,8 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["getPrivateMessages"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["getPrivateMessages"]> {
-    const response = await this.#client.GET("/private_message/list", {
+    const response = await this.#client.GET("/api/alpha/private_message/list", {
       ...options,
-      // @ts-expect-error TODO: fix this
       params: { query: compat.fromPageParams(payload) },
     });
 
@@ -489,9 +486,8 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["getReplies"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["getReplies"]> {
-    const response = await this.#client.GET("/user/replies", {
+    const response = await this.#client.GET("/api/alpha/user/replies", {
       ...options,
-      // @ts-expect-error TODO: fix this
       params: { query: compat.fromPageParams(payload) },
     });
 
@@ -502,7 +498,9 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async getSite(options?: RequestOptions): ReturnType<BaseClient["getSite"]> {
-    const response = await this.#client.GET("/site", options);
+    const response = await this.#client.GET("/api/alpha/site", {
+      ...options,
+    });
 
     return {
       ...response.data!,
@@ -512,7 +510,7 @@ export class UnsafePiefedClient implements BaseClient {
         ? {
             ...response.data!.my_user,
             community_blocks: response.data!.my_user?.community_blocks.map(
-              ({ community }) => compat.toCommunity(community)
+              ({ community }) => compat.toCommunity(community!)
             ),
             follows: response.data!.my_user.follows.map((f) => ({
               community: compat.toCommunity(f.community),
@@ -542,7 +540,7 @@ export class UnsafePiefedClient implements BaseClient {
         : undefined,
       site_view: {
         local_site: compat.toLocalSite(response.data!.site),
-        site: response.data!.site,
+        site: compat.toSite(response.data!.site),
       },
     };
   }
@@ -554,7 +552,7 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async getUnreadCount(options?: RequestOptions) {
-    const response = await this.#client.GET("/user/unread_count", {
+    const response = await this.#client.GET("/api/alpha/user/unread_count", {
       ...options,
     });
 
@@ -565,10 +563,11 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["likeComment"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["likeComment"]> {
-    const response = await this.#client.POST("/comment/like", {
+    const response = await this.#client.POST("/api/alpha/comment/like", {
       ...options,
       body: {
         ...payload,
+        private: false,
       },
     });
 
@@ -581,7 +580,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["likePost"]>[0],
     options?: RequestOptions
   ) {
-    const response = await this.#client.POST("/post/like", {
+    const response = await this.#client.POST("/api/alpha/post/like", {
       ...options,
       body: {
         ...payload,
@@ -605,7 +604,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["listCommunities"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["listCommunities"]> {
-    const response = await this.#client.GET("/community/list", {
+    const response = await this.#client.GET("/api/alpha/community/list", {
       ...options,
       // @ts-expect-error TODO: fix this
       params: { query: compat.fromPageParams(payload) },
@@ -661,10 +660,9 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["listPersonContent"]> {
-    const response = await this.#client.GET("/user", {
+    const response = await this.#client.GET("/api/alpha/user", {
       ...options,
       params: {
-        // @ts-expect-error TODO: fix this
         query: { ...compat.fromPageParams(payload), saved_only: true },
       },
     });
@@ -710,7 +708,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: { locked: boolean; post_id: number },
     options?: RequestOptions
   ): Promise<{ post_view: PostView }> {
-    const response = await this.#client.POST("/post/lock", {
+    const response = await this.#client.POST("/api/alpha/post/lock", {
       ...options,
       body: { ...payload },
     });
@@ -724,7 +722,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["login"]>[0],
     options?: RequestOptions
   ) {
-    const response = await this.#client.POST("/user/login", {
+    const response = await this.#client.POST("/api/alpha/user/login", {
       ...options,
       body: { password: payload.password, username: payload.username_or_email },
     });
@@ -736,14 +734,14 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async markAllAsRead(options: Parameters<BaseClient["markAllAsRead"]>[0]) {
-    await this.#client.POST("/user/mark_all_as_read", options);
+    await this.#client.POST("/api/alpha/user/mark_all_as_read", options);
   }
 
   async markCommentReplyAsRead(
     payload: Parameters<BaseClient["markCommentReplyAsRead"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["markCommentReplyAsRead"]> {
-    await this.#client.POST("/comment/mark_as_read", {
+    await this.#client.POST("/api/alpha/comment/mark_as_read", {
       ...options,
       body: payload,
     });
@@ -753,7 +751,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["markPersonMentionAsRead"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["markPersonMentionAsRead"]> {
-    await this.#client.POST("/comment/mark_as_read", {
+    await this.#client.POST("/api/alpha/comment/mark_as_read", {
       ...options,
       body: {
         comment_reply_id: payload.person_mention_id,
@@ -766,7 +764,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["markPostAsRead"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["markPostAsRead"]> {
-    await this.#client.POST("/post/mark_as_read", {
+    await this.#client.POST("/api/alpha/post/mark_as_read", {
       ...options,
       body: payload,
     });
@@ -776,7 +774,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["markPrivateMessageAsRead"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["markPrivateMessageAsRead"]> {
-    await this.#client.POST("/private_message/mark_as_read", {
+    await this.#client.POST("/api/alpha/private_message/mark_as_read", {
       ...options,
       body: payload,
     });
@@ -792,7 +790,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["removeComment"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["removeComment"]> {
-    const response = await this.#client.POST("/comment/remove", {
+    const response = await this.#client.POST("/api/alpha/comment/remove", {
       ...options,
       body: { ...payload },
     });
@@ -806,7 +804,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: { post_id: number; removed: boolean },
     options?: RequestOptions
   ): Promise<{ post_view: PostView }> {
-    const response = await this.#client.POST("/post/remove", {
+    const response = await this.#client.POST("/api/alpha/post/remove", {
       ...options,
       body: { ...payload },
     });
@@ -828,9 +826,8 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["resolveObject"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["resolveObject"]> {
-    const response = await this.#client.GET("/resolve_object", {
+    const response = await this.#client.GET("/api/alpha/resolve_object", {
       ...options,
-      // @ts-expect-error TODO: fix this
       params: { query: payload },
     });
 
@@ -866,7 +863,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["saveComment"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["saveComment"]> {
-    const response = await this.#client.PUT("/comment/save", {
+    const response = await this.#client.PUT("/api/alpha/comment/save", {
       ...options,
       body: { ...payload },
     });
@@ -880,7 +877,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["savePost"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["savePost"]> {
-    const response = await this.#client.PUT("/post/save", {
+    const response = await this.#client.PUT("/api/alpha/post/save", {
       ...options,
       body: { ...payload },
     });
@@ -900,11 +897,7 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["search"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["search"]> {
-    if (payload.type_ === "Comments") {
-      throw new UnsupportedError("Comment search is not supported by piefed");
-    }
-
-    const response = await this.#client.GET("/search", {
+    const response = await this.#client.GET("/api/alpha/search", {
       ...options,
       // @ts-expect-error TODO: fix this
       params: { query: compat.fromPageParams(payload) },
@@ -916,6 +909,7 @@ export class UnsafePiefedClient implements BaseClient {
         ...response.data!.communities.map(compat.toCommunityView),
         ...response.data!.posts.map(compat.toPostView),
         ...response.data!.users.map(compat.toPersonView),
+        ...response.data!.comments.map(compat.toCommentView),
       ],
     };
   }
@@ -956,9 +950,8 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions
   ) {
-    const response = await this.#client.GET("/comment/list", {
+    const response = await this.#client.GET("/api/alpha/comment/list", {
       ...options,
-      // @ts-expect-error TODO: fix this
       params: { query: compat.fromPageParams(payload) },
     });
 
@@ -972,9 +965,8 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions
   ) {
-    const response = await this.#client.GET("/post/list", {
+    const response = await this.#client.GET("/api/alpha/post/list", {
       ...options,
-      // @ts-expect-error TODO: fix this
       params: { query: compat.fromPageParams(payload) },
     });
 
