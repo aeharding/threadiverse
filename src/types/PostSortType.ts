@@ -1,7 +1,7 @@
 import { GetPosts as LemmyV0GetPosts } from "lemmy-js-client-v0";
 import { GetPosts as LemmyV1GetPosts } from "lemmy-js-client-v1";
 
-import { components } from "../providers/piefed/schema";
+import { paths } from "../providers/piefed/schema";
 
 export type PostSortType =
   | PostSortTypeByMode[keyof PostSortTypeByMode]
@@ -20,7 +20,12 @@ export type PostSortTypeByMode = {
     Required<Pick<LemmyV1GetPosts, "sort">> & {
       mode: "lemmyv1";
     };
-  piefed: Required<Pick<components["schemas"]["GetPosts"], "sort">> & {
+  piefed: Pick<
+    Required<
+      NonNullable<paths["/api/alpha/post/list"]["get"]["parameters"]["query"]>
+    >,
+    "sort"
+  > & {
     mode: "piefed";
   };
 };
