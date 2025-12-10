@@ -5,11 +5,11 @@ import * as types from "../../types";
 
 // TODO Temporary until we support other types
 export type LemmyV1PostCommentReportOnly =
-  | (LemmyV1.CommentReportView & { type_: "Comment" })
-  | (LemmyV1.PostReportView & { type_: "Post" });
+  | (LemmyV1.CommentReportView & { type_: "comment" })
+  | (LemmyV1.PostReportView & { type_: "post" });
 
 export function fromPageParams<const T extends types.PageParams>(
-  params: T,
+  params: T
 ): Omit<T, "page_cursor"> & { page_cursor?: string } {
   if (typeof params.page_cursor === "number")
     throw new InvalidPayloadError("page_cursor must be string in lemmyv1");
@@ -21,7 +21,7 @@ export function fromPageParams<const T extends types.PageParams>(
 }
 
 export function toCommentMentionView(
-  personMentionView: LemmyV1.PersonCommentMentionView,
+  personMentionView: LemmyV1.PersonCommentMentionView
 ): types.PersonMentionView {
   return {
     ...personMentionView,
@@ -42,13 +42,13 @@ export function toCommentMentionView(
     recipient: toPerson(personMentionView.recipient),
     saved: !!personMentionView.comment_actions?.saved_at,
     subscribed: toFollowState(
-      personMentionView.community_actions?.follow_state,
+      personMentionView.community_actions?.follow_state
     ),
   };
 }
 
 export function toCommentReplyView(
-  commentReply: LemmyV1.CommentReplyView,
+  commentReply: LemmyV1.CommentReplyView
 ): types.CommentReplyView {
   return {
     ...commentReply,
@@ -70,7 +70,7 @@ export function toCommentReplyView(
 }
 
 export function toCommentReportView(
-  commentReport: LemmyV1.CommentReportView,
+  commentReport: LemmyV1.CommentReportView
 ): types.CommentReportView {
   return {
     ...commentReport,
@@ -98,7 +98,7 @@ export function toCommentReportView(
 }
 
 export function toCommentView(
-  commentView: LemmyV1.CommentView,
+  commentView: LemmyV1.CommentView
 ): types.CommentView {
   return {
     ...commentView,
@@ -114,7 +114,7 @@ export function toCommentView(
 }
 
 export function toCommunityCounts(
-  community: LemmyV1.Community,
+  community: LemmyV1.Community
 ): types.CommunityAggregates {
   return {
     comments: community.comments,
@@ -129,7 +129,7 @@ export function toCommunityCounts(
 }
 
 export function toCommunityModeratorView(
-  communityModerator: LemmyV1.CommunityModeratorView,
+  communityModerator: LemmyV1.CommunityModeratorView
 ): types.CommunityModeratorView {
   return {
     ...communityModerator,
@@ -139,7 +139,7 @@ export function toCommunityModeratorView(
 }
 
 export function toCommunityView(
-  communityView: LemmyV1.CommunityView,
+  communityView: LemmyV1.CommunityView
 ): types.CommunityView {
   return {
     ...communityView,
@@ -150,7 +150,7 @@ export function toCommunityView(
 }
 
 export function toFederatedInstances(
-  federatedInstances: LemmyV1.FederatedInstances,
+  federatedInstances: LemmyV1.FederatedInstances
 ): types.FederatedInstances {
   return {
     ...federatedInstances,
@@ -160,23 +160,8 @@ export function toFederatedInstances(
   };
 }
 
-export function toInboxCombinedView(
-  inboxItem: LemmyV1.InboxCombinedView,
-): types.Notification | undefined {
-  switch (inboxItem.type_) {
-    case "CommentMention":
-      return toCommentMentionView(inboxItem);
-    case "CommentReply":
-      return toCommentReplyView(inboxItem);
-    case "PrivateMessage":
-      return toPrivateMessageView(inboxItem);
-    default:
-      return; // TODO support other inbox items
-  }
-}
-
 export function toModlogView(
-  modlog: LemmyV1.ModlogCombinedView,
+  modlog: LemmyV1.ModlogCombinedView
 ): types.ModlogItem | undefined {
   switch (modlog.type_) {
     case "AdminAllowInstance":
@@ -223,7 +208,7 @@ export function toPersonView(personView: LemmyV1.PersonView): types.PersonView {
 }
 
 export function toPostReportView(
-  postReport: LemmyV1.PostReportView,
+  postReport: LemmyV1.PostReportView
 ): types.PostReportView {
   return {
     ...postReport,
@@ -267,7 +252,7 @@ export function toPostView(postView: LemmyV1.PostView): types.PostView {
 }
 
 export function toPrivateMessageView(
-  privateMessage: LemmyV1.PrivateMessageView,
+  privateMessage: LemmyV1.PrivateMessageView
 ): types.PrivateMessageView {
   return {
     ...privateMessage,
@@ -275,13 +260,14 @@ export function toPrivateMessageView(
     private_message: {
       ...privateMessage.private_message,
       published: privateMessage.private_message.published_at,
+      read: false, // TODO
     },
     recipient: toPerson(privateMessage.recipient),
   };
 }
 
 export function toReportView(
-  report: LemmyV1PostCommentReportOnly,
+  report: LemmyV1PostCommentReportOnly
 ): types.CommentReportView | types.PostReportView {
   switch (report.type_) {
     case "Comment":
@@ -292,18 +278,18 @@ export function toReportView(
 }
 
 export function toSearchItem(
-  item: LemmyV1.SearchCombinedView,
+  item: LemmyV1.SearchCombinedView
 ): types.SearchItem | undefined {
   switch (item.type_) {
-    case "Comment":
+    case "comment":
       return toCommentView(item);
-    case "Community":
+    case "community":
       return toCommunityView(item);
-    case "MultiCommunity":
+    case "multi_community":
       return; // Not supported
-    case "Person":
+    case "person":
       return toPersonView(item);
-    case "Post":
+    case "post":
       return toPostView(item);
   }
 }
@@ -315,8 +301,43 @@ export function toSiteView(siteView: LemmyV1.SiteView): types.SiteView {
   };
 }
 
+export function toSupportedNotificationView(
+  item: LemmyV1.NotificationView
+): types.NotificationView | undefined {
+  switch (item.notification.kind) {
+    case "mention":
+    case "private_message":
+    case "reply":
+      switch (item.data.type_) {
+        case "comment":
+          return {
+            ...item,
+            data: { type_: "comment", ...toCommentView(item.data) },
+          };
+        case "post":
+          return {
+            ...item,
+            data: { type_: "post", ...toPostView(item.data) },
+          };
+        case "private_message":
+          return {
+            ...item,
+            data: {
+              type_: "private_message",
+              ...toPrivateMessageView(item.data),
+            },
+          };
+        default:
+          return undefined;
+      }
+    case "mod_action":
+    case "subscribed":
+      return;
+  }
+}
+
 function toAdminPurgeCommentView(
-  adminPurgeComment: LemmyV1.AdminPurgeCommentView,
+  adminPurgeComment: LemmyV1.AdminPurgeCommentView
 ): types.ModlogItem {
   return {
     ...adminPurgeComment,
@@ -332,7 +353,7 @@ function toAdminPurgeCommentView(
 }
 
 function toAdminPurgeCommunityView(
-  adminPurgeCommunity: LemmyV1.AdminPurgeCommunityView,
+  adminPurgeCommunity: LemmyV1.AdminPurgeCommunityView
 ): types.ModlogItem {
   return {
     ...adminPurgeCommunity,
@@ -347,7 +368,7 @@ function toAdminPurgeCommunityView(
 }
 
 function toAdminPurgePersonView(
-  adminPurgePerson: LemmyV1.AdminPurgePersonView,
+  adminPurgePerson: LemmyV1.AdminPurgePersonView
 ): types.ModlogItem {
   return {
     ...adminPurgePerson,
@@ -362,7 +383,7 @@ function toAdminPurgePersonView(
 }
 
 function toAdminPurgePostView(
-  adminPurgePost: LemmyV1.AdminPurgePostView,
+  adminPurgePost: LemmyV1.AdminPurgePostView
 ): types.ModlogItem {
   return {
     ...adminPurgePost,
@@ -394,7 +415,7 @@ function toCommentCounts(comment: LemmyV1.Comment): types.CommentAggregates {
 }
 
 function toCommentViewActions(
-  commentActions: LemmyV1.CommentActions | undefined,
+  commentActions: LemmyV1.CommentActions | undefined
 ): Pick<types.CommentView, "my_vote" | "saved"> {
   return {
     my_vote: commentActions?.like_score,
@@ -412,7 +433,7 @@ function toCommunity(community: LemmyV1.Community): types.Community {
 }
 
 function toFollowState(
-  followState: LemmyV1.CommunityFollowerState | undefined,
+  followState: LemmyV1.CommunityFollowerState | undefined
 ): types.SubscribedType {
   switch (followState) {
     case "Accepted":
@@ -426,7 +447,7 @@ function toFollowState(
 }
 
 function toInstanceWithFederationState(
-  instance: LemmyV1.InstanceWithFederationState,
+  instance: LemmyV1.InstanceWithFederationState
 ): types.InstanceWithFederationState {
   return {
     ...instance,
@@ -435,7 +456,7 @@ function toInstanceWithFederationState(
 }
 
 function toModAddCommunityView(
-  modAddCommunity: LemmyV1.ModAddCommunityView,
+  modAddCommunity: LemmyV1.ModAddCommunityView
 ): types.ModlogItem {
   return {
     ...modAddCommunity,
@@ -464,7 +485,7 @@ function toModAddView(modAdd: LemmyV1.ModAddView): types.ModlogItem {
 }
 
 function toModBanFromCommunityView(
-  modBanFromCommunity: LemmyV1.ModBanFromCommunityView,
+  modBanFromCommunity: LemmyV1.ModBanFromCommunityView
 ): types.ModlogItem {
   return {
     ...modBanFromCommunity,
@@ -493,7 +514,7 @@ function toModBanView(modBan: LemmyV1.ModBanView): types.ModlogItem {
 }
 
 function toModFeaturePostView(
-  modFeaturePost: LemmyV1.ModFeaturePostView,
+  modFeaturePost: LemmyV1.ModFeaturePostView
 ): types.ModlogItem {
   return {
     ...modFeaturePost,
@@ -510,7 +531,7 @@ function toModFeaturePostView(
 }
 
 function toModLockPostView(
-  modLockPost: LemmyV1.ModLockPostView,
+  modLockPost: LemmyV1.ModLockPostView
 ): types.ModlogItem {
   return {
     ...modLockPost,
@@ -527,7 +548,7 @@ function toModLockPostView(
 }
 
 function toModRemoveCommentView(
-  modRemoveComment: LemmyV1.ModRemoveCommentView,
+  modRemoveComment: LemmyV1.ModRemoveCommentView
 ): types.ModlogItem {
   return {
     ...modRemoveComment,
@@ -546,7 +567,7 @@ function toModRemoveCommentView(
 }
 
 function toModRemoveCommunityView(
-  modRemoveCommunity: LemmyV1.ModRemoveCommunityView,
+  modRemoveCommunity: LemmyV1.ModRemoveCommunityView
 ): types.ModlogItem {
   return {
     ...modRemoveCommunity,
@@ -562,7 +583,7 @@ function toModRemoveCommunityView(
 }
 
 function toModRemovePostView(
-  modRemovePost: LemmyV1.ModRemovePostView,
+  modRemovePost: LemmyV1.ModRemovePostView
 ): types.ModlogItem {
   return {
     ...modRemovePost,
@@ -579,7 +600,7 @@ function toModRemovePostView(
 }
 
 function toModTransferCommunityView(
-  modTransferCommunity: LemmyV1.ModTransferCommunityView,
+  modTransferCommunity: LemmyV1.ModTransferCommunityView
 ): types.ModlogItem {
   return {
     ...modTransferCommunity,
@@ -630,7 +651,7 @@ function toPostCounts(post: LemmyV1.Post): types.PostAggregates {
 
 function toPostViewUserActions(
   postActions: LemmyV1.PostActions | undefined,
-  totalComments: number,
+  totalComments: number
 ): Pick<types.PostView, "hidden" | "read" | "saved" | "unread_comments"> {
   return {
     hidden: !!postActions?.hidden_at,
@@ -650,7 +671,7 @@ function toSite(site: LemmyV1.Site): types.Site {
 }
 
 function toViewUserActions(
-  userActions: LemmyV1.CommunityActions | undefined,
+  userActions: LemmyV1.CommunityActions | undefined
 ): Pick<types.CommunityView, "blocked" | "subscribed"> {
   return {
     blocked: !!userActions?.blocked_at,

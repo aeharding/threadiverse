@@ -16,8 +16,6 @@ export type AdminPurgePost = z.infer<typeof schemas.AdminPurgePost>;
 export type AdminPurgePostView = z.infer<typeof schemas.AdminPurgePostView>;
 export type Comment = z.infer<typeof schemas.Comment>;
 export type CommentAggregates = z.infer<typeof schemas.CommentAggregates>;
-export type CommentReply = z.infer<typeof schemas.CommentReply>;
-export type CommentReplyView = z.infer<typeof schemas.CommentReplyView>;
 export type CommentReport = z.infer<typeof schemas.CommentReport>;
 export type CommentReportView = z.infer<typeof schemas.CommentReportView>;
 export type CommentView = z.infer<typeof schemas.CommentView>;
@@ -68,17 +66,10 @@ export type ListPersonContentResponse = z.infer<
 export type ListPersonLikedResponse = z.infer<
   typeof schemas.ListPersonLikedResponse
 >;
-export type ListPersonMentionsResponse = z.infer<
-  typeof schemas.ListPersonMentionsResponse
->;
 export type ListPostReportsResponse = z.infer<
   typeof schemas.ListPostReportsResponse
 >;
 export type ListPostsResponse = z.infer<typeof schemas.ListPostsResponse>;
-export type ListPrivateMessagesResponse = z.infer<
-  typeof schemas.ListPrivateMessagesResponse
->;
-export type ListRepliesResponse = z.infer<typeof schemas.ListRepliesResponse>;
 export type ListReportsResponse = z.infer<typeof schemas.ListReportsResponse>;
 export type ListSearchResponse = z.infer<typeof schemas.ListSearchResponse>;
 export type LocalSite = z.infer<typeof schemas.LocalSite>;
@@ -113,20 +104,22 @@ export type ModTransferCommunityView = z.infer<
   typeof schemas.ModTransferCommunityView
 >;
 export type MyUserInfo = z.infer<typeof schemas.MyUserInfo>;
-export type Notification = z.infer<typeof schemas.Notification>;
+export type Notification = z.infer<typeof schemas.NotificationView>;
+export type NotificationDataType = z.infer<typeof schemas.NotificationDataType>;
+export type NotificationView = z.infer<typeof schemas.NotificationView>;
 export type PagableResponse = z.infer<typeof schemas.PagableResponse>;
 export type PageCursor = z.infer<typeof schemas.PageCursor>;
 export type Person = z.infer<typeof schemas.Person>;
 export type PersonAggregates = z.infer<typeof schemas.PersonAggregates>;
 export type PersonContentItem = z.infer<typeof schemas.PersonContentItem>;
 export type PersonMention = z.infer<typeof schemas.PersonMention>;
-export type PersonMentionView = z.infer<typeof schemas.PersonMentionView>;
 export type PersonView = z.infer<typeof schemas.PersonView>;
 export type Post = z.infer<typeof schemas.Post>;
 export type PostAggregates = z.infer<typeof schemas.PostAggregates>;
 export type PostReport = z.infer<typeof schemas.PostReport>;
 export type PostReportView = z.infer<typeof schemas.PostReportView>;
 export type PostView = z.infer<typeof schemas.PostView>;
+export type PrivateMessage = z.infer<typeof schemas.PrivateMessage>;
 export type PrivateMessageView = z.infer<typeof schemas.PrivateMessageView>;
 export type RegistrationMode = z.infer<typeof schemas.RegistrationMode>;
 export type ResolveObjectResponse = z.infer<
@@ -153,11 +146,9 @@ export type * from "./EditPost";
 export type * from "./GetComments";
 export type * from "./GetCommunity";
 export type * from "./GetModlog";
-export type * from "./GetPersonMentions";
+export type * from "./GetNotifications";
 export type * from "./GetPost";
 export type * from "./GetPosts";
-export type * from "./GetPrivateMessages";
-export type * from "./GetReplies";
 export type * from "./LikeType";
 export type * from "./ListCommunities";
 export type * from "./ListPersonContent";

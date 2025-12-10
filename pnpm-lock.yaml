@@ -18,8 +18,8 @@ importers:
         specifier: npm:lemmy-js-client@0.20.0-alpha.18
         version: lemmy-js-client@0.20.0-alpha.18
       lemmy-js-client-v1:
-        specifier: npm:lemmy-js-client@1.0.0-dont-return-actions.1
-        version: lemmy-js-client@1.0.0-dont-return-actions.1
+        specifier: npm:lemmy-js-client@1.0.0-api-updates-6.1
+        version: lemmy-js-client@1.0.0-api-updates-6.1
       openapi-fetch:
         specifier: ^0.14.0
         version: 0.14.0
@@ -1502,8 +1502,8 @@ packages:
   lemmy-js-client@0.20.0-alpha.18:
     resolution: {integrity: sha512-oZy8DboTWfUar4mPWpi7SYrOEjTBJxkvd1e6QaVwoA5UhqQV1WhxEYbzrpi/gXnEokaVQ0i5sjtL/Y2PHMO3MQ==}
 
-  lemmy-js-client@1.0.0-dont-return-actions.1:
-    resolution: {integrity: sha512-1eiLU+0ZBOqu//p2CRrO8hOTJbOWgpNYAB/R9I4sjuunp6i0oIzMhXNTg7hW8hQ8fyG7YO2BrgQQu861ZchnDg==}
+  lemmy-js-client@1.0.0-api-updates-6.1:
+    resolution: {integrity: sha512-+1phRWmXZZHjBtwLi98KRtWjuyaWAkDC6DZiThGQcBsqnfyz9PDGuLfSAas2738+M3JiCre8pJ9tEiKPc4Rn2w==}
 
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
@@ -3927,7 +3927,7 @@ snapshots:
 
   lemmy-js-client@0.20.0-alpha.18: {}
 
-  lemmy-js-client@1.0.0-dont-return-actions.1:
+  lemmy-js-client@1.0.0-api-updates-6.1:
     dependencies:
       '@tsoa/runtime': 6.6.0
     transitivePeerDependencies:

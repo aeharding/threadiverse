@@ -4,8 +4,6 @@
 export * from "./PersonView";
 
 export * from "./Comment";
-export * from "./CommentReply";
-export * from "./CommentReplyView";
 export * from "./CommentReport";
 export * from "./CommentReportView";
 export * from "./CommentView";
@@ -27,13 +25,13 @@ export * from "./Instance";
 export * from "./InstanceWithFederationState";
 export * from "./ListingType";
 export * from "./LoginResponse";
-export * from "./Notification";
+export * from "./NotificationDataType";
+export * from "./NotificationView";
 export * from "./PagableResponse";
 export * from "./Person";
 export * from "./PersonContentItem";
 export * from "./PersonContentItem";
 export * from "./PersonMention";
-export * from "./PersonMentionView";
 export * from "./Post";
 export * from "./PostReport";
 export * from "./PostReportView";
