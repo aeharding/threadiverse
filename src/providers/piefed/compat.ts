@@ -115,6 +115,8 @@ export function toPerson(
   return {
     ...person,
     avatar: person.avatar ?? undefined, // TODO piefed types are wrong, this is returned as null if not set
+    banner: person.banner ?? undefined, // TODO piefed types are wrong, this is returned as null if not set
+    bio: person.about ?? undefined, // TODO piefed types are wrong, this is returned as null if not set
     bot_account: person.bot,
     display_name: person.title ?? undefined, // TODO piefed types are wrong, this is returned as null if not set
     name: person.user_name!,
