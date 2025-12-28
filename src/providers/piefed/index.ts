@@ -73,7 +73,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async banFromCommunity(
     payload: Parameters<BaseClient["banFromCommunity"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["banFromCommunity"]> {
     await this.#client.POST("/api/alpha/community/moderate/ban", {
       ...options,
@@ -84,7 +84,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async blockCommunity(
     payload: Parameters<BaseClient["blockCommunity"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["blockCommunity"]> {
     const response = await this.#client.POST("/api/alpha/community/block", {
       ...options,
@@ -98,7 +98,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async blockInstance(
     payload: Parameters<BaseClient["blockInstance"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["blockInstance"]> {
     await this.#client.POST("/api/alpha/site/block", {
       ...options,
@@ -108,7 +108,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async blockPerson(
     payload: Parameters<BaseClient["blockPerson"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["blockPerson"]> {
     const response = await this.#client.POST("/api/alpha/user/block", {
       ...options,
@@ -123,7 +123,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async createComment(
     payload: Parameters<BaseClient["createComment"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["createComment"]> {
     const response = await this.#client.POST("/api/alpha/comment", {
       ...options,
@@ -140,7 +140,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async createCommentReport(
     payload: Parameters<BaseClient["createCommentReport"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["createCommentReport"]> {
     await this.#client.POST("/api/alpha/comment/report", {
       ...options,
@@ -150,7 +150,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async createPost(
     payload: Parameters<BaseClient["createPost"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ) {
     const response = await this.#client.POST("/api/alpha/post", {
       ...options,
@@ -167,7 +167,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async createPostReport(
     payload: Parameters<BaseClient["createPostReport"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["createPostReport"]> {
     await this.#client.POST("/api/alpha/post/report", {
       ...options,
@@ -177,7 +177,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async createPrivateMessage(
     payload: Parameters<BaseClient["createPrivateMessage"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["createPrivateMessage"]> {
     const response = await this.#client.POST("/api/alpha/private_message", {
       ...options,
@@ -186,7 +186,7 @@ export class UnsafePiefedClient implements BaseClient {
 
     return {
       private_message_view: compat.toPrivateMessageView(
-        response.data!.private_message_view
+        response.data!.private_message_view,
       ),
     };
   }
@@ -195,13 +195,13 @@ export class UnsafePiefedClient implements BaseClient {
     ..._params: Parameters<BaseClient["createPrivateMessageReport"]>
   ): ReturnType<BaseClient["createPrivateMessageReport"]> {
     throw new UnsupportedError(
-      "Create private message report is not supported by piefed"
+      "Create private message report is not supported by piefed",
     );
   }
 
   async deleteComment(
     payload: Parameters<BaseClient["deleteComment"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["deleteComment"]> {
     const response = await this.#client.POST("/api/alpha/comment/delete", {
       ...options,
@@ -221,7 +221,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async deletePost(
     payload: { deleted: boolean; post_id: number },
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<{ post_view: PostView }> {
     const response = await this.#client.POST("/api/alpha/post/delete", {
       ...options,
@@ -237,13 +237,13 @@ export class UnsafePiefedClient implements BaseClient {
     ..._params: Parameters<BaseClient["distinguishComment"]>
   ): ReturnType<BaseClient["distinguishComment"]> {
     throw new UnsupportedError(
-      "Distinguish comment is not supported by piefed"
+      "Distinguish comment is not supported by piefed",
     );
   }
 
   async editComment(
     payload: Parameters<BaseClient["editComment"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["editComment"]> {
     const response = await this.#client.PUT("/api/alpha/comment", {
       ...options,
@@ -263,7 +263,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async editPost(
     payload: Parameters<BaseClient["editPost"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ) {
     const response = await this.#client.PUT("/api/alpha/post", {
       ...options,
@@ -280,7 +280,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async featurePost(
     payload: Parameters<BaseClient["featurePost"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<{ post_view: PostView }> {
     const response = await this.#client.POST("/api/alpha/post/feature", {
       ...options,
@@ -294,7 +294,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async followCommunity(
     payload: Parameters<BaseClient["followCommunity"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["followCommunity"]> {
     const response = await this.#client.POST("/api/alpha/community/follow", {
       ...options,
@@ -314,15 +314,15 @@ export class UnsafePiefedClient implements BaseClient {
 
   async getComments(
     payload: Parameters<BaseClient["getComments"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getComments"]> {
     if (payload.mode && payload.mode !== "piefed")
       throw new InvalidPayloadError(
-        `Connected to piefed, ${payload.mode} is not supported`
+        `Connected to piefed, ${payload.mode} is not supported`,
       );
 
     const query = cleanThreadiverseParams(
-      compat.fromPageParams(payload)
+      compat.fromPageParams(payload),
     ) satisfies paths["/api/alpha/comment/list"]["get"]["parameters"]["query"];
 
     const response = await this.#client.GET("/api/alpha/comment/list", {
@@ -338,7 +338,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async getCommunity(
     payload: Parameters<BaseClient["getCommunity"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getCommunity"]> {
     const response = await this.#client.GET("/api/alpha/community", {
       ...options,
@@ -378,7 +378,7 @@ export class UnsafePiefedClient implements BaseClient {
     ].sort(
       (a, b) =>
         Date.parse(getInboxItemPublished(b)) -
-        Date.parse(getInboxItemPublished(a))
+        Date.parse(getInboxItemPublished(a)),
     );
 
     return {
@@ -389,7 +389,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async getPersonDetails(
     payload: Parameters<BaseClient["getPersonDetails"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getPersonDetails"]> {
     const response = await this.#client.GET("/api/alpha/user", {
       ...options,
@@ -405,7 +405,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async getPersonMentions(
     payload: Parameters<BaseClient["getPersonMentions"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getPersonMentions"]> {
     const response = await this.#client.GET("/api/alpha/user/mentions", {
       ...options,
@@ -420,7 +420,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async getPost(
     payload: Parameters<BaseClient["getPost"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ) {
     const query =
       payload satisfies paths["/api/alpha/post"]["get"]["parameters"]["query"];
@@ -437,15 +437,15 @@ export class UnsafePiefedClient implements BaseClient {
 
   async getPosts(
     payload: Parameters<BaseClient["getPosts"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getPosts"]> {
     if (payload.mode && payload.mode !== "piefed")
       throw new InvalidPayloadError(
-        `Connected to piefed, ${payload.mode} is not supported`
+        `Connected to piefed, ${payload.mode} is not supported`,
       );
 
     const query = cleanThreadiverseParams(
-      compat.fromPageParams(payload)
+      compat.fromPageParams(payload),
     ) satisfies paths["/api/alpha/post/list"]["get"]["parameters"]["query"];
 
     const response = await this.#client.GET("/api/alpha/post/list", {
@@ -461,7 +461,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async getPrivateMessages(
     payload: Parameters<BaseClient["getPrivateMessages"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getPrivateMessages"]> {
     const response = await this.#client.GET("/api/alpha/private_message/list", {
       ...options,
@@ -478,13 +478,13 @@ export class UnsafePiefedClient implements BaseClient {
     ..._params: Parameters<BaseClient["getRandomCommunity"]>
   ): ReturnType<BaseClient["getRandomCommunity"]> {
     throw new UnsupportedError(
-      "Get random community is not supported by piefed"
+      "Get random community is not supported by piefed",
     );
   }
 
   async getReplies(
     payload: Parameters<BaseClient["getReplies"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getReplies"]> {
     const response = await this.#client.GET("/api/alpha/user/replies", {
       ...options,
@@ -510,14 +510,14 @@ export class UnsafePiefedClient implements BaseClient {
         ? {
             ...response.data!.my_user,
             community_blocks: response.data!.my_user?.community_blocks.map(
-              ({ community }) => compat.toCommunity(community!)
+              ({ community }) => compat.toCommunity(community!),
             ),
             follows: response.data!.my_user.follows.map((f) => ({
               community: compat.toCommunity(f.community),
               follower: compat.toPerson(f.follower),
             })),
             instance_blocks: response.data!.my_user?.instance_blocks.map(
-              ({ instance }) => instance
+              ({ instance }) => instance,
             ),
             local_user_view: {
               ...response.data!.my_user.local_user_view,
@@ -527,14 +527,14 @@ export class UnsafePiefedClient implements BaseClient {
                   response.data!.my_user.local_user_view.local_user.show_nsfw,
               },
               person: compat.toPerson(
-                response.data!.my_user.local_user_view.person
+                response.data!.my_user.local_user_view.person,
               ),
             },
             moderates: response.data!.my_user.moderates.map(
-              compat.toCommunityModeratorView
+              compat.toCommunityModeratorView,
             ),
             person_blocks: response.data!.my_user?.person_blocks.map(
-              ({ target }) => compat.toPerson(target)
+              ({ target }) => compat.toPerson(target),
             ),
           }
         : undefined,
@@ -561,7 +561,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async likeComment(
     payload: Parameters<BaseClient["likeComment"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["likeComment"]> {
     const response = await this.#client.POST("/api/alpha/comment/like", {
       ...options,
@@ -578,7 +578,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async likePost(
     payload: Parameters<BaseClient["likePost"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ) {
     const response = await this.#client.POST("/api/alpha/post/like", {
       ...options,
@@ -596,13 +596,13 @@ export class UnsafePiefedClient implements BaseClient {
     ..._params: Parameters<BaseClient["listCommentReports"]>
   ): ReturnType<BaseClient["listCommentReports"]> {
     throw new UnsupportedError(
-      "List comment reports is not supported by piefed"
+      "List comment reports is not supported by piefed",
     );
   }
 
   async listCommunities(
     payload: Parameters<BaseClient["listCommunities"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["listCommunities"]> {
     const response = await this.#client.GET("/api/alpha/community/list", {
       ...options,
@@ -618,7 +618,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async listPersonContent(
     payload: ListPersonContent,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<ListPersonContentResponse> {
     switch (payload.type) {
       case "All":
@@ -631,8 +631,8 @@ export class UnsafePiefedClient implements BaseClient {
           [...posts.data, ...comments.data].sort(
             (a, b) =>
               getPostCommentItemCreatedDate(b) -
-              getPostCommentItemCreatedDate(a)
-          )
+              getPostCommentItemCreatedDate(a),
+          ),
         );
 
         return {
@@ -658,7 +658,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async listPersonSaved(
     payload: Parameters<BaseClient["listPersonContent"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonContent"]> {
     const response = await this.#client.GET("/api/alpha/user", {
       ...options,
@@ -677,7 +677,7 @@ export class UnsafePiefedClient implements BaseClient {
           ].sort(
             (a, b) =>
               getPostCommentItemCreatedDate(b) -
-              getPostCommentItemCreatedDate(a)
+              getPostCommentItemCreatedDate(a),
           );
         case "Comments":
           return response.data!.comments.map(compat.toCommentView);
@@ -706,7 +706,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async lockPost(
     payload: { locked: boolean; post_id: number },
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<{ post_view: PostView }> {
     const response = await this.#client.POST("/api/alpha/post/lock", {
       ...options,
@@ -720,7 +720,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async login(
     payload: Parameters<BaseClient["login"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ) {
     const response = await this.#client.POST("/api/alpha/user/login", {
       ...options,
@@ -739,7 +739,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async markCommentReplyAsRead(
     payload: Parameters<BaseClient["markCommentReplyAsRead"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["markCommentReplyAsRead"]> {
     await this.#client.POST("/api/alpha/comment/mark_as_read", {
       ...options,
@@ -749,7 +749,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async markPersonMentionAsRead(
     payload: Parameters<BaseClient["markPersonMentionAsRead"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["markPersonMentionAsRead"]> {
     await this.#client.POST("/api/alpha/comment/mark_as_read", {
       ...options,
@@ -762,7 +762,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async markPostAsRead(
     payload: Parameters<BaseClient["markPostAsRead"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["markPostAsRead"]> {
     await this.#client.POST("/api/alpha/post/mark_as_read", {
       ...options,
@@ -772,7 +772,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async markPrivateMessageAsRead(
     payload: Parameters<BaseClient["markPrivateMessageAsRead"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["markPrivateMessageAsRead"]> {
     await this.#client.POST("/api/alpha/private_message/mark_as_read", {
       ...options,
@@ -788,7 +788,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async removeComment(
     payload: Parameters<BaseClient["removeComment"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["removeComment"]> {
     const response = await this.#client.POST("/api/alpha/comment/remove", {
       ...options,
@@ -802,7 +802,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async removePost(
     payload: { post_id: number; removed: boolean },
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<{ post_view: PostView }> {
     const response = await this.#client.POST("/api/alpha/post/remove", {
       ...options,
@@ -818,13 +818,13 @@ export class UnsafePiefedClient implements BaseClient {
     ..._params: Parameters<BaseClient["resolveCommentReport"]>
   ): ReturnType<BaseClient["resolveCommentReport"]> {
     throw new UnsupportedError(
-      "Resolve comment report is not supported by piefed"
+      "Resolve comment report is not supported by piefed",
     );
   }
 
   async resolveObject(
     payload: Parameters<BaseClient["resolveObject"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["resolveObject"]> {
     const response = await this.#client.GET("/api/alpha/resolve_object", {
       ...options,
@@ -855,13 +855,13 @@ export class UnsafePiefedClient implements BaseClient {
     ..._params: Parameters<BaseClient["resolvePostReport"]>
   ): ReturnType<BaseClient["resolvePostReport"]> {
     throw new UnsupportedError(
-      "Resolve post report is not supported by piefed"
+      "Resolve post report is not supported by piefed",
     );
   }
 
   async saveComment(
     payload: Parameters<BaseClient["saveComment"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["saveComment"]> {
     const response = await this.#client.PUT("/api/alpha/comment/save", {
       ...options,
@@ -875,7 +875,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async savePost(
     payload: Parameters<BaseClient["savePost"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["savePost"]> {
     const response = await this.#client.PUT("/api/alpha/post/save", {
       ...options,
@@ -895,7 +895,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async search(
     payload: Parameters<BaseClient["search"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["search"]> {
     const response = await this.#client.GET("/api/alpha/search", {
       ...options,
@@ -916,7 +916,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async uploadImage(
     payload: Parameters<BaseClient["uploadImage"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ) {
     const formData = new FormData();
     formData.append("file", payload.file);
@@ -934,7 +934,7 @@ export class UnsafePiefedClient implements BaseClient {
         body: formData,
         headers: this.#headers,
         method: "POST",
-      }
+      },
     );
 
     await validateResponse(response);
@@ -948,7 +948,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async #listPersonComments(
     payload: Parameters<BaseClient["listPersonContent"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ) {
     const response = await this.#client.GET("/api/alpha/comment/list", {
       ...options,
@@ -963,7 +963,7 @@ export class UnsafePiefedClient implements BaseClient {
 
   async #listPersonPosts(
     payload: Parameters<BaseClient["listPersonContent"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ) {
     const response = await this.#client.GET("/api/alpha/post/list", {
       ...options,
