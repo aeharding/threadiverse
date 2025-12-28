@@ -174,5 +174,5 @@ function compatCommunityVisibility(
 ): types.CommunityVisibility {
   return visibility === "LocalOnly"
     ? "LocalOnlyPublic"
-    : visibility ?? "Public";
+    : (visibility ?? "Public");
 }

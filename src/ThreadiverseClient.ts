@@ -25,7 +25,7 @@ export default class ThreadiverseClient implements BaseClient {
       !this.discoveredSoftware
     )
       throw new Error(
-        "Client not initialized. Wait for getSoftware() or any other async method to resolve first"
+        "Client not initialized. Wait for getSoftware() or any other async method to resolve first",
       );
 
     return {
@@ -450,7 +450,7 @@ export default class ThreadiverseClient implements BaseClient {
 
       if (!Client) {
         throw new UnsupportedSoftwareError(
-          `${this.discoveredSoftware.name} v${this.discoveredSoftware.version} is not supported`
+          `${this.discoveredSoftware.name} v${this.discoveredSoftware.version} is not supported`,
         );
       }
 

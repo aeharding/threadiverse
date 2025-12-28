@@ -7,7 +7,7 @@ export const fromPageParams = lemmyCompat.fromPageParams;
 
 export function toComment(
   comment: components["schemas"]["Comment"],
-  creator_id: number // TODO piefed types are wrong, this isn't being returned rn
+  creator_id: number, // TODO piefed types are wrong, this isn't being returned rn
 ) {
   return {
     ...comment,
@@ -18,7 +18,7 @@ export function toComment(
 }
 
 export function toCommentReplyView(
-  reply: components["schemas"]["CommentReplyView"]
+  reply: components["schemas"]["CommentReplyView"],
 ) {
   return {
     ...reply,
@@ -32,7 +32,7 @@ export function toCommentReplyView(
 }
 
 export function toCommentView(
-  comment: components["schemas"]["CommentView"]
+  comment: components["schemas"]["CommentView"],
 ): types.CommentView {
   return {
     ...comment,
@@ -47,7 +47,7 @@ export function toCommentView(
 }
 
 export function toCommunity(
-  community: components["schemas"]["Community"]
+  community: components["schemas"]["Community"],
 ): types.Community {
   return {
     ...community,
@@ -59,7 +59,7 @@ export function toCommunity(
 }
 
 export function toCommunityModeratorView(
-  view: components["schemas"]["CommunityModeratorView"]
+  view: components["schemas"]["CommunityModeratorView"],
 ) {
   return {
     ...view,
@@ -69,7 +69,7 @@ export function toCommunityModeratorView(
 }
 
 export function toCommunityView(
-  community: components["schemas"]["CommunityView"]
+  community: components["schemas"]["CommunityView"],
 ): types.CommunityView {
   return {
     ...community,
@@ -87,7 +87,7 @@ export function toCommunityView(
 }
 
 export function toGetCommunityResponse(
-  response: components["schemas"]["GetCommunityResponse"]
+  response: components["schemas"]["GetCommunityResponse"],
 ) {
   return {
     community_view: toCommunityView(response.community_view),
@@ -96,7 +96,7 @@ export function toGetCommunityResponse(
 }
 
 export function toLocalSite(
-  site: components["schemas"]["Site"]
+  site: components["schemas"]["Site"],
 ): types.LocalSite {
   return {
     captcha_enabled: false,
@@ -110,7 +110,7 @@ export function toLocalSite(
 }
 
 export function toPerson(
-  person: components["schemas"]["Person"]
+  person: components["schemas"]["Person"],
 ): types.Person {
   return {
     ...person,
@@ -125,7 +125,7 @@ export function toPerson(
 }
 
 export function toPersonMentionView(
-  mention: components["schemas"]["CommentReplyView"]
+  mention: components["schemas"]["CommentReplyView"],
 ): types.PersonMentionView {
   return {
     ...mention,
@@ -157,7 +157,7 @@ export function toPost(post: components["schemas"]["Post"]) {
 }
 
 export function toPostView(
-  post: components["schemas"]["PostView"]
+  post: components["schemas"]["PostView"],
 ): types.PostView {
   return {
     ...post,
@@ -169,7 +169,7 @@ export function toPostView(
 }
 
 export function toPrivateMessageView(
-  message: components["schemas"]["PrivateMessageView"]
+  message: components["schemas"]["PrivateMessageView"],
 ) {
   return {
     ...message,
