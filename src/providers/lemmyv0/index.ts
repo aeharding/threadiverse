@@ -119,14 +119,14 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async deleteImage(
     payload: Parameters<BaseClient["deleteImage"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["deleteImage"]> {
     await this.#client.deleteImage(
       {
         filename: new URL(payload.url).pathname.split("/").pop()!,
         token: payload.delete_token,
       },
-      options,
+      options
     );
   }
 
@@ -199,16 +199,16 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async getComments(
     payload: Parameters<BaseClient["getComments"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["getComments"]> {
     if (payload.mode && payload.mode !== "lemmyv0")
       throw new InvalidPayloadError(
-        `Connected to lemmyv1, ${payload.mode} is not supported`,
+        `Connected to lemmyv1, ${payload.mode} is not supported`
       );
 
     const response = await this.#client.getComments(
       cleanThreadiverseParams(compat.fromPageParams(payload)),
-      options,
+      options
     );
 
     return {
@@ -239,11 +239,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async getModlog(
     payload: Parameters<BaseClient["getModlog"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["getModlog"]> {
     const response = await this.#client.getModlog(
       compat.fromPageParams(payload),
-      options,
+      options
     );
 
     return {
@@ -257,7 +257,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async getNotifications(
     payload: Parameters<BaseClient["getNotifications"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["getNotifications"]> {
     const params = compat.fromPageParams(payload);
 
@@ -274,7 +274,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     ].sort(
       (a, b) =>
         Date.parse(getInboxItemPublished(b)) -
-        Date.parse(getInboxItemPublished(a)),
+        Date.parse(getInboxItemPublished(a))
     );
 
     return {
@@ -285,14 +285,14 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async getPersonDetails(
     payload: Parameters<BaseClient["getPersonDetails"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["getPersonDetails"]> {
     const response = await this.#client.getPersonDetails(
       {
         ...payload,
         limit: 1, // Lemmy melts down if limit is 0
       },
-      options,
+      options
     );
 
     return {
@@ -303,11 +303,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async getPersonMentions(
     payload: Parameters<BaseClient["getPersonMentions"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["getPersonMentions"]> {
     const response = await this.#client.getPersonMentions(
       { ...payload, sort: "New" },
-      options,
+      options
     );
 
     return {
@@ -328,11 +328,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async getPosts(
     payload: Parameters<BaseClient["getPosts"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["getPosts"]> {
     if (payload.mode && payload.mode !== "lemmyv0")
       throw new InvalidPayloadError(
-        `Connected to lemmyv1, ${payload.mode} is not supported`,
+        `Connected to lemmyv1, ${payload.mode} is not supported`
       );
 
     const page_cursor = payload.page_cursor;
@@ -346,7 +346,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
         ...cleanThreadiverseParams(payload),
         page_cursor,
       },
-      options,
+      options
     );
 
     return {
@@ -361,11 +361,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async getPrivateMessages(
     payload: Parameters<BaseClient["getPrivateMessages"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["getPrivateMessages"]> {
     const response = await this.#client.getPrivateMessages(
       compat.fromPageParams(payload),
-      options,
+      options
     );
 
     return {
@@ -378,17 +378,17 @@ export class UnsafeLemmyV0Client implements BaseClient {
     ..._params: Parameters<BaseClient["getRandomCommunity"]>
   ): ReturnType<BaseClient["getRandomCommunity"]> {
     throw new UnsupportedError(
-      "Get random community is not supported by Lemmy v0",
+      "Get random community is not supported by Lemmy v0"
     );
   }
 
   async getReplies(
     payload: Parameters<BaseClient["getReplies"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["getReplies"]> {
     const response = await this.#client.getReplies(
       compat.fromPageParams({ ...payload, sort: "New" }),
-      options,
+      options
     );
 
     return {
@@ -409,7 +409,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
             ...site.my_user,
             follows: site.my_user.follows.map(compat.toCommunityFollowerView),
             moderates: site.my_user.moderates.map(
-              compat.toCommunityModeratorView,
+              compat.toCommunityModeratorView
             ),
             ...compat.toBlocks(site.my_user),
           }
@@ -455,11 +455,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async listCommentReports(
     payload: Parameters<BaseClient["listCommentReports"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["listCommentReports"]> {
     const response = await this.#client.listCommentReports(
       compat.fromPageParams(payload),
-      options,
+      options
     );
 
     return {
@@ -470,16 +470,16 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async listCommunities(
     payload: Parameters<BaseClient["listCommunities"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["listCommunities"]> {
     if (payload.mode && payload.mode !== "lemmyv0")
       throw new InvalidPayloadError(
-        `Connected to lemmyv1, ${payload.mode} is not supported`,
+        `Connected to lemmyv1, ${payload.mode} is not supported`
       );
 
     const response = await this.#client.listCommunities(
       cleanThreadiverseParams(compat.fromPageParams(payload)),
-      options,
+      options
     );
 
     return {
@@ -490,11 +490,14 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async listPersonContent(
     payload: Parameters<BaseClient["listPersonContent"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["listPersonContent"]> {
     const response = await this.#client.getPersonDetails(
-      compat.fromPageParams(payload),
-      options,
+      {
+        ...compat.fromPageParams(payload),
+        sort: "New",
+      },
+      options
     );
 
     const data = (() => {
@@ -507,7 +510,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
           ].sort(
             (a, b) =>
               getPostCommentItemCreatedDate(b) -
-              getPostCommentItemCreatedDate(a),
+              getPostCommentItemCreatedDate(a)
           );
         case "Comments":
           return response.comments.map(compat.toCommentView);
@@ -524,7 +527,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async listPersonLiked(
     { type, ...payload }: Parameters<BaseClient["listPersonLiked"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<ListPersonLikedResponse> {
     const v0Payload: LemmyV0.GetComments & LemmyV0.GetPosts = {
       ...compat.fromPageParams(payload),
@@ -549,7 +552,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async listPersonSaved(
     payload: Parameters<BaseClient["listPersonSaved"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["listPersonSaved"]> {
     return this.listPersonContent(
       {
@@ -557,17 +560,17 @@ export class UnsafeLemmyV0Client implements BaseClient {
         // @ts-expect-error Dogfood the api
         saved_only: true,
       },
-      options,
+      options
     );
   }
 
   async listPostReports(
     payload: Parameters<BaseClient["listPostReports"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["listPostReports"]> {
     const response = await this.#client.listPostReports(
       compat.fromPageParams(payload),
-      options,
+      options
     );
 
     return {
@@ -578,7 +581,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async listReports(
     payload: Parameters<BaseClient["listReports"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["listReports"]> {
     const params = compat.fromPageParams(payload);
 
@@ -594,7 +597,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
         ...post_reports.map(compat.toPostReportView),
       ].sort(
         (a, b) =>
-          getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a),
+          getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a)
       ),
     };
   }
@@ -685,7 +688,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async resolveObject(
     payload: Parameters<BaseClient["resolveObject"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["resolveObject"]> {
     const response = await this.#client.resolveObject(payload, options);
 
@@ -735,16 +738,16 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async search(
     payload: Parameters<BaseClient["search"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["search"]> {
     if (payload.mode && payload.mode !== "lemmyv0")
       throw new InvalidPayloadError(
-        `Connected to lemmyv1, ${payload.mode} is not supported`,
+        `Connected to lemmyv1, ${payload.mode} is not supported`
       );
 
     const response = await this.#client.search(
       cleanThreadiverseParams(compat.fromPageParams(payload)),
-      options,
+      options
     );
 
     return {
@@ -760,11 +763,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   async uploadImage(
     payload: Parameters<BaseClient["uploadImage"]>[0],
-    options?: RequestOptions,
+    options?: RequestOptions
   ): ReturnType<BaseClient["uploadImage"]> {
     const response = await this.#client.uploadImage(
       { image: payload.file },
-      options,
+      options
     );
 
     const fileResponse = response.files?.[0];

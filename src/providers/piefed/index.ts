@@ -952,7 +952,7 @@ export class UnsafePiefedClient implements BaseClient {
   ) {
     const response = await this.#client.GET("/api/alpha/comment/list", {
       ...options,
-      params: { query: compat.fromPageParams(payload) },
+      params: { query: { ...compat.fromPageParams(payload), sort: "New" } },
     });
 
     return {
@@ -967,7 +967,7 @@ export class UnsafePiefedClient implements BaseClient {
   ) {
     const response = await this.#client.GET("/api/alpha/post/list", {
       ...options,
-      params: { query: compat.fromPageParams(payload) },
+      params: { query: { ...compat.fromPageParams(payload), sort: "New" } },
     });
 
     return {
