@@ -1,3 +1,5 @@
+import { PiefedErrorResponse } from "./types";
+
 export class FediverseError extends Error {
   constructor(message: string, errorOptions?: ErrorOptions) {
     super(message, errorOptions);
@@ -9,6 +11,25 @@ export class InvalidPayloadError extends FediverseError {
   constructor(message: string) {
     super(message);
     this.name = "InvalidPayloadError";
+  }
+}
+
+export class ResponseError extends FediverseError {
+  status: number;
+
+  constructor(status: number, message?: string) {
+    super(message ?? `${status}`);
+    this.status = status;
+    this.name = "ResponseError";
+  }
+}
+export class PiefedResponseError extends ResponseError {
+  response: PiefedErrorResponse;
+
+  constructor(status: number, payload: PiefedErrorResponse) {
+    super(status, payload.message);
+    this.response = payload;
+    this.name = "PiefedResponseError";
   }
 }
 

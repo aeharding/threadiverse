@@ -49,5 +49,7 @@ export * from "./SiteAggregates";
 export * from "./SubscribedType";
 export * from "./UploadImageResponse";
 
+export * from "./PiefedErrorResponse";
+
 // Should be last (can't access lexical declaration 'PersonView' before initialization)
 export * from "./list";
