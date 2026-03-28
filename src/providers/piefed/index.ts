@@ -5,9 +5,15 @@ import {
   BaseClientOptions,
   RequestOptions,
 } from "../../BaseClient";
-import { InvalidPayloadError, UnsupportedError } from "../../errors";
+import {
+  InvalidPayloadError,
+  PiefedResponseError,
+  ResponseError,
+  UnsupportedError,
+} from "../../errors";
 import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
+import { PiefedErrorResponse } from "../../schemas";
 import {
   ListPersonContent,
   ListPersonContentResponse,
@@ -23,9 +29,13 @@ import { components, paths } from "./schema";
 async function validateResponse(response: Response) {
   if (!response.ok) {
     const data = await response.json();
-    if ("error" in data && typeof data.error === "string") {
-      throw new Error(data.error);
-    }
+
+    const parsed = PiefedErrorResponse.safeParse(data);
+
+    if (parsed.success)
+      throw new PiefedResponseError(response.status, parsed.data);
+
+    throw new ResponseError(response.status);
   }
 }
 
