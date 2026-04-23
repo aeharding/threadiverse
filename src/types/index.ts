@@ -168,6 +168,7 @@ export type * from "./PostSortType";
 export type * from "./Register";
 export type * from "./Search";
 export type * from "./SearchSortType";
+
 export type * from "./SearchType";
 
 // TODO: unified error handling in threadiverse project

@@ -100,7 +100,6 @@ export class UnsafeMbinClient implements BaseClient {
       },
     };
   }
-
   async getPosts(
     payload: Parameters<BaseClient["getPosts"]>[0],
     options?: RequestOptions,
@@ -179,6 +178,12 @@ export class UnsafeMbinClient implements BaseClient {
       },
       version: "0.0.0",
     };
+  }
+
+  login(
+    ..._params: Parameters<BaseClient["login"]>
+  ): ReturnType<BaseClient["login"]> {
+    throw new UnsupportedError("jwt auth (login) is not supported by mbin");
   }
 
   async logout() {

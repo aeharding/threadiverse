@@ -8,6 +8,7 @@ import {
 import { InvalidPayloadError, UnsupportedError } from "../../../errors";
 import { cleanThreadiverseParams } from "../../../helpers";
 import buildSafeClient from "../../../SafeClient";
+import { buildCommentsTree } from "../helpers";
 import * as compat from "./compat";
 import { isPostCommentReport } from "./helpers";
 
@@ -18,9 +19,13 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   static softwareVersionRange = ">=1.0.0-alpha.5";
 
+  url: string;
+
   #client: LemmyV1.LemmyHttp;
 
   constructor(hostname: string, options: BaseClientOptions) {
+    this.url = hostname;
+
     this.#client = new LemmyV1.LemmyHttp(hostname, {
       ...options,
       headers: options.jwt
@@ -213,7 +218,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
     return {
       ...response,
-      data: response.comments.map(compat.toCommentView),
+      data: buildCommentsTree(response.comments.map(compat.toCommentView)),
     };
   }
 
@@ -646,10 +651,34 @@ export class UnsafeLemmyV1Client implements BaseClient {
     await this.#client.markPrivateMessageAsRead(...params);
   }
 
+  oauthLogin(
+    ..._params: Parameters<BaseClient["oauthLogin"]>
+  ): ReturnType<BaseClient["oauthLogin"]> {
+    throw new UnsupportedError(
+      "oauth (oauthLogin) is not supported by Lemmy v1",
+    );
+  }
+
+  onOauthCallback(
+    ..._params: Parameters<BaseClient["onOauthCallback"]>
+  ): ReturnType<BaseClient["onOauthCallback"]> {
+    throw new UnsupportedError(
+      "oauth (onOauthCallback) is not supported by Lemmy v1",
+    );
+  }
+
   async register(
     ...params: Parameters<BaseClient["register"]>
   ): ReturnType<BaseClient["register"]> {
     return this.#client.register(...params);
+  }
+
+  registerClient(
+    ..._params: Parameters<BaseClient["registerClient"]>
+  ): ReturnType<BaseClient["registerClient"]> {
+    throw new UnsupportedError(
+      "oauth (registerClient) is not supported by Lemmy v1",
+    );
   }
 
   async removeComment(

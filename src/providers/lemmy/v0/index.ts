@@ -29,9 +29,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   static softwareVersionRange = ">=0.19.0";
 
+  url: string;
+
   #client: LemmyV0.LemmyHttp;
 
   constructor(hostname: string, options: BaseClientOptions) {
+    this.url = hostname;
+
     this.#client = new LemmyV0.LemmyHttp(hostname, {
       ...options,
       headers: options.jwt
@@ -662,10 +666,34 @@ export class UnsafeLemmyV0Client implements BaseClient {
     await this.#client.markPrivateMessageAsRead(...params);
   }
 
+  oauthLogin(
+    ..._params: Parameters<BaseClient["oauthLogin"]>
+  ): ReturnType<BaseClient["oauthLogin"]> {
+    throw new UnsupportedError(
+      "oauth (oauthLogin) is not supported by Lemmy v0",
+    );
+  }
+
+  onOauthCallback(
+    ..._params: Parameters<BaseClient["onOauthCallback"]>
+  ): ReturnType<BaseClient["onOauthCallback"]> {
+    throw new UnsupportedError(
+      "oauth (onOauthCallback) is not supported by Lemmy v0",
+    );
+  }
+
   async register(
     ...params: Parameters<BaseClient["register"]>
   ): ReturnType<BaseClient["register"]> {
     return this.#client.register(...params);
+  }
+
+  registerClient(
+    ..._params: Parameters<BaseClient["registerClient"]>
+  ): ReturnType<BaseClient["registerClient"]> {
+    throw new UnsupportedError(
+      "oauth (registerClient) is not supported by Lemmy v0",
+    );
   }
 
   async removeComment(

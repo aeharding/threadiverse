@@ -7,7 +7,7 @@ import {
   PostReportView,
   PostView,
   PrivateMessageView,
-} from "../../types";
+} from "../../../types";
 
 export function getInboxItemPublished(
   item: CommentReplyView | PersonMentionView | PrivateMessageView,

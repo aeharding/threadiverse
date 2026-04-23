@@ -2,6 +2,7 @@ import type * as LemmyV1 from "lemmy-js-client-v1";
 
 import { InvalidPayloadError } from "../../../errors";
 import * as types from "../../../types";
+import * as sharedLemmyCompat from "../compat";
 
 // TODO Temporary until we support other types
 export type LemmyV1PostCommentReportOnly =
@@ -378,7 +379,10 @@ function toAdminPurgePostView(
 function toComment(comment: LemmyV1.Comment): types.Comment {
   return {
     ...comment,
+    depth: sharedLemmyCompat.getDepthFromComment(comment),
+    parentId: sharedLemmyCompat.getLemmyCommentParentId(comment),
     published: comment.published_at,
+    rootId: sharedLemmyCompat.getLemmyCommentRootId(comment),
   };
 }
 

@@ -79,7 +79,6 @@ export abstract class BaseClient {
     payload: types.CreatePost,
     options?: RequestOptions,
   ): Promise<{ post_view: types.PostView }>;
-
   abstract createPostReport(
     payload: { post_id: number; reason: string },
     options?: RequestOptions,
@@ -94,7 +93,6 @@ export abstract class BaseClient {
     payload: { private_message_id: number; reason: string },
     options?: RequestOptions,
   ): Promise<void>;
-
   abstract deleteComment(
     payload: { comment_id: number; deleted: boolean },
     options?: RequestOptions,

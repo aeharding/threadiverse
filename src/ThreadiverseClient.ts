@@ -23,6 +23,7 @@ export default class ThreadiverseClient implements BaseClient {
   }
 
   url: string;
+
   get software(): ProviderInfo {
     if (
       !this.delegateClient ||
@@ -38,8 +39,8 @@ export default class ThreadiverseClient implements BaseClient {
       version: this.discoveredSoftware.version,
     };
   }
-
   private delegateClient: BaseClient | undefined;
+
   private discoveredSoftware:
     | Awaited<ReturnType<typeof resolveSoftware>>
     | undefined;

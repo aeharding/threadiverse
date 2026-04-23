@@ -61,6 +61,7 @@ export function toComment(comment: LemmyV0.Comment): types.Comment {
 export function toCommentReportView(commentReport: LemmyV0.CommentReportView) {
   return {
     ...commentReport,
+    comment: toComment(commentReport.comment),
     community: toCommunity(commentReport.community),
   };
 }
@@ -125,6 +126,7 @@ export function toLocalSite(localSite: LemmyV0.LocalSite): types.LocalSite {
 export function toMentionView(personMention: LemmyV0.PersonMentionView) {
   return {
     ...personMention,
+    comment: toComment(personMention.comment),
     community: toCommunity(personMention.community),
   };
 }
@@ -176,6 +178,7 @@ export function toPostView(post: LemmyV0.PostView) {
 export function toReplyView(personMention: LemmyV0.CommentReplyView) {
   return {
     ...personMention,
+    comment: toComment(personMention.comment),
     community: toCommunity(personMention.community),
   };
 }
