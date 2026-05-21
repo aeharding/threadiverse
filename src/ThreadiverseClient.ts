@@ -3,7 +3,7 @@ import { satisfies } from "compare-versions";
 import { BaseClient, BaseClientOptions, ProviderInfo } from "./BaseClient";
 import { UnsupportedSoftwareError } from "./errors";
 import LemmyV0Client from "./providers/lemmyv0";
-import LemmyV1Client from "./providers/lemmyv1";
+// import LemmyV1Client from "./providers/lemmyv1";
 import PiefedClient from "./providers/piefed";
 import { Nodeinfo21Payload, resolveSoftware } from "./wellknown";
 
@@ -16,7 +16,7 @@ export default class ThreadiverseClient implements BaseClient {
    * Important: First match wins.
    */
   static get supportedSoftware() {
-    return [LemmyV1Client, LemmyV0Client, PiefedClient] as const;
+    return [LemmyV0Client, PiefedClient] as const;
   }
   get software(): ProviderInfo {
     if (
@@ -51,7 +51,8 @@ export default class ThreadiverseClient implements BaseClient {
     for (const Client of ThreadiverseClient.supportedSoftware) {
       if (
         Client.softwareName === software.name &&
-        (Client.softwareVersionRange === "*" ||
+        (software.version.startsWith("nightly") ||
+          Client.softwareVersionRange === "*" ||
           satisfies(software.version, Client.softwareVersionRange))
       ) {
         return Client;
