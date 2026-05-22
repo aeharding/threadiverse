@@ -5,27 +5,41 @@ import {
   BaseClientOptions,
   RequestOptions,
 } from "../../BaseClient";
-import { InvalidPayloadError, UnsupportedError } from "../../errors";
+import {
+  InvalidPayloadError,
+  PiefedResponseError,
+  UnsupportedError,
+} from "../../errors";
 import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
+import * as types from "../../types";
 import {
   ListPersonContent,
   ListPersonContentResponse,
   PostView,
 } from "../../types";
-import {
-  getInboxItemPublished,
-  getPostCommentItemCreatedDate,
-} from "../lemmyv0/helpers";
+import { getPostCommentItemCreatedDate } from "../lemmyv0/helpers";
 import * as compat from "./compat";
 import { components, paths } from "./schema";
 
 async function validateResponse(response: Response) {
   if (!response.ok) {
-    const data = await response.json();
-    if ("error" in data && typeof data.error === "string") {
-      throw new Error(data.error);
+    let code = response.statusText;
+    try {
+      const data: unknown = await response.json();
+      if (
+        data &&
+        typeof data === "object" &&
+        "error" in data &&
+        typeof data.error === "string"
+      ) {
+        code = data.error;
+      }
+    } catch {
+      // Non-JSON body (e.g., HTML error page from an upstream proxy).
+      // Fall back to statusText already set above.
     }
+    throw new PiefedResponseError(code, { status: response.status });
   }
 }
 
@@ -363,26 +377,69 @@ export class UnsafePiefedClient implements BaseClient {
   }
 
   async getNotifications(
-    ...params: Parameters<BaseClient["getNotifications"]>
+    payload: Parameters<BaseClient["getNotifications"]>[0],
+    options?: RequestOptions
   ): ReturnType<BaseClient["getNotifications"]> {
-    const [replies, mentions, privateMessages] = await Promise.all([
-      this.getReplies(...params),
-      this.getPersonMentions(...params),
-      this.getPrivateMessages(...params),
-    ]);
+    const fetchReplies = async (): Promise<types.NotificationView[]> => {
+      const response = await this.#client.GET("/api/alpha/user/replies", {
+        ...options,
+        params: { query: compat.fromPageParams(payload) },
+      });
+      return response.data!.replies.map(compat.toReplyNotificationView);
+    };
+    const fetchMentions = async (): Promise<types.NotificationView[]> => {
+      const response = await this.#client.GET("/api/alpha/user/mentions", {
+        ...options,
+        params: { query: compat.fromPageParams(payload) },
+      });
+      return response.data!.replies.map(compat.toMentionNotificationView);
+    };
+    const fetchMessages = async (): Promise<types.NotificationView[]> => {
+      const response = await this.#client.GET(
+        "/api/alpha/private_message/list",
+        {
+          ...options,
+          params: { query: compat.fromPageParams(payload) },
+        }
+      );
+      return response.data!.private_messages.map(
+        compat.toPrivateMessageNotificationView
+      );
+    };
 
-    const data = [
-      ...replies.data,
-      ...mentions.data,
-      ...privateMessages.data,
-    ].sort(
-      (a, b) =>
-        Date.parse(getInboxItemPublished(b)) -
-        Date.parse(getInboxItemPublished(a))
-    );
+    let data: types.NotificationView[];
+    switch (payload.type_) {
+      case "all":
+      case undefined: {
+        const [replies, mentions, messages] = await Promise.all([
+          fetchReplies(),
+          fetchMentions(),
+          fetchMessages(),
+        ]);
+        data = [...replies, ...mentions, ...messages].sort(
+          (a, b) =>
+            Date.parse(b.notification.published_at) -
+            Date.parse(a.notification.published_at)
+        );
+        break;
+      }
+      case "mention":
+        data = await fetchMentions();
+        break;
+      case "mod_action":
+      case "subscribed":
+        data = [];
+        break;
+      case "private_message":
+        data = await fetchMessages();
+        break;
+      case "reply":
+        data = await fetchReplies();
+        break;
+    }
 
     return {
-      ...compat.toPageResponse(params[0]),
+      ...compat.toPageResponse(payload),
       data,
     };
   }
@@ -400,21 +457,6 @@ export class UnsafePiefedClient implements BaseClient {
       ...response.data!,
       moderates: response.data!.moderates.map(compat.toCommunityModeratorView),
       person_view: compat.toPersonView(response.data!.person_view),
-    };
-  }
-
-  async getPersonMentions(
-    payload: Parameters<BaseClient["getPersonMentions"]>[0],
-    options?: RequestOptions
-  ): ReturnType<BaseClient["getPersonMentions"]> {
-    const response = await this.#client.GET("/api/alpha/user/mentions", {
-      ...options,
-      params: { query: compat.fromPageParams(payload) },
-    });
-
-    return {
-      ...compat.toPageResponse(payload),
-      data: response.data!.replies.map(compat.toPersonMentionView),
     };
   }
 
@@ -444,9 +486,13 @@ export class UnsafePiefedClient implements BaseClient {
         `Connected to piefed, ${payload.mode} is not supported`
       );
 
-    const query = cleanThreadiverseParams(
+    const { type_, ...rest } = cleanThreadiverseParams(
       compat.fromPageParams(payload)
-    ) satisfies paths["/api/alpha/post/list"]["get"]["parameters"]["query"];
+    );
+    const query = {
+      ...rest,
+      type_: compat.toListingType(type_),
+    } satisfies paths["/api/alpha/post/list"]["get"]["parameters"]["query"];
 
     const response = await this.#client.GET("/api/alpha/post/list", {
       ...options,
@@ -459,42 +505,12 @@ export class UnsafePiefedClient implements BaseClient {
     };
   }
 
-  async getPrivateMessages(
-    payload: Parameters<BaseClient["getPrivateMessages"]>[0],
-    options?: RequestOptions
-  ): ReturnType<BaseClient["getPrivateMessages"]> {
-    const response = await this.#client.GET("/api/alpha/private_message/list", {
-      ...options,
-      params: { query: compat.fromPageParams(payload) },
-    });
-
-    return {
-      ...compat.toPageResponse(payload),
-      data: response.data!.private_messages.map(compat.toPrivateMessageView),
-    };
-  }
-
   async getRandomCommunity(
     ..._params: Parameters<BaseClient["getRandomCommunity"]>
   ): ReturnType<BaseClient["getRandomCommunity"]> {
     throw new UnsupportedError(
       "Get random community is not supported by piefed"
     );
-  }
-
-  async getReplies(
-    payload: Parameters<BaseClient["getReplies"]>[0],
-    options?: RequestOptions
-  ): ReturnType<BaseClient["getReplies"]> {
-    const response = await this.#client.GET("/api/alpha/user/replies", {
-      ...options,
-      params: { query: compat.fromPageParams(payload) },
-    });
-
-    return {
-      ...compat.toPageResponse(payload),
-      data: response.data!.replies.map(compat.toCommentReplyView),
-    };
   }
 
   async getSite(options?: RequestOptions): ReturnType<BaseClient["getSite"]> {
@@ -737,27 +753,29 @@ export class UnsafePiefedClient implements BaseClient {
     await this.#client.POST("/api/alpha/user/mark_all_as_read", options);
   }
 
-  async markCommentReplyAsRead(
-    payload: Parameters<BaseClient["markCommentReplyAsRead"]>[0],
+  async markNotificationAsRead(
+    payload: Parameters<BaseClient["markNotificationAsRead"]>[0],
     options?: RequestOptions
-  ): ReturnType<BaseClient["markCommentReplyAsRead"]> {
-    await this.#client.POST("/api/alpha/comment/mark_as_read", {
-      ...options,
-      body: payload,
-    });
-  }
-
-  async markPersonMentionAsRead(
-    payload: Parameters<BaseClient["markPersonMentionAsRead"]>[0],
-    options?: RequestOptions
-  ): ReturnType<BaseClient["markPersonMentionAsRead"]> {
-    await this.#client.POST("/api/alpha/comment/mark_as_read", {
-      ...options,
-      body: {
-        comment_reply_id: payload.person_mention_id,
-        read: payload.read,
-      },
-    });
+  ): ReturnType<BaseClient["markNotificationAsRead"]> {
+    const { notification, read } = payload;
+    switch (notification.kind) {
+      case "mention":
+      case "reply":
+        await this.#client.POST("/api/alpha/comment/mark_as_read", {
+          ...options,
+          body: { comment_reply_id: notification.id, read },
+        });
+        return;
+      case "mod_action":
+      case "subscribed":
+        return;
+      case "private_message":
+        await this.#client.POST("/api/alpha/private_message/mark_as_read", {
+          ...options,
+          body: { private_message_id: notification.id, read },
+        });
+        return;
+    }
   }
 
   async markPostAsRead(
@@ -765,16 +783,6 @@ export class UnsafePiefedClient implements BaseClient {
     options?: RequestOptions
   ): ReturnType<BaseClient["markPostAsRead"]> {
     await this.#client.POST("/api/alpha/post/mark_as_read", {
-      ...options,
-      body: payload,
-    });
-  }
-
-  async markPrivateMessageAsRead(
-    payload: Parameters<BaseClient["markPrivateMessageAsRead"]>[0],
-    options?: RequestOptions
-  ): ReturnType<BaseClient["markPrivateMessageAsRead"]> {
-    await this.#client.POST("/api/alpha/private_message/mark_as_read", {
       ...options,
       body: payload,
     });

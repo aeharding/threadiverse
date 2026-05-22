@@ -11,7 +11,6 @@ export const PrivateMessage = z.object({
   id: z.number(),
   local: z.boolean(),
   published: z.string(),
-  read: z.boolean(),
   recipient_id: z.number(),
   updated: z.optional(z.string()),
 });

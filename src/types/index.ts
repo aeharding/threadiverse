@@ -2,18 +2,6 @@ import type { z } from "zod/v4-mini";
 
 import * as schemas from "../schemas";
 
-export type AdminPurgeComment = z.infer<typeof schemas.AdminPurgeComment>;
-export type AdminPurgeCommentView = z.infer<
-  typeof schemas.AdminPurgeCommentView
->;
-export type AdminPurgeCommunity = z.infer<typeof schemas.AdminPurgeCommunity>;
-export type AdminPurgeCommunityView = z.infer<
-  typeof schemas.AdminPurgeCommunityView
->;
-export type AdminPurgePerson = z.infer<typeof schemas.AdminPurgePerson>;
-export type AdminPurgePersonView = z.infer<typeof schemas.AdminPurgePersonView>;
-export type AdminPurgePost = z.infer<typeof schemas.AdminPurgePost>;
-export type AdminPurgePostView = z.infer<typeof schemas.AdminPurgePostView>;
 export type Comment = z.infer<typeof schemas.Comment>;
 export type CommentAggregates = z.infer<typeof schemas.CommentAggregates>;
 export type CommentReport = z.infer<typeof schemas.CommentReport>;
@@ -74,37 +62,11 @@ export type ListReportsResponse = z.infer<typeof schemas.ListReportsResponse>;
 export type ListSearchResponse = z.infer<typeof schemas.ListSearchResponse>;
 export type LocalSite = z.infer<typeof schemas.LocalSite>;
 export type LoginResponse = z.infer<typeof schemas.LoginResponse>;
-export type ModAdd = z.infer<typeof schemas.ModAdd>;
-export type ModAddCommunity = z.infer<typeof schemas.ModAddCommunity>;
-export type ModAddCommunityView = z.infer<typeof schemas.ModAddCommunityView>;
-export type ModAddView = z.infer<typeof schemas.ModAddView>;
-export type ModBan = z.infer<typeof schemas.ModBan>;
-export type ModBanFromCommunity = z.infer<typeof schemas.ModBanFromCommunity>;
-export type ModBanFromCommunityView = z.infer<
-  typeof schemas.ModBanFromCommunityView
->;
-export type ModBanView = z.infer<typeof schemas.ModBanView>;
-export type ModFeaturePost = z.infer<typeof schemas.ModFeaturePost>;
-export type ModFeaturePostView = z.infer<typeof schemas.ModFeaturePostView>;
-export type ModHideCommunity = z.infer<typeof schemas.ModHideCommunity>;
-export type ModHideCommunityView = z.infer<typeof schemas.ModHideCommunityView>;
-export type ModLockPost = z.infer<typeof schemas.ModLockPost>;
-export type ModLockPostView = z.infer<typeof schemas.ModLockPostView>;
+export type Modlog = z.infer<typeof schemas.Modlog>;
 export type ModlogItem = z.infer<typeof schemas.ModlogItem>;
-export type ModRemoveComment = z.infer<typeof schemas.ModRemoveComment>;
-export type ModRemoveCommentView = z.infer<typeof schemas.ModRemoveCommentView>;
-export type ModRemoveCommunity = z.infer<typeof schemas.ModRemoveCommunity>;
-export type ModRemoveCommunityView = z.infer<
-  typeof schemas.ModRemoveCommunityView
->;
-export type ModRemovePost = z.infer<typeof schemas.ModRemovePost>;
-export type ModRemovePostView = z.infer<typeof schemas.ModRemovePostView>;
-export type ModTransferCommunity = z.infer<typeof schemas.ModTransferCommunity>;
-export type ModTransferCommunityView = z.infer<
-  typeof schemas.ModTransferCommunityView
->;
+export type ModlogKind = z.infer<typeof schemas.ModlogKind>;
 export type MyUserInfo = z.infer<typeof schemas.MyUserInfo>;
-export type Notification = z.infer<typeof schemas.NotificationView>;
+export type Notification = z.infer<typeof schemas.Notification>;
 export type NotificationDataType = z.infer<typeof schemas.NotificationDataType>;
 export type NotificationView = z.infer<typeof schemas.NotificationView>;
 export type PagableResponse = z.infer<typeof schemas.PagableResponse>;

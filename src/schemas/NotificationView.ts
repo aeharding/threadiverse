@@ -7,6 +7,7 @@ import { PrivateMessageView } from "./PrivateMessageView";
 
 export const Notification = z.object({
   comment_id: z.optional(z.number()),
+  creator_id: z.number(),
   id: z.number(),
   kind: NotificationDataType,
   modlog_id: z.optional(z.number()),
@@ -20,13 +21,13 @@ export const Notification = z.object({
 export const NotificationView = z.object({
   data: z.discriminatedUnion("type_", [
     z.extend(CommentView, {
-      type_: "comment",
+      type_: z.literal("comment"),
     }),
     z.extend(PostView, {
-      type_: "post",
+      type_: z.literal("post"),
     }),
     z.extend(PrivateMessageView, {
-      type_: "private_message",
+      type_: z.literal("private_message"),
     }),
   ]),
   notification: Notification,

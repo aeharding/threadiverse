@@ -18,8 +18,8 @@ importers:
         specifier: npm:lemmy-js-client@0.20.0-alpha.18
         version: lemmy-js-client@0.20.0-alpha.18
       lemmy-js-client-v1:
-        specifier: npm:lemmy-js-client@1.0.0-api-updates-6.1
-        version: lemmy-js-client@1.0.0-api-updates-6.1
+        specifier: npm:lemmy-js-client@1.0.0-image-uploads-request.0
+        version: lemmy-js-client@1.0.0-image-uploads-request.0
       openapi-fetch:
         specifier: ^0.14.0
         version: 0.14.0
@@ -1502,8 +1502,8 @@ packages:
   lemmy-js-client@0.20.0-alpha.18:
     resolution: {integrity: sha512-oZy8DboTWfUar4mPWpi7SYrOEjTBJxkvd1e6QaVwoA5UhqQV1WhxEYbzrpi/gXnEokaVQ0i5sjtL/Y2PHMO3MQ==}
 
-  lemmy-js-client@1.0.0-api-updates-6.1:
-    resolution: {integrity: sha512-+1phRWmXZZHjBtwLi98KRtWjuyaWAkDC6DZiThGQcBsqnfyz9PDGuLfSAas2738+M3JiCre8pJ9tEiKPc4Rn2w==}
+  lemmy-js-client@1.0.0-image-uploads-request.0:
+    resolution: {integrity: sha512-SLngw08pE84vRB2xoY2Gjm0zyY8OPhK9n1RaZFqPuGGgp9EsO44Av5n/PUSzH2o1hkpFETi9EkGp0FQmC4Ibaw==}
 
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
@@ -3927,7 +3927,7 @@ snapshots:
 
   lemmy-js-client@0.20.0-alpha.18: {}
 
-  lemmy-js-client@1.0.0-api-updates-6.1:
+  lemmy-js-client@1.0.0-image-uploads-request.0:
     dependencies:
       '@tsoa/runtime': 6.6.0
     transitivePeerDependencies:

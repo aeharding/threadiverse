@@ -54,7 +54,7 @@ export function toCommunity(
     banner: community.banner ?? undefined,
     icon: community.icon ?? undefined,
     posting_restricted_to_mods: community.restricted_to_mods,
-    visibility: "Public" as const,
+    visibility: "public",
   };
 }
 
@@ -95,17 +95,60 @@ export function toGetCommunityResponse(
   };
 }
 
+export function toListingType(
+  listingType: types.ListingType | undefined
+):
+  | "All"
+  | "Local"
+  | "Moderating"
+  | "ModeratorView"
+  | "Popular"
+  | "Subscribed"
+  | undefined {
+  switch (listingType) {
+    case "all":
+      return "All";
+    case "local":
+      return "Local";
+    case "moderator_view":
+      return "ModeratorView";
+    case "subscribed":
+      return "Subscribed";
+    case undefined:
+      return undefined;
+  }
+}
+
 export function toLocalSite(
   site: components["schemas"]["Site"]
 ): types.LocalSite {
   return {
     captcha_enabled: false,
-    comment_downvotes: "All",
-    comment_upvotes: "All",
-    post_downvotes: "All",
-    post_upvotes: "All",
-    registration_mode: site.registration_mode!,
+    comment_downvotes: "all",
+    comment_upvotes: "all",
+    post_downvotes: "all",
+    post_upvotes: "all",
+    registration_mode: toRegistrationMode(site.registration_mode),
     require_email_verification: false,
+  };
+}
+
+export function toMentionNotificationView(
+  mention: components["schemas"]["CommentReplyView"]
+): types.NotificationView {
+  const commentView = toPersonMentionView(mention);
+  return {
+    data: { ...commentView, type_: "comment" } as types.NotificationView["data"],
+    notification: {
+      comment_id: mention.comment.id,
+      creator_id: mention.creator.id,
+      id: mention.comment_reply.id,
+      kind: "mention",
+      post_id: mention.post.id,
+      published_at: mention.comment_reply.published,
+      read: mention.comment_reply.read,
+      recipient_id: mention.recipient.id,
+    },
   };
 }
 
@@ -124,7 +167,7 @@ export function toPerson(
 
 export function toPersonMentionView(
   mention: components["schemas"]["CommentReplyView"]
-): types.PersonMentionView {
+) {
   return {
     ...mention,
     banned_from_community: false, // TODO isn't being returned rn
@@ -166,6 +209,23 @@ export function toPostView(
   };
 }
 
+export function toPrivateMessageNotificationView(
+  message: components["schemas"]["PrivateMessageView"]
+): types.NotificationView {
+  return {
+    data: { ...toPrivateMessageView(message), type_: "private_message" } as types.NotificationView["data"],
+    notification: {
+      creator_id: message.creator.id,
+      id: message.private_message.id,
+      kind: "private_message",
+      private_message_id: message.private_message.id,
+      published_at: message.private_message.published,
+      read: message.private_message.read,
+      recipient_id: message.recipient.id,
+    },
+  };
+}
+
 export function toPrivateMessageView(
   message: components["schemas"]["PrivateMessageView"]
 ) {
@@ -176,9 +236,42 @@ export function toPrivateMessageView(
   };
 }
 
+export function toReplyNotificationView(
+  reply: components["schemas"]["CommentReplyView"]
+): types.NotificationView {
+  const commentView = toCommentReplyView(reply);
+  return {
+    data: { ...commentView, type_: "comment" } as types.NotificationView["data"],
+    notification: {
+      comment_id: reply.comment.id,
+      creator_id: reply.creator.id,
+      id: reply.comment_reply.id,
+      kind: "reply",
+      post_id: reply.post.id,
+      published_at: reply.comment_reply.published,
+      read: reply.comment_reply.read,
+      recipient_id: reply.recipient.id,
+    },
+  };
+}
+
 export function toSite(site: components["schemas"]["Site"]): types.Site {
   return {
     ...site,
     icon: site.icon ?? undefined,
   };
+}
+
+function toRegistrationMode(
+  mode: components["schemas"]["Site"]["registration_mode"]
+): types.RegistrationMode {
+  switch (mode) {
+    case "Closed":
+      return "closed";
+    case "RequireApplication":
+      return "require_application";
+    case "Open":
+    default:
+      return "open";
+  }
 }

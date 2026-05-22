@@ -166,13 +166,6 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
       return schemas.GetPersonDetailsResponse.parse(response);
     }
 
-    async getPersonMentions(
-      ...params: Parameters<BaseClient["getPersonMentions"]>
-    ) {
-      const response = await super.getPersonMentions(...params);
-      return schemas.ListPersonMentionsResponse.parse(response);
-    }
-
     async getPost(...params: Parameters<BaseClient["getPost"]>) {
       const { post_view } = await super.getPost(...params);
       return { post_view: schemas.PostView.parse(post_view) };
@@ -183,23 +176,11 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
       return schemas.ListPostsResponse.parse(response);
     }
 
-    async getPrivateMessages(
-      ...params: Parameters<BaseClient["getPrivateMessages"]>
-    ) {
-      const response = await super.getPrivateMessages(...params);
-      return schemas.ListPrivateMessagesResponse.parse(response);
-    }
-
     async getRandomCommunity(
       ...params: Parameters<BaseClient["getRandomCommunity"]>
     ) {
       const { community_view } = await super.getRandomCommunity(...params);
       return { community_view: schemas.CommunityView.parse(community_view) };
-    }
-
-    async getReplies(...params: Parameters<BaseClient["getReplies"]>) {
-      const response = await super.getReplies(...params);
-      return schemas.ListRepliesResponse.parse(response);
     }
 
     async getSite(...params: Parameters<BaseClient["getSite"]>) {
@@ -294,26 +275,14 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
       return super.markAllAsRead(...params);
     }
 
-    async markCommentReplyAsRead(
-      ...params: Parameters<BaseClient["markCommentReplyAsRead"]>
+    async markNotificationAsRead(
+      ...params: Parameters<BaseClient["markNotificationAsRead"]>
     ) {
-      return super.markCommentReplyAsRead(...params);
-    }
-
-    async markPersonMentionAsRead(
-      ...params: Parameters<BaseClient["markPersonMentionAsRead"]>
-    ) {
-      return super.markPersonMentionAsRead(...params);
+      return super.markNotificationAsRead(...params);
     }
 
     async markPostAsRead(...params: Parameters<BaseClient["markPostAsRead"]>) {
       return super.markPostAsRead(...params);
-    }
-
-    async markPrivateMessageAsRead(
-      ...params: Parameters<BaseClient["markPrivateMessageAsRead"]>
-    ) {
-      return super.markPrivateMessageAsRead(...params);
     }
 
     async register(...params: Parameters<BaseClient["register"]>) {

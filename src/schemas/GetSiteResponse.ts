@@ -25,7 +25,7 @@ export const MyUserInfo = z.object({
   person_blocks: z.array(Person),
 });
 
-export const FederationMode = z.enum(["All", "Local", "Disable"]);
+export const FederationMode = z.enum(["all", "local", "disable"]);
 
 export const LocalSite = z.object({
   /**

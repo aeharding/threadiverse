@@ -240,6 +240,11 @@ export abstract class BaseClient {
 
   abstract markAllAsRead(options?: RequestOptions): Promise<void>;
 
+  abstract markNotificationAsRead(
+    payload: { notification: types.Notification; read: boolean },
+    options?: RequestOptions
+  ): Promise<void>;
+
   abstract markPostAsRead(
     payload: { post_ids: number[]; read: boolean },
     options?: RequestOptions
