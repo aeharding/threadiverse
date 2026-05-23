@@ -35,7 +35,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async banFromCommunity(
     payload: Parameters<BaseClient["banFromCommunity"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["banFromCommunity"]> {
     await unwrap(
       await this.#client.banFromCommunity(
@@ -43,8 +43,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
           ...payload,
           reason: payload.reason ?? DEFAULT_REASON,
         },
-        options
-      )
+        options,
+      ),
     );
   }
 
@@ -121,7 +121,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
     return {
       private_message_view: compat.toPrivateMessageView(
-        response.private_message_view
+        response.private_message_view,
       ),
     };
   }
@@ -144,13 +144,13 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async deleteImage(
     payload: Parameters<BaseClient["deleteImage"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["deleteImage"]> {
     await unwrap(
       await this.#client.deleteMedia(
         { filename: payload.url }, // delete_token is not needed. Lemmy verifies account ownership
-        options
-      )
+        options,
+      ),
     );
   }
 
@@ -222,18 +222,15 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async getComments(
     payload: Parameters<BaseClient["getComments"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getComments"]> {
     if (payload.mode && payload.mode !== "lemmyv1")
       throw new InvalidPayloadError(
-        `Connected to lemmyv1, ${payload.mode} is not supported`
+        `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
     const response = unwrap(
-      await this.#client.getComments(
-        compat.fromPageParams(payload),
-        options
-      )
+      await this.#client.getComments(compat.fromPageParams(payload), options),
     );
 
     return {
@@ -256,22 +253,19 @@ export class UnsafeLemmyV1Client implements BaseClient {
   }
 
   async getFederatedInstances(
-    _options?: RequestOptions
+    _options?: RequestOptions,
   ): ReturnType<BaseClient["getFederatedInstances"]> {
     throw new UnsupportedError(
-      "getFederatedInstances is not supported for Lemmy v1 (endpoint is now paginated)"
+      "getFederatedInstances is not supported for Lemmy v1 (endpoint is now paginated)",
     );
   }
 
   async getModlog(
     payload: Parameters<BaseClient["getModlog"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getModlog"]> {
     const response = unwrap(
-      await this.#client.getModlog(
-        compat.fromPageParams(payload),
-        options
-      )
+      await this.#client.getModlog(compat.fromPageParams(payload), options),
     );
 
     return {
@@ -283,13 +277,13 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async getNotifications(
     payload: Parameters<BaseClient["getNotifications"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getNotifications"]> {
     const response = unwrap(
       await this.#client.listNotifications(
         compat.fromPageParams(payload),
-        options
-      )
+        options,
+      ),
     );
 
     return {
@@ -325,15 +319,15 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async getPosts(
     payload: Parameters<BaseClient["getPosts"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["getPosts"]> {
     if (payload.mode && payload.mode !== "lemmyv1")
       throw new InvalidPayloadError(
-        `Connected to lemmyv1, ${payload.mode} is not supported`
+        `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
     const response = unwrap(
-      await this.#client.getPosts(compat.fromPageParams(payload), options)
+      await this.#client.getPosts(compat.fromPageParams(payload), options),
     );
 
     return {
@@ -366,7 +360,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
       my_user: myUserInfo ? compat.toMyUserInfo(myUserInfo) : undefined,
       site_view: compat.toSiteView(
         siteResponse.site_view,
-        siteResponse.captcha_enabled
+        siteResponse.captcha_enabled,
       ),
       version: siteResponse.version,
     };
@@ -412,7 +406,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async listCommentReports(
     payload: Parameters<BaseClient["listCommentReports"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["listCommentReports"]> {
     const response = unwrap(
       await this.#client.listReports(
@@ -420,15 +414,15 @@ export class UnsafeLemmyV1Client implements BaseClient {
           ...compat.fromPageParams(payload),
           type_: "comments",
         },
-        options
-      )
+        options,
+      ),
     );
 
     return {
       data: response.items
         .filter(
           (r): r is LemmyV1.CommentReportView & { type_: "comment" } =>
-            r.type_ === "comment"
+            r.type_ === "comment",
         )
         .map(compat.toCommentReportView),
       next_page: nullToUndefined(response.next_page),
@@ -438,18 +432,18 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async listCommunities(
     payload: Parameters<BaseClient["listCommunities"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["listCommunities"]> {
     if (payload.mode && payload.mode !== "lemmyv1")
       throw new InvalidPayloadError(
-        `Connected to lemmyv1, ${payload.mode} is not supported`
+        `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
     const response = unwrap(
       await this.#client.listCommunities(
         compat.fromPageParams(payload),
-        options
-      )
+        options,
+      ),
     );
 
     return {
@@ -461,7 +455,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async listPersonContent(
     payload: Parameters<BaseClient["listPersonContent"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonContent"]> {
     // Threadiverse exposes `type`; v1's wire schema is `type_` (Rust avoids
     // the reserved word). Same lowercase string values.
@@ -469,8 +463,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
     const response = unwrap(
       await this.#client.listPersonContent(
         { ...compat.fromPageParams(rest), type_: type },
-        options
-      )
+        options,
+      ),
     );
 
     return {
@@ -485,13 +479,13 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async listPersonLiked(
     payload: Parameters<BaseClient["listPersonLiked"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonLiked"]> {
     const response = unwrap(
       await this.#client.listPersonLiked(
         compat.fromPageParams(payload),
-        options
-      )
+        options,
+      ),
     );
 
     return {
@@ -510,13 +504,13 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async listPersonSaved(
     payload: Parameters<BaseClient["listPersonSaved"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonSaved"]> {
     const response = unwrap(
       await this.#client.listPersonSaved(
         compat.fromPageParams(payload),
-        options
-      )
+        options,
+      ),
     );
 
     return {
@@ -531,7 +525,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async listPostReports(
     payload: Parameters<BaseClient["listPostReports"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["listPostReports"]> {
     const response = unwrap(
       await this.#client.listReports(
@@ -539,15 +533,15 @@ export class UnsafeLemmyV1Client implements BaseClient {
           ...compat.fromPageParams(payload),
           type_: "posts",
         },
-        options
-      )
+        options,
+      ),
     );
 
     return {
       data: response.items
         .filter(
           (r): r is LemmyV1.PostReportView & { type_: "post" } =>
-            r.type_ === "post"
+            r.type_ === "post",
         )
         .map(compat.toPostReportView),
       next_page: nullToUndefined(response.next_page),
@@ -557,13 +551,10 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async listReports(
     payload: Parameters<BaseClient["listReports"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["listReports"]> {
     const response = unwrap(
-      await this.#client.listReports(
-        compat.fromPageParams(payload),
-        options
-      )
+      await this.#client.listReports(compat.fromPageParams(payload), options),
     );
 
     return {
@@ -575,7 +566,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async lockPost(
     payload: Parameters<BaseClient["lockPost"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["lockPost"]> {
     const response = unwrap(
       await this.#client.lockPost(
@@ -583,8 +574,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
           ...payload,
           reason: DEFAULT_REASON,
         },
-        options
-      )
+        options,
+      ),
     );
 
     return {
@@ -612,13 +603,13 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async markNotificationAsRead(
     payload: Parameters<BaseClient["markNotificationAsRead"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["markNotificationAsRead"]> {
     await unwrap(
       await this.#client.markNotificationAsRead(
         { notification_id: payload.notification.id, read: payload.read },
-        options
-      )
+        options,
+      ),
     );
   }
 
@@ -636,7 +627,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async removeComment(
     payload: Parameters<BaseClient["removeComment"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["removeComment"]> {
     const response = unwrap(
       await this.#client.removeComment(
@@ -644,8 +635,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
           ...payload,
           reason: payload.reason ?? DEFAULT_REASON,
         },
-        options
-      )
+        options,
+      ),
     );
 
     return {
@@ -655,7 +646,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async removePost(
     payload: Parameters<BaseClient["removePost"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["removePost"]> {
     const response = unwrap(
       await this.#client.removePost(
@@ -663,8 +654,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
           ...payload,
           reason: payload.reason ?? DEFAULT_REASON,
         },
-        options
-      )
+        options,
+      ),
     );
 
     return {
@@ -680,7 +671,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async resolveObject(
     payload: Parameters<BaseClient["resolveObject"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["resolveObject"]> {
     const result = unwrap(await this.#client.resolveObject(payload, options));
 
@@ -741,11 +732,11 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
   async search(
     payload: Parameters<BaseClient["search"]>[0],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): ReturnType<BaseClient["search"]> {
     if (payload.mode && payload.mode !== "lemmyv1")
       throw new InvalidPayloadError(
-        `Connected to lemmyv1, ${payload.mode} is not supported`
+        `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
     const fromPaged = compat.fromPageParams(payload);
@@ -765,8 +756,8 @@ export class UnsafeLemmyV1Client implements BaseClient {
           title_only: payload.title_only,
           type_: payload.type_,
         },
-        options
-      )
+        options,
+      ),
     );
 
     return {

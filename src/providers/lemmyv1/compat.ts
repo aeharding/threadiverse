@@ -45,9 +45,7 @@ export function toCommentView(v: LemmyV1.CommentView): types.CommentView {
   };
 }
 
-export function toCommunityView(
-  v: LemmyV1.CommunityView,
-): types.CommunityView {
+export function toCommunityView(v: LemmyV1.CommunityView): types.CommunityView {
   return {
     ...v,
     blocked: !!v.community_actions?.blocked_at,
@@ -58,28 +56,27 @@ export function toCommunityView(
 // Maps v1 ModlogKind values to threadiverse ModlogKind. Absent entries
 // (admin_allow_instance, admin_block_instance) are federation-related and
 // don't have a threadiverse equivalent yet.
-const MODLOG_KIND_MAP: Partial<Record<LemmyV1.ModlogKind, types.ModlogKind>> =
-  {
-    admin_add: "admin_add",
-    admin_ban: "admin_ban",
-    admin_feature_post_site: "admin_feature_post_site",
-    admin_purge_comment: "admin_purge_comment",
-    admin_purge_community: "admin_purge_community",
-    admin_purge_person: "admin_purge_person",
-    admin_purge_post: "admin_purge_post",
-    admin_remove_community: "admin_remove_community",
-    mod_add_to_community: "mod_add_to_community",
-    mod_ban_from_community: "mod_ban_from_community",
-    mod_change_community_visibility: "mod_change_community_visibility",
-    mod_feature_post_community: "mod_feature_post_community",
-    mod_lock_comment: "mod_lock_comment",
-    mod_lock_post: "mod_lock_post",
-    mod_remove_comment: "mod_remove_comment",
-    mod_remove_post: "mod_remove_post",
-    mod_transfer_community: "mod_transfer_community",
-    mod_warn_comment: "mod_warn_comment",
-    mod_warn_post: "mod_warn_post",
-  };
+const MODLOG_KIND_MAP: Partial<Record<LemmyV1.ModlogKind, types.ModlogKind>> = {
+  admin_add: "admin_add",
+  admin_ban: "admin_ban",
+  admin_feature_post_site: "admin_feature_post_site",
+  admin_purge_comment: "admin_purge_comment",
+  admin_purge_community: "admin_purge_community",
+  admin_purge_person: "admin_purge_person",
+  admin_purge_post: "admin_purge_post",
+  admin_remove_community: "admin_remove_community",
+  mod_add_to_community: "mod_add_to_community",
+  mod_ban_from_community: "mod_ban_from_community",
+  mod_change_community_visibility: "mod_change_community_visibility",
+  mod_feature_post_community: "mod_feature_post_community",
+  mod_lock_comment: "mod_lock_comment",
+  mod_lock_post: "mod_lock_post",
+  mod_remove_comment: "mod_remove_comment",
+  mod_remove_post: "mod_remove_post",
+  mod_transfer_community: "mod_transfer_community",
+  mod_warn_comment: "mod_warn_comment",
+  mod_warn_post: "mod_warn_post",
+};
 
 export function toModlogView(
   v: LemmyV1.ModlogView,
@@ -269,7 +266,7 @@ function toUnreadComments(
   // v1 sends JSON `null` (not omitted) when this field is unset on an
   // existing post_actions row. Use `== null` so both null and undefined
   // are treated as "user has never read the comments."
-   
+
   if (actions?.read_comments_at == null) return post.comments;
   return post.comments - (actions.read_comments_amount ?? 0);
 }
@@ -289,7 +286,6 @@ function toUnreadComments(
 function toVote(
   actions: LemmyV1.CommentActions | LemmyV1.PostActions | undefined,
 ): -1 | 1 | undefined {
-   
   if (actions?.vote_is_upvote == null) return undefined;
   return actions.vote_is_upvote ? 1 : -1;
 }

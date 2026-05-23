@@ -73,6 +73,7 @@ export type Person = z.infer<typeof schemas.Person>;
 export type PersonContentItem = z.infer<typeof schemas.PersonContentItem>;
 export type PersonMention = z.infer<typeof schemas.PersonMention>;
 export type PersonView = z.infer<typeof schemas.PersonView>;
+export type PiefedErrorResponse = z.infer<typeof schemas.PiefedErrorResponse>;
 export type Post = z.infer<typeof schemas.Post>;
 export type PostReport = z.infer<typeof schemas.PostReport>;
 export type PostReportView = z.infer<typeof schemas.PostReportView>;

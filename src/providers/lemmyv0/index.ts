@@ -265,7 +265,8 @@ export class UnsafeLemmyV0Client implements BaseClient {
   ): ReturnType<BaseClient["getFederatedInstances"]> {
     const response = await this.#client.getFederatedInstances(...params);
 
-    if (!response.federated_instances) return { federated_instances: undefined };
+    if (!response.federated_instances)
+      return { federated_instances: undefined };
 
     return {
       federated_instances: {
@@ -558,7 +559,10 @@ export class UnsafeLemmyV0Client implements BaseClient {
     options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonContent"]> {
     const response = await this.#client.getPersonDetails(
-      compat.fromPageParams(payload),
+      {
+        ...compat.fromPageParams(payload),
+        sort: "New",
+      },
       options,
     );
 
@@ -773,7 +777,9 @@ export class UnsafeLemmyV0Client implements BaseClient {
       community: response.community
         ? compat.toCommunityView(response.community)
         : undefined,
-      person: response.person ? compat.toPersonView(response.person) : undefined,
+      person: response.person
+        ? compat.toPersonView(response.person)
+        : undefined,
       post: response.post ? compat.toPostView(response.post) : undefined,
     };
   }

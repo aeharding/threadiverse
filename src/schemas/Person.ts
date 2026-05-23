@@ -6,6 +6,8 @@ export const Person = z.object({
    */
   ap_id: z.string(),
   avatar: z.optional(z.string()),
+  banner: z.optional(z.string()),
+  bio: z.optional(z.string()),
   bot_account: z.boolean(),
   comment_count: z.number(),
   deleted: z.boolean(),

@@ -1,3 +1,5 @@
+import { PiefedErrorResponse } from "./types";
+
 export class FediverseError extends Error {
   constructor(message: string, errorOptions?: ErrorOptions) {
     super(message, errorOptions);
@@ -50,9 +52,19 @@ export class LemmyResponseError extends ResponseError {
 
 /** Thrown when a PieFed server returns an error response. */
 export class PiefedResponseError extends ResponseError {
-  constructor(code: string, options?: { cause?: unknown; status?: number }) {
+  response?: PiefedErrorResponse;
+
+  constructor(
+    code: string,
+    options?: {
+      cause?: unknown;
+      response?: PiefedErrorResponse;
+      status?: number;
+    },
+  ) {
     super(code, options);
     this.name = "PiefedResponseError";
+    this.response = options?.response;
   }
 }
 

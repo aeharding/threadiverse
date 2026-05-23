@@ -3,7 +3,7 @@ import { ReportCombinedView as LemmyReportCombinedView } from "lemmy-js-client-v
 import { LemmyV1PostCommentReportOnly } from "./compat";
 
 export function isPostCommentReport(
-  report: LemmyReportCombinedView
+  report: LemmyReportCombinedView,
 ): report is LemmyV1PostCommentReportOnly {
   return report.type_ === "post" || report.type_ === "comment";
 }

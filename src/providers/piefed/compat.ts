@@ -208,6 +208,8 @@ export function toPerson(
   return {
     ap_id: person.actor_id,
     avatar: person.avatar ?? undefined,
+    banner: person.banner ?? undefined,
+    bio: person.about ?? undefined,
     bot_account: person.bot,
     comment_count: counts?.comment_count ?? 0,
     deleted: person.deleted,
@@ -404,9 +406,7 @@ function toPost(post: PiefedPost, counts: PiefedPostAggregates): types.Post {
   };
 }
 
-function toPrivateMessage(
-  message: PiefedPrivateMessage,
-): types.PrivateMessage {
+function toPrivateMessage(message: PiefedPrivateMessage): types.PrivateMessage {
   return {
     ap_id: message.ap_id,
     content: message.content,

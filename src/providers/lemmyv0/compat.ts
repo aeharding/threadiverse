@@ -201,9 +201,7 @@ export function toCommunityModeratorView(
   };
 }
 
-export function toCommunityView(
-  v: LemmyV0.CommunityView,
-): types.CommunityView {
+export function toCommunityView(v: LemmyV0.CommunityView): types.CommunityView {
   return {
     blocked: false,
     community: toCommunityWithCounts(v.community, v.counts),
