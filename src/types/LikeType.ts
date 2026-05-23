@@ -1,1 +1,1 @@
-export type LikeType = "Downvoted" | "Upvoted";
+export type LikeType = "disliked_only" | "liked_only";

@@ -5,16 +5,7 @@ export const ListPostsResponse = buildPagableResponse(schemas.PostView);
 export const ListCommentsResponse = buildPagableResponse(schemas.CommentView);
 export const ListModlogResponse = buildPagableResponse(schemas.ModlogItem);
 export const ListNotificationsResponse = buildPagableResponse(
-  schemas.Notification,
-);
-export const ListPersonMentionsResponse = buildPagableResponse(
-  schemas.PersonMentionView,
-);
-export const ListPrivateMessagesResponse = buildPagableResponse(
-  schemas.PrivateMessageView,
-);
-export const ListRepliesResponse = buildPagableResponse(
-  schemas.CommentReplyView,
+  schemas.NotificationView,
 );
 export const ListCommentReportsResponse = buildPagableResponse(
   schemas.CommentReportView,

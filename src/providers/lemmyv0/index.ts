@@ -7,15 +7,16 @@ import {
 } from "../../BaseClient";
 import {
   InvalidPayloadError,
+  LemmyResponseError,
   UnexpectedResponseError,
   UnsupportedError,
 } from "../../errors";
 import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
+import * as types from "../../types";
 import { ListPersonLikedResponse } from "../../types";
 import * as compat from "./compat";
 import {
-  getInboxItemPublished,
   getLogDate,
   getPostCommentItemCreatedDate,
   sortPostCommentByPublished,
@@ -31,13 +32,18 @@ export class UnsafeLemmyV0Client implements BaseClient {
   #client: LemmyV0.LemmyHttp;
 
   constructor(hostname: string, options: BaseClientOptions) {
-    this.#client = new LemmyV0.LemmyHttp(hostname, options);
+    this.#client = wrapLemmyV0Errors(new LemmyV0.LemmyHttp(hostname, options));
   }
 
   async banFromCommunity(
-    ...params: Parameters<BaseClient["banFromCommunity"]>
+    payload: Parameters<BaseClient["banFromCommunity"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["banFromCommunity"]> {
-    await this.#client.banFromCommunity(...params);
+    const { expires_at, ...rest } = payload;
+    await this.#client.banFromCommunity(
+      { ...rest, expires: expires_at },
+      options,
+    );
   }
 
   async blockCommunity(
@@ -60,7 +66,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
   async blockPerson(
     ...params: Parameters<BaseClient["blockPerson"]>
   ): ReturnType<BaseClient["blockPerson"]> {
-    return this.#client.blockPerson(...params);
+    const response = await this.#client.blockPerson(...params);
+
+    return {
+      person_view: compat.toPersonView(response.person_view),
+    };
   }
 
   async createComment(
@@ -98,7 +108,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
   async createPrivateMessage(
     ...params: Parameters<BaseClient["createPrivateMessage"]>
   ): ReturnType<BaseClient["createPrivateMessage"]> {
-    return this.#client.createPrivateMessage(...params);
+    const response = await this.#client.createPrivateMessage(...params);
+
+    return {
+      private_message_view: compat.toPrivateMessageView(
+        response.private_message_view,
+      ),
+    };
   }
 
   async createPrivateMessageReport(
@@ -171,9 +187,17 @@ export class UnsafeLemmyV0Client implements BaseClient {
   }
 
   async featurePost(
-    ...params: Parameters<BaseClient["featurePost"]>
+    payload: Parameters<BaseClient["featurePost"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["featurePost"]> {
-    const response = await this.#client.featurePost(...params);
+    const response = await this.#client.featurePost(
+      {
+        ...payload,
+        feature_type:
+          payload.feature_type === "community" ? "Community" : "Local",
+      },
+      options,
+    );
 
     return {
       post_view: compat.toPostView(response.post_view),
@@ -206,8 +230,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
+    const { type_, ...rest } = compat.fromPageParams(payload);
+
     const response = await this.#client.getComments(
-      cleanThreadiverseParams(compat.fromPageParams(payload)),
+      {
+        ...rest,
+        type_: compat.fromListingType(type_),
+      },
       options,
     );
 
@@ -234,7 +263,24 @@ export class UnsafeLemmyV0Client implements BaseClient {
   async getFederatedInstances(
     ...params: Parameters<BaseClient["getFederatedInstances"]>
   ): ReturnType<BaseClient["getFederatedInstances"]> {
-    return this.#client.getFederatedInstances(...params);
+    const response = await this.#client.getFederatedInstances(...params);
+
+    if (!response.federated_instances)
+      return { federated_instances: undefined };
+
+    return {
+      federated_instances: {
+        allowed: response.federated_instances.allowed.map(
+          compat.toInstanceWithFederationState,
+        ),
+        blocked: response.federated_instances.blocked.map(
+          compat.toInstanceWithFederationState,
+        ),
+        linked: response.federated_instances.linked.map(
+          compat.toInstanceWithFederationState,
+        ),
+      },
+    };
   }
 
   async getModlog(
@@ -251,6 +297,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
       data: Object.values(response)
         .flat()
         .map(compat.toModlogView)
+        .filter((m) => !!m)
         .sort((a, b) => Date.parse(getLogDate(b)) - Date.parse(getLogDate(a))),
     };
   }
@@ -259,23 +306,58 @@ export class UnsafeLemmyV0Client implements BaseClient {
     payload: Parameters<BaseClient["getNotifications"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["getNotifications"]> {
+    const { type_ } = payload;
     const params = compat.fromPageParams(payload);
 
-    const [replies, mentions, privateMessages] = await Promise.all([
-      this.getReplies(params, options),
-      this.getPersonMentions(params, options),
-      this.getPrivateMessages(params, options),
-    ]);
+    const fetchReplies = async (): Promise<types.NotificationView[]> => {
+      const res = await this.#client.getReplies(
+        { ...params, sort: "New" },
+        options,
+      );
+      return res.replies.map(compat.toReplyNotificationView);
+    };
+    const fetchMentions = async (): Promise<types.NotificationView[]> => {
+      const res = await this.#client.getPersonMentions(
+        { ...params, sort: "New" },
+        options,
+      );
+      return res.mentions.map(compat.toMentionNotificationView);
+    };
+    const fetchMessages = async (): Promise<types.NotificationView[]> => {
+      const res = await this.#client.getPrivateMessages(params, options);
+      return res.private_messages.map(compat.toPrivateMessageNotificationView);
+    };
 
-    const data = [
-      ...replies.data,
-      ...mentions.data,
-      ...privateMessages.data,
-    ].sort(
-      (a, b) =>
-        Date.parse(getInboxItemPublished(b)) -
-        Date.parse(getInboxItemPublished(a)),
-    );
+    let data: types.NotificationView[];
+    switch (type_) {
+      case "all":
+      case undefined: {
+        const [replies, mentions, messages] = await Promise.all([
+          fetchReplies(),
+          fetchMentions(),
+          fetchMessages(),
+        ]);
+        data = [...replies, ...mentions, ...messages].sort(
+          (a, b) =>
+            Date.parse(b.notification.published_at) -
+            Date.parse(a.notification.published_at),
+        );
+        break;
+      }
+      case "mention":
+        data = await fetchMentions();
+        break;
+      case "mod_action":
+      case "subscribed":
+        data = [];
+        break;
+      case "private_message":
+        data = await fetchMessages();
+        break;
+      case "reply":
+        data = await fetchReplies();
+        break;
+    }
 
     return {
       ...compat.toPageResponse(payload),
@@ -296,23 +378,8 @@ export class UnsafeLemmyV0Client implements BaseClient {
     );
 
     return {
-      ...response,
       moderates: response.moderates.map(compat.toCommunityModeratorView),
-    };
-  }
-
-  async getPersonMentions(
-    payload: Parameters<BaseClient["getPersonMentions"]>[0],
-    options?: RequestOptions,
-  ): ReturnType<BaseClient["getPersonMentions"]> {
-    const response = await this.#client.getPersonMentions(
-      { ...payload, sort: "New" },
-      options,
-    );
-
-    return {
-      ...compat.toPageResponse(payload),
-      data: response.mentions.map(compat.toMentionView),
+      person_view: compat.toPersonView(response.person_view),
     };
   }
 
@@ -339,12 +406,15 @@ export class UnsafeLemmyV0Client implements BaseClient {
     if (typeof page_cursor === "number")
       throw new InvalidPayloadError("page_cursor must be string");
 
+    const { type_, ...rest } = cleanThreadiverseParams(payload);
+
     const response = await this.#client.getPosts(
       {
         // Only endpoint in lemmy v0 that supports page_cursor
         // Do not call fromPageParams here!
-        ...cleanThreadiverseParams(payload),
+        ...rest,
         page_cursor,
+        type_: compat.fromListingType(type_),
       },
       options,
     );
@@ -359,21 +429,6 @@ export class UnsafeLemmyV0Client implements BaseClient {
     return [{ sort: "Top" }, { sort: "All" }] as const;
   }
 
-  async getPrivateMessages(
-    payload: Parameters<BaseClient["getPrivateMessages"]>[0],
-    options?: RequestOptions,
-  ): ReturnType<BaseClient["getPrivateMessages"]> {
-    const response = await this.#client.getPrivateMessages(
-      compat.fromPageParams(payload),
-      options,
-    );
-
-    return {
-      ...compat.toPageResponse(payload),
-      data: response.private_messages,
-    };
-  }
-
   async getRandomCommunity(
     ..._params: Parameters<BaseClient["getRandomCommunity"]>
   ): ReturnType<BaseClient["getRandomCommunity"]> {
@@ -382,32 +437,26 @@ export class UnsafeLemmyV0Client implements BaseClient {
     );
   }
 
-  async getReplies(
-    payload: Parameters<BaseClient["getReplies"]>[0],
-    options?: RequestOptions,
-  ): ReturnType<BaseClient["getReplies"]> {
-    const response = await this.#client.getReplies(
-      compat.fromPageParams({ ...payload, sort: "New" }),
-      options,
-    );
-
-    return {
-      ...compat.toPageResponse(payload),
-      data: response.replies.map(compat.toReplyView),
-    };
-  }
-
   async getSite(
     ...params: Parameters<BaseClient["getSite"]>
   ): ReturnType<BaseClient["getSite"]> {
     const site = await this.#client.getSite(...params);
 
     return {
-      ...site,
+      admins: site.admins.map(compat.toPersonView),
       my_user: site.my_user
         ? {
-            ...site.my_user,
             follows: site.my_user.follows.map(compat.toCommunityFollowerView),
+            local_user_view: {
+              local_user: {
+                admin: site.my_user.local_user_view.local_user.admin,
+                show_nsfw: site.my_user.local_user_view.local_user.show_nsfw,
+              },
+              person: compat.toPerson(
+                site.my_user.local_user_view.person,
+                site.my_user.local_user_view.counts,
+              ),
+            },
             moderates: site.my_user.moderates.map(
               compat.toCommunityModeratorView,
             ),
@@ -415,9 +464,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
           }
         : undefined,
       site_view: {
-        ...site.site_view,
-        local_site: compat.toLocalSite(site.site_view.local_site),
+        local_site: compat.toLocalSite(
+          site.site_view.local_site,
+          site.site_view.counts,
+        ),
+        site: compat.toSite(site.site_view.site),
       },
+      version: site.version,
     };
   }
 
@@ -434,9 +487,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
   }
 
   async likeComment(
-    ...params: Parameters<BaseClient["likeComment"]>
+    payload: Parameters<BaseClient["likeComment"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["likeComment"]> {
-    const response = await this.#client.likeComment(...params);
+    const response = await this.#client.likeComment(
+      { comment_id: payload.comment_id, score: toScore(payload.is_upvote) },
+      options,
+    );
 
     return {
       comment_view: compat.toCommentView(response.comment_view),
@@ -444,9 +501,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
   }
 
   async likePost(
-    ...params: Parameters<BaseClient["likePost"]>
+    payload: Parameters<BaseClient["likePost"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["likePost"]> {
-    const response = await this.#client.likePost(...params);
+    const response = await this.#client.likePost(
+      { post_id: payload.post_id, score: toScore(payload.is_upvote) },
+      options,
+    );
 
     return {
       post_view: compat.toPostView(response.post_view),
@@ -477,8 +538,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
+    const { type_, ...rest } = compat.fromPageParams(payload);
+
     const response = await this.#client.listCommunities(
-      cleanThreadiverseParams(compat.fromPageParams(payload)),
+      {
+        ...rest,
+        type_: compat.fromListingType(type_),
+      },
       options,
     );
 
@@ -502,7 +568,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
     const data = (() => {
       switch (payload.type) {
-        case "All":
+        case "all":
         case undefined:
           return [
             ...response.posts.map(compat.toPostView),
@@ -512,9 +578,9 @@ export class UnsafeLemmyV0Client implements BaseClient {
               getPostCommentItemCreatedDate(b) -
               getPostCommentItemCreatedDate(a),
           );
-        case "Comments":
+        case "comments":
           return response.comments.map(compat.toCommentView);
-        case "Posts":
+        case "posts":
           return response.posts.map(compat.toPostView);
       }
     })();
@@ -526,13 +592,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
   }
 
   async listPersonLiked(
-    { type, ...payload }: Parameters<BaseClient["listPersonLiked"]>[0],
+    { like_type, ...payload }: Parameters<BaseClient["listPersonLiked"]>[0],
     options?: RequestOptions,
   ): Promise<ListPersonLikedResponse> {
     const v0Payload: LemmyV0.GetComments & LemmyV0.GetPosts = {
       ...compat.fromPageParams(payload),
-      disliked_only: type === "Downvoted",
-      liked_only: type === "Upvoted",
+      disliked_only: like_type === "disliked_only",
+      liked_only: like_type === "liked_only",
       show_read: true,
     };
 
@@ -630,28 +696,40 @@ export class UnsafeLemmyV0Client implements BaseClient {
     await this.#client.markAllAsRead(...params);
   }
 
-  async markCommentReplyAsRead(
-    ...params: Parameters<BaseClient["markCommentReplyAsRead"]>
-  ): ReturnType<BaseClient["markCommentReplyAsRead"]> {
-    await this.#client.markCommentReplyAsRead(...params);
-  }
-
-  async markPersonMentionAsRead(
-    ...params: Parameters<BaseClient["markPersonMentionAsRead"]>
-  ): ReturnType<BaseClient["markPersonMentionAsRead"]> {
-    await this.#client.markPersonMentionAsRead(...params);
+  async markNotificationAsRead(
+    payload: Parameters<BaseClient["markNotificationAsRead"]>[0],
+    options?: RequestOptions,
+  ): ReturnType<BaseClient["markNotificationAsRead"]> {
+    const { notification, read } = payload;
+    switch (notification.kind) {
+      case "mention":
+        await this.#client.markPersonMentionAsRead(
+          { person_mention_id: notification.id, read },
+          options,
+        );
+        return;
+      case "mod_action":
+      case "subscribed":
+        return;
+      case "private_message":
+        await this.#client.markPrivateMessageAsRead(
+          { private_message_id: notification.id, read },
+          options,
+        );
+        return;
+      case "reply":
+        await this.#client.markCommentReplyAsRead(
+          { comment_reply_id: notification.id, read },
+          options,
+        );
+        return;
+    }
   }
 
   async markPostAsRead(
     ...params: Parameters<BaseClient["markPostAsRead"]>
   ): ReturnType<BaseClient["markPostAsRead"]> {
     await this.#client.markPostAsRead(...params);
-  }
-
-  async markPrivateMessageAsRead(
-    ...params: Parameters<BaseClient["markPrivateMessageAsRead"]>
-  ): ReturnType<BaseClient["markPrivateMessageAsRead"]> {
-    await this.#client.markPrivateMessageAsRead(...params);
   }
 
   async register(
@@ -693,12 +771,14 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.resolveObject(payload, options);
 
     return {
-      ...response,
       comment: response.comment
         ? compat.toCommentView(response.comment)
         : undefined,
       community: response.community
         ? compat.toCommunityView(response.community)
+        : undefined,
+      person: response.person
+        ? compat.toPersonView(response.person)
         : undefined,
       post: response.post ? compat.toPostView(response.post) : undefined,
     };
@@ -745,8 +825,16 @@ export class UnsafeLemmyV0Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
+    const { listing_type, search_term, type_, ...rest } =
+      compat.fromPageParams(payload);
+
     const response = await this.#client.search(
-      cleanThreadiverseParams(compat.fromPageParams(payload)),
+      {
+        ...rest,
+        listing_type: compat.fromListingType(listing_type),
+        q: search_term,
+        type_: compat.fromSearchType(type_),
+      },
       options,
     );
 
@@ -756,19 +844,15 @@ export class UnsafeLemmyV0Client implements BaseClient {
         ...response.comments.map(compat.toCommentView),
         ...response.posts.map(compat.toPostView),
         ...response.communities.map(compat.toCommunityView),
-        ...response.users,
+        ...response.users.map(compat.toPersonView),
       ],
     };
   }
 
   async uploadImage(
-    payload: Parameters<BaseClient["uploadImage"]>[0],
-    options?: RequestOptions,
+    ...params: Parameters<BaseClient["uploadImage"]>
   ): ReturnType<BaseClient["uploadImage"]> {
-    const response = await this.#client.uploadImage(
-      { image: payload.file },
-      options,
-    );
+    const response = await this.#client.uploadImage(...params);
 
     const fileResponse = response.files?.[0];
 
@@ -781,6 +865,51 @@ export class UnsafeLemmyV0Client implements BaseClient {
       url: response.url,
     };
   }
+}
+
+/**
+ * v0 uses a tri-state `score: 1 | 0 | -1`; threadiverse exposes v1's
+ * `is_upvote?: boolean` (true=upvote, false=downvote, undefined=clear).
+ */
+function toScore(is_upvote: boolean | undefined): number {
+  if (is_upvote === true) return 1;
+  if (is_upvote === false) return -1;
+  return 0;
+}
+
+/**
+ * Wrap every method on the lemmy-js-client-v0 instance so that any thrown
+ * `Error` (whose `.message` carries the server error code) becomes a
+ * `LemmyResponseError`. Consumers can then `instanceof LemmyResponseError`
+ * uniformly across v0 and v1, and the original error is preserved as `.cause`.
+ */
+function wrapLemmyV0Errors(client: LemmyV0.LemmyHttp): LemmyV0.LemmyHttp {
+  // The v0 client throws `new Error(json.error ?? statusText)` for server
+  // error responses — i.e. plain `Error`, not a subclass. Transport-level
+  // failures (e.g. `TypeError("Failed to fetch")` from the network) bubble up
+  // as their own subclass and should NOT be coerced into `LemmyResponseError`,
+  // which is reserved for actual server responses.
+  function normalize(err: unknown): never {
+    if (
+      err instanceof Error &&
+      err.constructor === Error &&
+      !(err instanceof LemmyResponseError) &&
+      err.message
+    ) {
+      throw new LemmyResponseError(err.message, { cause: err });
+    }
+    throw err;
+  }
+  return new Proxy(client, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== "function") return value;
+      return (...args: unknown[]) => {
+        const result = Reflect.apply(value, target, args);
+        return result instanceof Promise ? result.catch(normalize) : result;
+      };
+    },
+  });
 }
 
 export default buildSafeClient(UnsafeLemmyV0Client);

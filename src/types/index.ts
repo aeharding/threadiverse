@@ -2,27 +2,11 @@ import type { z } from "zod/v4-mini";
 
 import * as schemas from "../schemas";
 
-export type AdminPurgeComment = z.infer<typeof schemas.AdminPurgeComment>;
-export type AdminPurgeCommentView = z.infer<
-  typeof schemas.AdminPurgeCommentView
->;
-export type AdminPurgeCommunity = z.infer<typeof schemas.AdminPurgeCommunity>;
-export type AdminPurgeCommunityView = z.infer<
-  typeof schemas.AdminPurgeCommunityView
->;
-export type AdminPurgePerson = z.infer<typeof schemas.AdminPurgePerson>;
-export type AdminPurgePersonView = z.infer<typeof schemas.AdminPurgePersonView>;
-export type AdminPurgePost = z.infer<typeof schemas.AdminPurgePost>;
-export type AdminPurgePostView = z.infer<typeof schemas.AdminPurgePostView>;
 export type Comment = z.infer<typeof schemas.Comment>;
-export type CommentAggregates = z.infer<typeof schemas.CommentAggregates>;
-export type CommentReply = z.infer<typeof schemas.CommentReply>;
-export type CommentReplyView = z.infer<typeof schemas.CommentReplyView>;
 export type CommentReport = z.infer<typeof schemas.CommentReport>;
 export type CommentReportView = z.infer<typeof schemas.CommentReportView>;
 export type CommentView = z.infer<typeof schemas.CommentView>;
 export type Community = z.infer<typeof schemas.Community>;
-export type CommunityAggregates = z.infer<typeof schemas.CommunityAggregates>;
 export type CommunityFollowerView = z.infer<
   typeof schemas.CommunityFollowerView
 >;
@@ -68,66 +52,33 @@ export type ListPersonContentResponse = z.infer<
 export type ListPersonLikedResponse = z.infer<
   typeof schemas.ListPersonLikedResponse
 >;
-export type ListPersonMentionsResponse = z.infer<
-  typeof schemas.ListPersonMentionsResponse
->;
 export type ListPostReportsResponse = z.infer<
   typeof schemas.ListPostReportsResponse
 >;
 export type ListPostsResponse = z.infer<typeof schemas.ListPostsResponse>;
-export type ListPrivateMessagesResponse = z.infer<
-  typeof schemas.ListPrivateMessagesResponse
->;
-export type ListRepliesResponse = z.infer<typeof schemas.ListRepliesResponse>;
 export type ListReportsResponse = z.infer<typeof schemas.ListReportsResponse>;
 export type ListSearchResponse = z.infer<typeof schemas.ListSearchResponse>;
 export type LocalSite = z.infer<typeof schemas.LocalSite>;
 export type LoginResponse = z.infer<typeof schemas.LoginResponse>;
-export type ModAdd = z.infer<typeof schemas.ModAdd>;
-export type ModAddCommunity = z.infer<typeof schemas.ModAddCommunity>;
-export type ModAddCommunityView = z.infer<typeof schemas.ModAddCommunityView>;
-export type ModAddView = z.infer<typeof schemas.ModAddView>;
-export type ModBan = z.infer<typeof schemas.ModBan>;
-export type ModBanFromCommunity = z.infer<typeof schemas.ModBanFromCommunity>;
-export type ModBanFromCommunityView = z.infer<
-  typeof schemas.ModBanFromCommunityView
->;
-export type ModBanView = z.infer<typeof schemas.ModBanView>;
-export type ModFeaturePost = z.infer<typeof schemas.ModFeaturePost>;
-export type ModFeaturePostView = z.infer<typeof schemas.ModFeaturePostView>;
-export type ModHideCommunity = z.infer<typeof schemas.ModHideCommunity>;
-export type ModHideCommunityView = z.infer<typeof schemas.ModHideCommunityView>;
-export type ModLockPost = z.infer<typeof schemas.ModLockPost>;
-export type ModLockPostView = z.infer<typeof schemas.ModLockPostView>;
+export type Modlog = z.infer<typeof schemas.Modlog>;
 export type ModlogItem = z.infer<typeof schemas.ModlogItem>;
-export type ModRemoveComment = z.infer<typeof schemas.ModRemoveComment>;
-export type ModRemoveCommentView = z.infer<typeof schemas.ModRemoveCommentView>;
-export type ModRemoveCommunity = z.infer<typeof schemas.ModRemoveCommunity>;
-export type ModRemoveCommunityView = z.infer<
-  typeof schemas.ModRemoveCommunityView
->;
-export type ModRemovePost = z.infer<typeof schemas.ModRemovePost>;
-export type ModRemovePostView = z.infer<typeof schemas.ModRemovePostView>;
-export type ModTransferCommunity = z.infer<typeof schemas.ModTransferCommunity>;
-export type ModTransferCommunityView = z.infer<
-  typeof schemas.ModTransferCommunityView
->;
+export type ModlogKind = z.infer<typeof schemas.ModlogKind>;
 export type MyUserInfo = z.infer<typeof schemas.MyUserInfo>;
 export type Notification = z.infer<typeof schemas.Notification>;
+export type NotificationDataType = z.infer<typeof schemas.NotificationDataType>;
+export type NotificationView = z.infer<typeof schemas.NotificationView>;
 export type PagableResponse = z.infer<typeof schemas.PagableResponse>;
 export type PageCursor = z.infer<typeof schemas.PageCursor>;
 export type Person = z.infer<typeof schemas.Person>;
-export type PersonAggregates = z.infer<typeof schemas.PersonAggregates>;
 export type PersonContentItem = z.infer<typeof schemas.PersonContentItem>;
 export type PersonMention = z.infer<typeof schemas.PersonMention>;
-export type PersonMentionView = z.infer<typeof schemas.PersonMentionView>;
 export type PersonView = z.infer<typeof schemas.PersonView>;
 export type PiefedErrorResponse = z.infer<typeof schemas.PiefedErrorResponse>;
 export type Post = z.infer<typeof schemas.Post>;
-export type PostAggregates = z.infer<typeof schemas.PostAggregates>;
 export type PostReport = z.infer<typeof schemas.PostReport>;
 export type PostReportView = z.infer<typeof schemas.PostReportView>;
 export type PostView = z.infer<typeof schemas.PostView>;
+export type PrivateMessage = z.infer<typeof schemas.PrivateMessage>;
 export type PrivateMessageView = z.infer<typeof schemas.PrivateMessageView>;
 export type RegistrationMode = z.infer<typeof schemas.RegistrationMode>;
 export type ResolveObjectResponse = z.infer<
@@ -135,7 +86,6 @@ export type ResolveObjectResponse = z.infer<
 >;
 export type SearchItem = z.infer<typeof schemas.SearchItem>;
 export type Site = z.infer<typeof schemas.Site>;
-export type SiteAggregates = z.infer<typeof schemas.SiteAggregates>;
 export type SiteView = z.infer<typeof schemas.SiteView>;
 export type SubscribedType = z.infer<typeof schemas.SubscribedType>;
 export type UploadImageResponse = z.infer<typeof schemas.UploadImageResponse>;
@@ -154,11 +104,9 @@ export type * from "./EditPost";
 export type * from "./GetComments";
 export type * from "./GetCommunity";
 export type * from "./GetModlog";
-export type * from "./GetPersonMentions";
+export type * from "./GetNotifications";
 export type * from "./GetPost";
 export type * from "./GetPosts";
-export type * from "./GetPrivateMessages";
-export type * from "./GetReplies";
 export type * from "./LikeType";
 export type * from "./ListCommunities";
 export type * from "./ListPersonContent";

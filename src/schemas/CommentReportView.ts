@@ -2,12 +2,12 @@ import { z } from "zod/v4-mini";
 
 import { Comment } from "./Comment";
 import { CommentReport } from "./CommentReport";
-import { CommentAggregates } from "./CommentView";
 import { Community } from "./Community";
 import { Person } from "./Person";
 import { Post } from "./Post";
 import { SubscribedType } from "./SubscribedType";
 import { Vote } from "./Vote";
+
 /**
  * A comment report view.
  */
@@ -16,7 +16,6 @@ export const CommentReportView = z.object({
   comment_creator: Person,
   comment_report: CommentReport,
   community: Community,
-  counts: CommentAggregates,
   creator: Person,
   creator_banned_from_community: z.boolean(),
   creator_blocked: z.boolean(),

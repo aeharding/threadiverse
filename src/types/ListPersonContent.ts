@@ -8,5 +8,5 @@ import { PageParams } from "./PageParams";
 export type ListPersonContent = PageParams & {
   page_back?: boolean;
   person_id?: number;
-  type?: "All" | "Comments" | "Posts";
+  type?: "all" | "comments" | "posts";
 };

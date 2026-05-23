@@ -1,659 +1,291 @@
 import type * as LemmyV1 from "lemmy-js-client-v1";
 
 import { InvalidPayloadError } from "../../errors";
+import { cleanThreadiverseParams } from "../../helpers";
 import * as types from "../../types";
 
 // TODO Temporary until we support other types
 export type LemmyV1PostCommentReportOnly =
-  | (LemmyV1.CommentReportView & { type_: "Comment" })
-  | (LemmyV1.PostReportView & { type_: "Post" });
+  | (LemmyV1.CommentReportView & { type_: "comment" })
+  | (LemmyV1.PostReportView & { type_: "post" });
 
 export function fromPageParams<const T extends types.PageParams>(
   params: T,
-): Omit<T, "page_cursor"> & { page_cursor?: string } {
+): Omit<Omit<T, "mode">, "page_cursor"> & { page_cursor?: string } {
   if (typeof params.page_cursor === "number")
     throw new InvalidPayloadError("page_cursor must be string in lemmyv1");
 
+  const { page_cursor, ...rest } = cleanThreadiverseParams(params);
   return {
-    ...params,
-    page_cursor: params.page_cursor,
-  };
-}
-
-export function toCommentMentionView(
-  personMentionView: LemmyV1.PersonCommentMentionView,
-): types.PersonMentionView {
-  return {
-    ...personMentionView,
-    banned_from_community:
-      !!personMentionView.community_actions?.ban_expires_at,
-    comment: toComment(personMentionView.comment),
-    community: toCommunity(personMentionView.community),
-    counts: toCommentCounts(personMentionView.comment),
-    creator: toPerson(personMentionView.creator),
-    creator_banned_from_community:
-      !!personMentionView.community_actions?.ban_expires_at,
-    creator_blocked: !!personMentionView.person_actions?.blocked_at,
-    person_mention: {
-      ...personMentionView.person_comment_mention,
-      published: personMentionView.person_comment_mention.published_at,
-    },
-    post: toPost(personMentionView.post),
-    recipient: toPerson(personMentionView.recipient),
-    saved: !!personMentionView.comment_actions?.saved_at,
-    subscribed: toFollowState(
-      personMentionView.community_actions?.follow_state,
-    ),
-  };
-}
-
-export function toCommentReplyView(
-  commentReply: LemmyV1.CommentReplyView,
-): types.CommentReplyView {
-  return {
-    ...commentReply,
-    banned_from_community: !!commentReply.community_actions?.ban_expires_at,
-    comment: toComment(commentReply.comment),
-    comment_reply: {
-      ...commentReply.comment_reply,
-      published: commentReply.comment_reply.published_at,
-    },
-    community: toCommunity(commentReply.community),
-    counts: toCommentCounts(commentReply.comment),
-    creator: toPerson(commentReply.creator),
-    creator_blocked: !!commentReply.person_actions?.blocked_at,
-    post: toPost(commentReply.post),
-    recipient: toPerson(commentReply.recipient),
-    saved: !!commentReply.comment_actions?.saved_at,
-    subscribed: toFollowState(commentReply.community_actions?.follow_state),
+    ...rest,
+    page_cursor: page_cursor as string | undefined,
   };
 }
 
 export function toCommentReportView(
-  commentReport: LemmyV1.CommentReportView,
+  v: LemmyV1.CommentReportView,
 ): types.CommentReportView {
   return {
-    ...commentReport,
-    comment: toComment(commentReport.comment),
-    comment_creator: toPerson(commentReport.comment_creator),
-    comment_report: {
-      ...commentReport.comment_report,
-      published: commentReport.comment_report.published_at,
-    },
-    community: toCommunity(commentReport.community),
-    counts: toCommentCounts(commentReport.comment),
-    creator: toPerson(commentReport.creator),
-    creator_banned_from_community:
-      !!commentReport.community_actions?.ban_expires_at,
-    creator_blocked: !!commentReport.person_actions?.blocked_at,
-    creator_is_moderator: false,
-    my_vote: commentReport.comment_actions?.like_score,
-    post: toPost(commentReport.post),
-    resolver: commentReport.resolver
-      ? toPerson(commentReport.resolver)
-      : undefined,
-    saved: !!commentReport.comment_actions?.saved_at,
-    subscribed: toFollowState(commentReport.community_actions?.follow_state),
+    ...v,
+    creator_banned_from_community: !!v.community_actions?.ban_expires_at,
+    creator_blocked: !!v.person_actions?.blocked_at,
+    my_vote: toVote(v.comment_actions),
+    saved: !!v.comment_actions?.saved_at,
+    subscribed: toFollowState(v.community_actions?.follow_state),
   };
 }
 
-export function toCommentView(
-  commentView: LemmyV1.CommentView,
-): types.CommentView {
+export function toCommentView(v: LemmyV1.CommentView): types.CommentView {
   return {
-    ...commentView,
-    banned_from_community: !!commentView.community_actions?.ban_expires_at,
-    comment: toComment(commentView.comment),
-    community: toCommunity(commentView.community),
-    counts: toCommentCounts(commentView.comment),
-    creator: toPerson(commentView.creator),
-    post: toPost(commentView.post),
-    subscribed: toFollowState(commentView.community_actions?.follow_state),
-    ...toCommentViewActions(commentView.comment_actions),
+    ...v,
+    banned_from_community: !!v.community_actions?.ban_expires_at,
+    my_vote: toVote(v.comment_actions),
+    saved: !!v.comment_actions?.saved_at,
+    subscribed: toFollowState(v.community_actions?.follow_state),
   };
 }
 
-export function toCommunityCounts(
-  community: LemmyV1.Community,
-): types.CommunityAggregates {
+export function toCommunityView(v: LemmyV1.CommunityView): types.CommunityView {
   return {
-    comments: community.comments,
-    posts: community.posts,
-    subscribers: community.subscribers,
-    subscribers_local: community.subscribers_local,
-    users_active_day: community.users_active_day,
-    users_active_half_year: community.users_active_half_year,
-    users_active_month: community.users_active_month,
-    users_active_week: community.users_active_week,
+    ...v,
+    blocked: !!v.community_actions?.blocked_at,
+    subscribed: toFollowState(v.community_actions?.follow_state),
   };
 }
 
-export function toCommunityModeratorView(
-  communityModerator: LemmyV1.CommunityModeratorView,
-): types.CommunityModeratorView {
-  return {
-    ...communityModerator,
-    community: toCommunity(communityModerator.community),
-    moderator: toPerson(communityModerator.moderator),
-  };
-}
-
-export function toCommunityView(
-  communityView: LemmyV1.CommunityView,
-): types.CommunityView {
-  return {
-    ...communityView,
-    community: toCommunity(communityView.community),
-    counts: toCommunityCounts(communityView.community),
-    ...toViewUserActions(communityView.community_actions),
-  };
-}
-
-export function toFederatedInstances(
-  federatedInstances: LemmyV1.FederatedInstances,
-): types.FederatedInstances {
-  return {
-    ...federatedInstances,
-    allowed: federatedInstances.allowed.map(toInstanceWithFederationState),
-    blocked: federatedInstances.blocked.map(toInstanceWithFederationState),
-    linked: federatedInstances.linked.map(toInstanceWithFederationState),
-  };
-}
-
-export function toInboxCombinedView(
-  inboxItem: LemmyV1.InboxCombinedView,
-): types.Notification | undefined {
-  switch (inboxItem.type_) {
-    case "CommentMention":
-      return toCommentMentionView(inboxItem);
-    case "CommentReply":
-      return toCommentReplyView(inboxItem);
-    case "PrivateMessage":
-      return toPrivateMessageView(inboxItem);
-    default:
-      return; // TODO support other inbox items
-  }
-}
+// Maps v1 ModlogKind values to threadiverse ModlogKind. Absent entries
+// (admin_allow_instance, admin_block_instance) are federation-related and
+// don't have a threadiverse equivalent yet.
+const MODLOG_KIND_MAP: Partial<Record<LemmyV1.ModlogKind, types.ModlogKind>> = {
+  admin_add: "admin_add",
+  admin_ban: "admin_ban",
+  admin_feature_post_site: "admin_feature_post_site",
+  admin_purge_comment: "admin_purge_comment",
+  admin_purge_community: "admin_purge_community",
+  admin_purge_person: "admin_purge_person",
+  admin_purge_post: "admin_purge_post",
+  admin_remove_community: "admin_remove_community",
+  mod_add_to_community: "mod_add_to_community",
+  mod_ban_from_community: "mod_ban_from_community",
+  mod_change_community_visibility: "mod_change_community_visibility",
+  mod_feature_post_community: "mod_feature_post_community",
+  mod_lock_comment: "mod_lock_comment",
+  mod_lock_post: "mod_lock_post",
+  mod_remove_comment: "mod_remove_comment",
+  mod_remove_post: "mod_remove_post",
+  mod_transfer_community: "mod_transfer_community",
+  mod_warn_comment: "mod_warn_comment",
+  mod_warn_post: "mod_warn_post",
+};
 
 export function toModlogView(
-  modlog: LemmyV1.ModlogCombinedView,
+  v: LemmyV1.ModlogView,
 ): types.ModlogItem | undefined {
-  switch (modlog.type_) {
-    case "AdminAllowInstance":
-    case "AdminBlockInstance":
-    case "ModChangeCommunityVisibility":
-      return undefined; // Currently Threadiverse doesn't support these types
-    case "AdminPurgeComment":
-      return toAdminPurgeCommentView(modlog);
-    case "AdminPurgeCommunity":
-      return toAdminPurgeCommunityView(modlog);
-    case "AdminPurgePerson":
-      return toAdminPurgePersonView(modlog);
-    case "AdminPurgePost":
-      return toAdminPurgePostView(modlog);
-    case "ModAdd":
-      return toModAddView(modlog);
-    case "ModAddCommunity":
-      return toModAddCommunityView(modlog);
-    case "ModBan":
-      return toModBanView(modlog);
-    case "ModBanFromCommunity":
-      return toModBanFromCommunityView(modlog);
-    case "ModFeaturePost":
-      return toModFeaturePostView(modlog);
-    case "ModLockPost":
-      return toModLockPostView(modlog);
-    case "ModRemoveComment":
-      return toModRemoveCommentView(modlog);
-    case "ModRemoveCommunity":
-      return toModRemoveCommunityView(modlog);
-    case "ModRemovePost":
-      return toModRemovePostView(modlog);
-    case "ModTransferCommunity":
-      return toModTransferCommunityView(modlog);
-  }
+  const kind = MODLOG_KIND_MAP[v.modlog.kind];
+  if (!kind) return undefined;
+
+  return {
+    moderator: v.moderator,
+    modlog: {
+      expires_at: v.modlog.expires_at ?? undefined,
+      id: v.modlog.id,
+      is_revert: v.modlog.is_revert,
+      kind,
+      published_at: v.modlog.published_at,
+      reason: v.modlog.reason ?? undefined,
+    },
+    target_comment: v.target_comment,
+    target_community: v.target_community,
+    target_person: v.target_person,
+    target_post: v.target_post,
+  };
 }
 
-export function toPersonView(personView: LemmyV1.PersonView): types.PersonView {
+export function toMyUserInfo(info: LemmyV1.MyUserInfo): types.MyUserInfo {
   return {
-    ...personView,
-    counts: toPersonCounts(personView.person),
-    person: toPerson(personView.person),
+    community_blocks: info.community_blocks,
+    follows: info.follows,
+    // v1 split instance_blocks into two separate lists; merge for consumers.
+    instance_blocks: [
+      ...info.instance_communities_blocks,
+      ...info.instance_persons_blocks,
+    ],
+    local_user_view: {
+      local_user: {
+        admin: info.local_user_view.local_user.admin,
+        show_nsfw: info.local_user_view.local_user.show_nsfw,
+      },
+      person: info.local_user_view.person,
+    },
+    moderates: info.moderates,
+    person_blocks: info.person_blocks,
   };
+}
+
+export function toPersonView(v: LemmyV1.PersonView): types.PersonView {
+  return { is_admin: v.is_admin, person: v.person };
 }
 
 export function toPostReportView(
-  postReport: LemmyV1.PostReportView,
+  v: LemmyV1.PostReportView,
 ): types.PostReportView {
   return {
-    ...postReport,
-    community: toCommunity(postReport.community),
-    counts: toPostCounts(postReport.post),
-    creator: toPerson(postReport.creator),
-    creator_banned_from_community:
-      !!postReport.community_actions?.ban_expires_at,
-    creator_blocked: !!postReport.person_actions?.blocked_at,
-    creator_is_moderator: false,
-    hidden: !!postReport.post_actions?.hidden_at,
-    post: toPost(postReport.post),
-    post_creator: toPerson(postReport.post_creator),
-    post_report: {
-      ...postReport.post_report,
-      published: postReport.post_report.published_at,
-    },
-    read: !!postReport.post_actions?.read_at,
-    resolver: postReport.resolver ? toPerson(postReport.resolver) : undefined,
-    saved: !!postReport.post_actions?.saved_at,
-    subscribed: toFollowState(postReport.community_actions?.follow_state),
-    unread_comments: postReport.post_actions?.read_comments_at
-      ? postReport.post.comments -
-        (postReport.post_actions.read_comments_amount ?? 0)
-      : 0,
+    ...v,
+    creator_banned_from_community: !!v.community_actions?.ban_expires_at,
+    creator_blocked: !!v.person_actions?.blocked_at,
+    hidden: !!v.post_actions?.hidden_at,
+    my_vote: toVote(v.post_actions),
+    read: !!v.post_actions?.read_at,
+    saved: !!v.post_actions?.saved_at,
+    subscribed: toFollowState(v.community_actions?.follow_state),
+    unread_comments: toUnreadComments(v.post, v.post_actions),
   };
 }
 
-export function toPostView(postView: LemmyV1.PostView): types.PostView {
+export function toPostView(v: LemmyV1.PostView): types.PostView {
   return {
-    ...postView,
-    banned_from_community: !!postView.community_actions?.ban_expires_at,
-    community: toCommunity(postView.community),
-    counts: toPostCounts(postView.post),
-    creator: toPerson(postView.creator),
-    creator_blocked: !!postView.person_actions?.blocked_at,
-    post: toPost(postView.post),
-    ...toPostViewUserActions(postView.post_actions, postView.post.comments),
-    ...toViewUserActions(postView.community_actions),
+    ...v,
+    banned_from_community: !!v.community_actions?.ban_expires_at,
+    creator_blocked: !!v.person_actions?.blocked_at,
+    hidden: !!v.post_actions?.hidden_at,
+    my_vote: toVote(v.post_actions),
+    read: !!v.post_actions?.read_at,
+    saved: !!v.post_actions?.saved_at,
+    subscribed: toFollowState(v.community_actions?.follow_state),
+    unread_comments: toUnreadComments(v.post, v.post_actions),
   };
 }
 
 export function toPrivateMessageView(
-  privateMessage: LemmyV1.PrivateMessageView,
+  v: LemmyV1.PrivateMessageView,
 ): types.PrivateMessageView {
-  return {
-    ...privateMessage,
-    creator: toPerson(privateMessage.creator),
-    private_message: {
-      ...privateMessage.private_message,
-      published: privateMessage.private_message.published_at,
-    },
-    recipient: toPerson(privateMessage.recipient),
-  };
+  return v;
 }
 
 export function toReportView(
   report: LemmyV1PostCommentReportOnly,
 ): types.CommentReportView | types.PostReportView {
   switch (report.type_) {
-    case "Comment":
+    case "comment":
       return toCommentReportView(report);
-    case "Post":
+    case "post":
       return toPostReportView(report);
   }
 }
 
-export function toSearchItem(
-  item: LemmyV1.SearchCombinedView,
-): types.SearchItem | undefined {
-  switch (item.type_) {
-    case "Comment":
-      return toCommentView(item);
-    case "Community":
-      return toCommunityView(item);
-    case "MultiCommunity":
-      return; // Not supported
-    case "Person":
-      return toPersonView(item);
-    case "Post":
-      return toPostView(item);
+export function toSiteView(
+  siteView: LemmyV1.SiteView,
+  captcha_enabled: boolean,
+): types.SiteView {
+  return {
+    local_site: { ...siteView.local_site, captcha_enabled },
+    site: siteView.site,
+  };
+}
+
+export function toSupportedNotificationView(
+  item: LemmyV1.NotificationView,
+): types.NotificationView | undefined {
+  // v1's wire sends JSON `null` (not omitted) for the *_id fields that don't
+  // apply to a given notification kind. The lib's `.d.ts` types these as
+  // `?: number` so TS doesn't catch it, and our schema accepts only
+  // `undefined` for optionals — without this normalization, SafeClient's
+  // zod parse rejects every notification with a `modlog_id: null` etc.
+  const notification: types.Notification = {
+    ...item.notification,
+    comment_id: nullToUndef(item.notification.comment_id),
+    modlog_id: nullToUndef(item.notification.modlog_id),
+    post_id: nullToUndef(item.notification.post_id),
+    private_message_id: nullToUndef(item.notification.private_message_id),
+  };
+
+  switch (item.notification.kind) {
+    case "mention":
+    case "private_message":
+    case "reply":
+      switch (item.data.type_) {
+        case "comment":
+          return {
+            ...item,
+            data: { type_: "comment", ...toCommentView(item.data) },
+            notification,
+          };
+        case "post":
+          return {
+            ...item,
+            data: { type_: "post", ...toPostView(item.data) },
+            notification,
+          };
+        case "private_message":
+          return { ...item, data: item.data, notification };
+        default:
+          return undefined;
+      }
+    case "mod_action": {
+      // `data` is a v1 ModlogView; upconvert to our flat ModlogItem shape.
+      if (item.data.type_ !== "mod_action") return undefined;
+      const modlogItem = toModlogView(item.data);
+      if (!modlogItem) return undefined; // kind not in our enum
+      return {
+        ...item,
+        data: { type_: "mod_action", ...modlogItem },
+        notification,
+      };
+    }
+    case "subscribed":
+      // "Someone posted/commented in a community you subscribe to." Voyager
+      // already surfaces these via the home feed; not shown in inbox.
+      return;
   }
 }
 
-export function toSiteView(siteView: LemmyV1.SiteView): types.SiteView {
-  return {
-    ...siteView,
-    site: toSite(siteView.site),
-  };
-}
-
-function toAdminPurgeCommentView(
-  adminPurgeComment: LemmyV1.AdminPurgeCommentView,
-): types.ModlogItem {
-  return {
-    ...adminPurgeComment,
-    admin: adminPurgeComment.admin
-      ? toPerson(adminPurgeComment.admin)
-      : undefined,
-    admin_purge_comment: {
-      ...adminPurgeComment.admin_purge_comment,
-      when_: adminPurgeComment.admin_purge_comment.published_at,
-    },
-    post: toPost(adminPurgeComment.post),
-  };
-}
-
-function toAdminPurgeCommunityView(
-  adminPurgeCommunity: LemmyV1.AdminPurgeCommunityView,
-): types.ModlogItem {
-  return {
-    ...adminPurgeCommunity,
-    admin: adminPurgeCommunity.admin
-      ? toPerson(adminPurgeCommunity.admin)
-      : undefined,
-    admin_purge_community: {
-      ...adminPurgeCommunity.admin_purge_community,
-      when_: adminPurgeCommunity.admin_purge_community.published_at,
-    },
-  };
-}
-
-function toAdminPurgePersonView(
-  adminPurgePerson: LemmyV1.AdminPurgePersonView,
-): types.ModlogItem {
-  return {
-    ...adminPurgePerson,
-    admin: adminPurgePerson.admin
-      ? toPerson(adminPurgePerson.admin)
-      : undefined,
-    admin_purge_person: {
-      ...adminPurgePerson.admin_purge_person,
-      when_: adminPurgePerson.admin_purge_person.published_at,
-    },
-  };
-}
-
-function toAdminPurgePostView(
-  adminPurgePost: LemmyV1.AdminPurgePostView,
-): types.ModlogItem {
-  return {
-    ...adminPurgePost,
-    admin: adminPurgePost.admin ? toPerson(adminPurgePost.admin) : undefined,
-    admin_purge_post: {
-      ...adminPurgePost.admin_purge_post,
-      when_: adminPurgePost.admin_purge_post.published_at,
-    },
-    community: toCommunity(adminPurgePost.community),
-  };
-}
-
-function toComment(comment: LemmyV1.Comment): types.Comment {
-  return {
-    ...comment,
-    published: comment.published_at,
-  };
-}
-
-function toCommentCounts(comment: LemmyV1.Comment): types.CommentAggregates {
-  return {
-    child_count: comment.child_count,
-    comment_id: comment.id,
-    downvotes: comment.downvotes,
-    published: comment.published_at,
-    score: comment.score,
-    upvotes: comment.upvotes,
-  };
-}
-
-function toCommentViewActions(
-  commentActions: LemmyV1.CommentActions | undefined,
-): Pick<types.CommentView, "my_vote" | "saved"> {
-  return {
-    my_vote: commentActions?.like_score,
-    saved: !!commentActions?.saved_at,
-  };
-}
-
-function toCommunity(community: LemmyV1.Community): types.Community {
-  return {
-    ...community,
-    actor_id: community.ap_id,
-    hidden: false, // TODO what does this mean, v0 vs v1?
-    published: community.published_at,
-  };
+function nullToUndef<T>(v: null | T | undefined): T | undefined {
+  return v ?? undefined;
 }
 
 function toFollowState(
   followState: LemmyV1.CommunityFollowerState | undefined,
 ): types.SubscribedType {
   switch (followState) {
-    case "Accepted":
+    case "accepted":
       return "Subscribed";
-    case "ApprovalRequired":
-    case "Pending":
-      return followState;
+    case "approval_required":
+      return "ApprovalRequired";
+    case "denied":
     case undefined:
       return "NotSubscribed";
+    case "pending":
+      return "Pending";
   }
 }
 
-function toInstanceWithFederationState(
-  instance: LemmyV1.InstanceWithFederationState,
-): types.InstanceWithFederationState {
-  return {
-    ...instance,
-    published: instance.published_at,
-  };
+function toUnreadComments(
+  post: LemmyV1.Post,
+  actions: LemmyV1.PostActions | undefined,
+): number {
+  // v1 sends JSON `null` (not omitted) when this field is unset on an
+  // existing post_actions row. Use `== null` so both null and undefined
+  // are treated as "user has never read the comments."
+
+  if (actions?.read_comments_at == null) return post.comments;
+  return post.comments - (actions.read_comments_amount ?? 0);
 }
 
-function toModAddCommunityView(
-  modAddCommunity: LemmyV1.ModAddCommunityView,
-): types.ModlogItem {
-  return {
-    ...modAddCommunity,
-    community: toCommunity(modAddCommunity.community),
-    mod_add_community: {
-      ...modAddCommunity.mod_add_community,
-      when_: modAddCommunity.mod_add_community.published_at,
-    },
-    modded_person: toPerson(modAddCommunity.other_person),
-    moderator: modAddCommunity.moderator
-      ? toPerson(modAddCommunity.moderator)
-      : undefined,
-  };
-}
-
-function toModAddView(modAdd: LemmyV1.ModAddView): types.ModlogItem {
-  return {
-    ...modAdd,
-    mod_add: {
-      ...modAdd.mod_add,
-      when_: modAdd.mod_add.published_at,
-    },
-    modded_person: toPerson(modAdd.other_person),
-    moderator: modAdd.moderator ? toPerson(modAdd.moderator) : undefined,
-  };
-}
-
-function toModBanFromCommunityView(
-  modBanFromCommunity: LemmyV1.ModBanFromCommunityView,
-): types.ModlogItem {
-  return {
-    ...modBanFromCommunity,
-    banned_person: toPerson(modBanFromCommunity.other_person),
-    community: toCommunity(modBanFromCommunity.community),
-    mod_ban_from_community: {
-      ...modBanFromCommunity.mod_ban_from_community,
-      when_: modBanFromCommunity.mod_ban_from_community.published_at,
-    },
-    moderator: modBanFromCommunity.moderator
-      ? toPerson(modBanFromCommunity.moderator)
-      : undefined,
-  };
-}
-
-function toModBanView(modBan: LemmyV1.ModBanView): types.ModlogItem {
-  return {
-    ...modBan,
-    banned_person: toPerson(modBan.other_person),
-    mod_ban: {
-      ...modBan.mod_ban,
-      when_: modBan.mod_ban.published_at,
-    },
-    moderator: modBan.moderator ? toPerson(modBan.moderator) : undefined,
-  };
-}
-
-function toModFeaturePostView(
-  modFeaturePost: LemmyV1.ModFeaturePostView,
-): types.ModlogItem {
-  return {
-    ...modFeaturePost,
-    community: toCommunity(modFeaturePost.community),
-    mod_feature_post: {
-      ...modFeaturePost.mod_feature_post,
-      when_: modFeaturePost.mod_feature_post.published_at,
-    },
-    moderator: modFeaturePost.moderator
-      ? toPerson(modFeaturePost.moderator)
-      : undefined,
-    post: toPost(modFeaturePost.post),
-  };
-}
-
-function toModLockPostView(
-  modLockPost: LemmyV1.ModLockPostView,
-): types.ModlogItem {
-  return {
-    ...modLockPost,
-    community: toCommunity(modLockPost.community),
-    mod_lock_post: {
-      ...modLockPost.mod_lock_post,
-      when_: modLockPost.mod_lock_post.published_at,
-    },
-    moderator: modLockPost.moderator
-      ? toPerson(modLockPost.moderator)
-      : undefined,
-    post: toPost(modLockPost.post),
-  };
-}
-
-function toModRemoveCommentView(
-  modRemoveComment: LemmyV1.ModRemoveCommentView,
-): types.ModlogItem {
-  return {
-    ...modRemoveComment,
-    comment: toComment(modRemoveComment.comment),
-    commenter: toPerson(modRemoveComment.other_person),
-    community: toCommunity(modRemoveComment.community),
-    mod_remove_comment: {
-      ...modRemoveComment.mod_remove_comment,
-      when_: modRemoveComment.mod_remove_comment.published_at,
-    },
-    moderator: modRemoveComment.moderator
-      ? toPerson(modRemoveComment.moderator)
-      : undefined,
-    post: toPost(modRemoveComment.post),
-  };
-}
-
-function toModRemoveCommunityView(
-  modRemoveCommunity: LemmyV1.ModRemoveCommunityView,
-): types.ModlogItem {
-  return {
-    ...modRemoveCommunity,
-    community: toCommunity(modRemoveCommunity.community),
-    mod_remove_community: {
-      ...modRemoveCommunity.mod_remove_community,
-      when_: modRemoveCommunity.mod_remove_community.published_at,
-    },
-    moderator: modRemoveCommunity.moderator
-      ? toPerson(modRemoveCommunity.moderator)
-      : undefined,
-  };
-}
-
-function toModRemovePostView(
-  modRemovePost: LemmyV1.ModRemovePostView,
-): types.ModlogItem {
-  return {
-    ...modRemovePost,
-    community: toCommunity(modRemovePost.community),
-    mod_remove_post: {
-      ...modRemovePost.mod_remove_post,
-      when_: modRemovePost.mod_remove_post.published_at,
-    },
-    moderator: modRemovePost.moderator
-      ? toPerson(modRemovePost.moderator)
-      : undefined,
-    post: toPost(modRemovePost.post),
-  };
-}
-
-function toModTransferCommunityView(
-  modTransferCommunity: LemmyV1.ModTransferCommunityView,
-): types.ModlogItem {
-  return {
-    ...modTransferCommunity,
-    community: toCommunity(modTransferCommunity.community),
-    mod_transfer_community: {
-      ...modTransferCommunity.mod_transfer_community,
-      when_: modTransferCommunity.mod_transfer_community.published_at,
-    },
-    modded_person: toPerson(modTransferCommunity.other_person),
-    moderator: modTransferCommunity.moderator
-      ? toPerson(modTransferCommunity.moderator)
-      : undefined,
-  };
-}
-
-function toPerson(person: LemmyV1.Person): types.Person {
-  return {
-    ...person,
-    actor_id: person.ap_id,
-    published: person.published_at,
-  };
-}
-
-function toPersonCounts(person: LemmyV1.Person): types.PersonAggregates {
-  return {
-    comment_count: person.comment_count,
-    post_count: person.post_count,
-  };
-}
-
-function toPost(post: LemmyV1.Post): types.Post {
-  return {
-    ...post,
-    published: post.published_at,
-  };
-}
-
-function toPostCounts(post: LemmyV1.Post): types.PostAggregates {
-  return {
-    comments: post.comments,
-    downvotes: post.downvotes,
-    newest_comment_time: post.newest_comment_time_at,
-    published: post.published_at,
-    score: post.score,
-    upvotes: post.upvotes,
-  };
-}
-
-function toPostViewUserActions(
-  postActions: LemmyV1.PostActions | undefined,
-  totalComments: number,
-): Pick<types.PostView, "hidden" | "read" | "saved" | "unread_comments"> {
-  return {
-    hidden: !!postActions?.hidden_at,
-    read: !!postActions?.read_at,
-    saved: !!postActions?.saved_at,
-    unread_comments: postActions?.read_comments_at
-      ? totalComments - (postActions.read_comments_amount ?? 0)
-      : 0,
-  };
-}
-
-function toSite(site: LemmyV1.Site): types.Site {
-  return {
-    ...site,
-    actor_id: site.ap_id,
-  };
-}
-
-function toViewUserActions(
-  userActions: LemmyV1.CommunityActions | undefined,
-): Pick<types.CommunityView, "blocked" | "subscribed"> {
-  return {
-    blocked: !!userActions?.blocked_at,
-    subscribed: toFollowState(userActions?.follow_state),
-  };
+/**
+ * v1 records the vote direction as `vote_is_upvote` (boolean) and the time as
+ * `voted_at`. Both are independently optional and the wire format returns
+ * JSON `null` (not omitted) when unset — because the `*Actions` row also
+ * tracks `read_at`/`saved_at`/`hidden_at` and may exist without a vote.
+ *
+ * Trust `vote_is_upvote` as the direction (matches lemmy-ui's own frontend).
+ * Compare with `==` so both `null` and `undefined` count as "no vote" —
+ * otherwise the falsy `null` collapses through the ternary to `-1` and the
+ * UI reports a phantom downvote on any post the user has merely read or
+ * saved.
+ */
+function toVote(
+  actions: LemmyV1.CommentActions | LemmyV1.PostActions | undefined,
+): -1 | 1 | undefined {
+  if (actions?.vote_is_upvote == null) return undefined;
+  return actions.vote_is_upvote ? 1 : -1;
 }

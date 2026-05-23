@@ -8,9 +8,9 @@ export const CommentReport = z.object({
   creator_id: z.number(),
   id: z.number(),
   original_comment_text: z.string(),
-  published: z.string(),
+  published_at: z.string(),
   reason: z.string(),
   resolved: z.boolean(),
   resolver_id: z.optional(z.number()),
-  updated: z.optional(z.string()),
+  updated_at: z.optional(z.string()),
 });

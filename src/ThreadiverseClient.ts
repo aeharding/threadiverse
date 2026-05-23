@@ -3,7 +3,7 @@ import { satisfies } from "compare-versions";
 import { BaseClient, BaseClientOptions, ProviderInfo } from "./BaseClient";
 import { UnsupportedSoftwareError } from "./errors";
 import LemmyV0Client from "./providers/lemmyv0";
-// import LemmyV1Client from "./providers/lemmyv1";
+import LemmyV1Client from "./providers/lemmyv1";
 import PiefedClient from "./providers/piefed";
 import { Nodeinfo21Payload, resolveSoftware } from "./wellknown";
 
@@ -16,7 +16,7 @@ export default class ThreadiverseClient implements BaseClient {
    * Important: First match wins.
    */
   static get supportedSoftware() {
-    return [LemmyV0Client, PiefedClient] as const;
+    return [LemmyV1Client, LemmyV0Client, PiefedClient] as const;
   }
   get software(): ProviderInfo {
     if (
@@ -208,13 +208,6 @@ export default class ThreadiverseClient implements BaseClient {
     return client.getPersonDetails(...params);
   }
 
-  async getPersonMentions(
-    ...params: Parameters<BaseClient["getPersonMentions"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.getPersonMentions(...params);
-  }
-
   async getPost(...params: Parameters<BaseClient["getPost"]>) {
     const client = await this.ensureClient();
     return client.getPost(...params);
@@ -225,23 +218,11 @@ export default class ThreadiverseClient implements BaseClient {
     return client.getPosts(...params);
   }
 
-  async getPrivateMessages(
-    ...params: Parameters<BaseClient["getPrivateMessages"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.getPrivateMessages(...params);
-  }
-
   async getRandomCommunity(
     ...params: Parameters<BaseClient["getRandomCommunity"]>
   ) {
     const client = await this.ensureClient();
     return client.getRandomCommunity(...params);
-  }
-
-  async getReplies(...params: Parameters<BaseClient["getReplies"]>) {
-    const client = await this.ensureClient();
-    return client.getReplies(...params);
   }
 
   async getSite(...params: Parameters<BaseClient["getSite"]>) {
@@ -339,30 +320,16 @@ export default class ThreadiverseClient implements BaseClient {
     return client.markAllAsRead(...params);
   }
 
-  async markCommentReplyAsRead(
-    ...params: Parameters<BaseClient["markCommentReplyAsRead"]>
+  async markNotificationAsRead(
+    ...params: Parameters<BaseClient["markNotificationAsRead"]>
   ) {
     const client = await this.ensureClient();
-    return client.markCommentReplyAsRead(...params);
-  }
-
-  async markPersonMentionAsRead(
-    ...params: Parameters<BaseClient["markPersonMentionAsRead"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.markPersonMentionAsRead(...params);
+    return client.markNotificationAsRead(...params);
   }
 
   async markPostAsRead(...params: Parameters<BaseClient["markPostAsRead"]>) {
     const client = await this.ensureClient();
     return client.markPostAsRead(...params);
-  }
-
-  async markPrivateMessageAsRead(
-    ...params: Parameters<BaseClient["markPrivateMessageAsRead"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.markPrivateMessageAsRead(...params);
   }
 
   async register(...params: Parameters<BaseClient["register"]>) {

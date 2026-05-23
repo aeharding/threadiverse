@@ -10,8 +10,7 @@ export const PrivateMessage = z.object({
   deleted: z.boolean(),
   id: z.number(),
   local: z.boolean(),
-  published: z.string(),
-  read: z.boolean(),
+  published_at: z.string(),
   recipient_id: z.number(),
-  updated: z.optional(z.string()),
+  updated_at: z.optional(z.string()),
 });

@@ -5,5 +5,5 @@ import { LemmyV1PostCommentReportOnly } from "./compat";
 export function isPostCommentReport(
   report: LemmyReportCombinedView,
 ): report is LemmyV1PostCommentReportOnly {
-  return report.type_ === "Post" || report.type_ === "Comment";
+  return report.type_ === "post" || report.type_ === "comment";
 }

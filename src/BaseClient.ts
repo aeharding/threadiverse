@@ -106,7 +106,7 @@ export abstract class BaseClient {
 
   abstract featurePost(
     payload: {
-      feature_type: "Community" | "Local";
+      feature_type: "community" | "local";
       featured: boolean;
       post_id: number;
     },
@@ -142,7 +142,7 @@ export abstract class BaseClient {
   ): Promise<types.ListModlogResponse>;
 
   abstract getNotifications(
-    payload: types.GetPersonMentions,
+    payload: types.GetNotifications,
     options?: RequestOptions,
   ): Promise<types.ListNotificationsResponse>;
 
@@ -150,11 +150,6 @@ export abstract class BaseClient {
     payload: { person_id: number } | { username: string },
     options?: RequestOptions,
   ): Promise<types.GetPersonDetailsResponse>;
-
-  abstract getPersonMentions(
-    payload: types.GetPersonMentions,
-    options?: RequestOptions,
-  ): Promise<types.ListPersonMentionsResponse>;
 
   abstract getPost(
     payload: types.GetPost,
@@ -166,20 +161,10 @@ export abstract class BaseClient {
     options?: RequestOptions,
   ): Promise<types.ListPostsResponse>;
 
-  abstract getPrivateMessages(
-    payload: types.GetPrivateMessages,
-    options?: RequestOptions,
-  ): Promise<types.ListPrivateMessagesResponse>;
-
   abstract getRandomCommunity(
     payload: { type_: types.ListingType },
     options?: RequestOptions,
   ): Promise<{ community_view: types.CommunityView }>;
-
-  abstract getReplies(
-    payload: types.GetReplies,
-    options?: RequestOptions,
-  ): Promise<types.ListRepliesResponse>;
 
   abstract getSite(options?: RequestOptions): Promise<types.GetSiteResponse>;
 
@@ -193,12 +178,12 @@ export abstract class BaseClient {
   ): Promise<types.GetUnreadCountResponse>;
 
   abstract likeComment(
-    payload: { comment_id: number; score: number },
+    payload: { comment_id: number; is_upvote?: boolean },
     options?: RequestOptions,
   ): Promise<{ comment_view: types.CommentView }>;
 
   abstract likePost(
-    payload: { post_id: number; score: number },
+    payload: { is_upvote?: boolean; post_id: number },
     options?: RequestOptions,
   ): Promise<{ post_view: types.PostView }>;
 
@@ -218,7 +203,7 @@ export abstract class BaseClient {
   ): Promise<types.ListPersonContentResponse>;
 
   abstract listPersonLiked(
-    payload: types.PageParams & { type: types.LikeType },
+    payload: types.PageParams & { like_type: types.LikeType },
     options?: RequestOptions,
   ): Promise<types.ListPersonLikedResponse>;
 
@@ -255,23 +240,13 @@ export abstract class BaseClient {
 
   abstract markAllAsRead(options?: RequestOptions): Promise<void>;
 
-  abstract markCommentReplyAsRead(
-    payload: { comment_reply_id: number; read: boolean },
-    options?: RequestOptions,
-  ): Promise<void>;
-
-  abstract markPersonMentionAsRead(
-    payload: { person_mention_id: number; read: boolean },
+  abstract markNotificationAsRead(
+    payload: { notification: types.Notification; read: boolean },
     options?: RequestOptions,
   ): Promise<void>;
 
   abstract markPostAsRead(
     payload: { post_ids: number[]; read: boolean },
-    options?: RequestOptions,
-  ): Promise<void>;
-
-  abstract markPrivateMessageAsRead(
-    payload: { private_message_id: number; read: boolean },
     options?: RequestOptions,
   ): Promise<void>;
 
@@ -328,7 +303,7 @@ export abstract class BaseClient {
   ): Promise<types.ListSearchResponse>;
 
   abstract uploadImage(
-    payload: { file: File },
+    payload: { image: File },
     options?: RequestOptions,
   ): Promise<types.UploadImageResponse>;
 }
