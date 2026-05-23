@@ -193,7 +193,7 @@ export class UnsafePiefedClient implements BaseClient {
   ): ReturnType<BaseClient["createPostReport"]> {
     await this.#client.POST("/api/alpha/post/report", {
       ...options,
-      body: { ...payload },
+      body: { ...payload, report_remote: true },
     });
   }
 
@@ -306,7 +306,11 @@ export class UnsafePiefedClient implements BaseClient {
   ): Promise<{ post_view: PostView }> {
     const response = await this.#client.POST("/api/alpha/post/feature", {
       ...options,
-      body: { ...payload },
+      body: {
+        ...payload,
+        feature_type:
+          payload.feature_type === "community" ? "Community" : "Local",
+      },
     });
 
     return {
@@ -640,8 +644,10 @@ export class UnsafePiefedClient implements BaseClient {
     const { type_, ...rest } = compat.fromPageParams(payload);
     const response = await this.#client.GET("/api/alpha/community/list", {
       ...options,
-      // @ts-expect-error TODO: fix this
-      params: { query: { ...rest, type_: compat.fromListingType(type_) } },
+      params: {
+        // @ts-expect-error `sort` from the unioned payload type leaks v1 values (e.g. "comments") that piefed doesn't accept
+        query: { ...rest, type_: compat.fromListingType(type_) },
+      },
     });
 
     return {

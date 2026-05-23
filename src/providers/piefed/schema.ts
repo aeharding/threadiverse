@@ -135,7 +135,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -229,7 +229,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -252,13 +252,30 @@ export interface paths {
             parameters: {
                 query: {
                     q: string;
-                    type_: "Communities" | "Posts" | "Users" | "Url";
+                    type_: "Communities" | "Posts" | "Users" | "Url" | "Comments";
                     limit?: number;
+                    /**
+                     * @description Only some types are supported for each `type_`.
+                     *
+                     *     - `Comments` and `Communities`: `Popular` will return the same results as `All`.
+                     *     - `Users`: only `Local` will differ from `All`.
+                     *     - `Posts` and `Url`: These types are equivalent.
+                     */
                     listing_type?: "All" | "Local" | "Subscribed" | "Popular" | "Moderating" | "ModeratorView";
                     page?: number;
-                    sort?: "Active" | "Hot" | "New" | "Top" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopDay" | "TopWeek" | "TopMonth" | "TopThreeMonths" | "TopSixMonths" | "TopNineMonths" | "TopYear" | "TopAll" | "Scaled" | "Old";
+                    /**
+                     * @description Only some sorting options supported for each `type_`. `NewFederated` and `OldFederated` are equivalent to `New` and `Old` respectively for each type except for `Communities`.
+                     *
+                     *     - `Comments`: `Scaled` is not supported and `Hot` will be returned instead.
+                     *     - `Communities`: `Top` sorts that are not present in `/community/list` are equivalent to `Top`.
+                     *     - `Users`: only `New`, `Old`, and `Top` (by number of posts, all `Top` sorts are equivalent) are supported. Otherwise will be sorted by user id.
+                     *     - `Posts` and `Url`: These types are equivalent. `TopPosts` and `TopSubscribers` are equivalent to `Top`.
+                     */
+                    sort?: "Active" | "Hot" | "New" | "Top" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopDay" | "TopWeek" | "TopMonth" | "TopThreeMonths" | "TopSixMonths" | "TopNineMonths" | "TopYear" | "TopAll" | "Scaled" | "Old" | "Relevance" | "TopPosts" | "TopSubscribers" | "NewFederated" | "OldFederated";
                     community_name?: string;
                     community_id?: number;
+                    minimum_upvotes?: number;
+                    nsfw?: "Exclude" | "Include" | "Only";
                 };
                 header?: never;
                 path?: never;
@@ -284,7 +301,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -332,7 +349,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -388,6 +405,118 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/alpha/suggest_completion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Suggest people and communities while users type. */
+        get: {
+            parameters: {
+                query?: {
+                    q?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetSuggestCompletionResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/modlog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get modlog. */
+        get: {
+            parameters: {
+                query?: {
+                    mod_person_id?: number;
+                    community_id?: number;
+                    page?: number;
+                    limit?: number;
+                    type_?: "All" | "ModRemovePost" | "ModLockPost" | "ModFeaturePost" | "ModRemoveComment" | "ModRemoveCommunity" | "ModBanFromCommunity" | "ModAddCommunity" | "ModTransferCommunity" | "ModAdd" | "ModBan" | "ModHideCommunity" | "AdminPurgePerson" | "AdminPurgeCommunity" | "AdminPurgePost" | "AdminPurgeComment";
+                    other_person_id?: number;
+                    post_id?: number;
+                    comment_id?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetModLogResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                /** @description Too Many Requests */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/alpha/community": {
         parameters: {
             query?: never;
@@ -426,7 +555,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         /** Edit community. */
@@ -461,7 +590,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         /** Create a new community. */
@@ -496,7 +625,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -528,8 +657,8 @@ export interface paths {
                     limit?: number;
                     page?: number;
                     show_nsfw?: boolean;
-                    sort?: "Hot" | "Top" | "New";
-                    type_?: "All" | "Local" | "Subscribed";
+                    sort?: "Hot" | "Top" | "New" | "Old" | "Active" | "TopAll" | "TopPosts" | "TopSubscribers" | "NewFederated" | "OldFederated";
+                    type_?: "All" | "Local" | "Subscribed" | "Moderating" | "ModeratorView";
                 };
                 header?: never;
                 path?: never;
@@ -555,7 +684,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -607,7 +736,52 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/community/leave_all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Leave all communities and feeds for which the user is not a moderator or owner. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserMeResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -657,7 +831,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -706,7 +880,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         post?: never;
@@ -757,7 +931,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -807,7 +981,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -855,7 +1029,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -906,7 +1080,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         post?: never;
@@ -957,7 +1131,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -1007,7 +1181,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -1056,7 +1230,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         /** Create a new post flair in the community */
@@ -1091,7 +1265,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -1141,7 +1315,133 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/feed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a feed */
+        get: {
+            parameters: {
+                query?: {
+                    id?: number;
+                    name?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FeedView"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        /** Edit feed. */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EditFeedRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FeedView"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        /** Create a new feed. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateFeedRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FeedView"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                /** @description Too Many Requests */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -1190,11 +1490,111 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/feed/follow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Follow / subscribe / leave / unsubscribe to a feed. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FollowFeedRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FeedView"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/feed/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete a feed. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DeleteFeedRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FeedView"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -1239,11 +1639,61 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/domain/block": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Block or unblock a domain */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DomainBlockRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DomainBlockResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -1265,7 +1715,7 @@ export interface paths {
                     person_id?: number;
                     /** @description One of either person_id or username must be specified */
                     username?: string;
-                    sort?: "Active" | "Hot" | "New" | "Top" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopDay" | "TopWeek" | "TopMonth" | "TopThreeMonths" | "TopSixMonths" | "TopNineMonths" | "TopYear" | "TopAll" | "Scaled" | "Old";
+                    sort?: "Active" | "Hot" | "New" | "Top" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopDay" | "TopWeek" | "TopMonth" | "TopThreeMonths" | "TopSixMonths" | "TopNineMonths" | "TopYear" | "TopAll" | "Scaled" | "Old" | "Relevance" | "TopPosts" | "TopSubscribers" | "NewFederated" | "OldFederated";
                     page?: number;
                     limit?: number;
                     /** @description Limit posts/comments to just a single community */
@@ -1297,7 +1747,52 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/user/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the details for the current user */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserMeResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
             };
         };
         put?: never;
@@ -1349,7 +1844,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -1425,7 +1920,7 @@ export interface paths {
                 query?: {
                     limit?: number;
                     page?: number;
-                    sort?: "Hot" | "Top" | "New" | "Old";
+                    sort?: "Hot" | "Top" | "TopAll" | "New" | "Old" | "Controversial";
                     unread_only?: boolean;
                 };
                 header?: never;
@@ -1452,7 +1947,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -1476,7 +1971,7 @@ export interface paths {
                 query?: {
                     limit?: number;
                     page?: number;
-                    sort?: "Hot" | "Top" | "New" | "Old";
+                    sort?: "Hot" | "Top" | "TopAll" | "New" | "Old" | "Controversial";
                     unread_only?: boolean;
                 };
                 header?: never;
@@ -1503,7 +1998,58 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/user/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get media the current user has uploaded */
+        get: {
+            parameters: {
+                query?: {
+                    limit?: number;
+                    page?: number;
+                    sort?: "Hot" | "Top" | "TopAll" | "New" | "Old" | "Controversial";
+                    unread_only?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserMediaResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -1555,7 +2101,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -1649,7 +2195,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         post?: never;
@@ -1699,7 +2245,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         post?: never;
@@ -1720,7 +2266,7 @@ export interface paths {
         get: {
             parameters: {
                 query: {
-                    status: "All" | "Unread" | "Read";
+                    status: "All" | "Unread" | "Read" | "New";
                     limit?: number;
                     page?: number;
                 };
@@ -1748,7 +2294,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -1799,7 +2345,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         post?: never;
@@ -1938,7 +2484,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -1988,9 +2534,254 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/user/note": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set a note for a user */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UserSetNoteRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserSetNoteResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/user/ban": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ban a user */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UserBanRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserBanResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/user/unban": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unban a user */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UserUnbanRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserBanResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/api/alpha/user/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register a new user */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UserRegistrationRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserRegistrationResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/api/alpha/user/get_captcha": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fetch a Captcha */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FetchCaptchaResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2010,7 +2801,8 @@ export interface paths {
                 query?: {
                     limit?: number;
                     page?: number;
-                    sort?: "Hot" | "Top" | "New" | "Old";
+                    sort?: "Hot" | "Top" | "TopAll" | "New" | "Old" | "Controversial";
+                    type_?: "All" | "Local" | "Subscribed" | "Popular" | "Moderating" | "ModeratorView";
                     liked_only?: boolean;
                     saved_only?: boolean;
                     person_id?: number;
@@ -2045,7 +2837,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -2097,7 +2889,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -2146,7 +2938,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         post?: never;
@@ -2196,7 +2988,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         post?: never;
@@ -2243,7 +3035,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         /** Edit a comment. */
@@ -2278,7 +3070,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         /** Create a comment. */
@@ -2313,7 +3105,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -2372,7 +3164,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -2422,9 +3214,63 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/comment/report/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get list of comment reports. */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Get the reports for a single comment */
+                    comment_id?: number;
+                    /** @description Limit reports to within a single community */
+                    community_id?: number;
+                    limit?: number;
+                    page?: number;
+                    unresolved_only?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetCommentReportListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2472,7 +3318,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -2522,7 +3368,107 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/comment/mark_as_answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark a comment as the preferred answer to a question. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MarkCommentAsAnswerRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetCommentReplyResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/comment/distinguish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Distinguish your comment as a moderator comment */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MarkCommentAsDistinguishedRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetCommentResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -2572,7 +3518,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -2620,7 +3566,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -2643,18 +3589,20 @@ export interface paths {
             parameters: {
                 query?: {
                     q?: string;
-                    sort?: "Hot" | "Top" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopWeek" | "TopDay" | "TopMonth" | "TopThreeMonths" | "TopSixMonths" | "TopNineMonths" | "TopYear" | "TopAll" | "New" | "Scaled" | "Active";
+                    sort?: "Hot" | "Top" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopWeek" | "TopDay" | "TopMonth" | "TopThreeMonths" | "TopSixMonths" | "TopNineMonths" | "TopYear" | "TopAll" | "New" | "Old" | "Scaled" | "Active";
                     type_?: "All" | "Local" | "Subscribed" | "Popular" | "Moderating" | "ModeratorView";
                     community_name?: string;
                     community_id?: number;
                     saved_only?: boolean;
+                    nsfw?: "Exclude" | "Only" | "Include";
                     person_id?: number;
                     limit?: number;
                     page?: number;
-                    page_cursor?: number;
                     liked_only?: boolean;
                     feed_id?: number;
                     topic_id?: number;
+                    /** @description Ignores a post's sticky state when sorting */
+                    ignore_sticky?: boolean;
                 };
                 header?: never;
                 path?: never;
@@ -2680,7 +3628,69 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/post/list2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List posts. For testing only, do not use. */
+        get: {
+            parameters: {
+                query?: {
+                    q?: string;
+                    sort?: "Hot" | "Top" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopWeek" | "TopDay" | "TopMonth" | "TopThreeMonths" | "TopSixMonths" | "TopNineMonths" | "TopYear" | "TopAll" | "New" | "Old" | "Scaled" | "Active";
+                    type_?: "All" | "Local" | "Subscribed" | "Popular" | "Moderating" | "ModeratorView";
+                    community_name?: string;
+                    community_id?: number;
+                    saved_only?: boolean;
+                    nsfw?: "Exclude" | "Only" | "Include";
+                    person_id?: number;
+                    limit?: number;
+                    page?: string;
+                    liked_only?: boolean;
+                    feed_id?: number;
+                    topic_id?: number;
+                    /** @description Ignores a post's sticky state when sorting */
+                    ignore_sticky?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ListPostsResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -2728,7 +3738,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         /** Edit a post. */
@@ -2763,7 +3773,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         /** Create a new post. */
@@ -2798,7 +3808,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -2829,7 +3839,7 @@ export interface paths {
                 query?: {
                     post_id?: number;
                     parent_id?: number;
-                    sort?: "Hot" | "Top" | "New" | "Old";
+                    sort?: "Hot" | "Top" | "TopAll" | "New" | "Old" | "Controversial";
                     max_depth?: number;
                     page?: string;
                     limit?: number;
@@ -2858,7 +3868,55 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/post/site_metadata": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get metadata about a url. */
+        get: {
+            parameters: {
+                query?: {
+                    url?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetSiteMetadataResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -2910,7 +3968,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -2959,7 +4017,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         post?: never;
@@ -3009,7 +4067,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         post?: never;
@@ -3060,7 +4118,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -3110,7 +4168,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -3160,7 +4218,57 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/post/hide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hide or unhide a post. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["HidePostRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetPostResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -3210,7 +4318,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -3260,7 +4368,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -3310,7 +4418,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -3358,7 +4466,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -3410,7 +4518,57 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/post/poll_vote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Vote in a poll */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PollVoteRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PollVoteResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -3460,7 +4618,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -3519,7 +4677,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -3578,7 +4736,66 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                /** @description Too Many Requests */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/image/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete a user image. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ImageDeleteRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ImageDeleteResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -3635,7 +4852,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
@@ -3656,8 +4873,11 @@ export interface paths {
         /** Get conversation with a specific person. */
         get: {
             parameters: {
-                query: {
-                    person_id: number;
+                query?: {
+                    /** @description One of either person_id or conversation_id must be specified */
+                    person_id?: number;
+                    /** @description One of either person_id or conversation_id must be specified */
+                    conversation_id?: number;
                     page?: number;
                     limit?: number;
                 };
@@ -3685,11 +4905,59 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/private_message/conversation/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Leave a conversation */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["LeaveConversationRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -3736,7 +5004,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         /** Create a new private message. */
@@ -3771,7 +5039,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -3830,7 +5098,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -3880,7 +5148,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
         delete?: never;
@@ -3930,9 +5198,108 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/admin/registration_application/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the list of applications ready for admin review */
+        get: {
+            parameters: {
+                query?: {
+                    limit?: number;
+                    page?: number;
+                    pending_only?: boolean;
+                    sort?: "Old" | "New";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetRegistrationListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/admin/registration_application/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Approve or deny a registration */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RegistrationApproveRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+            };
+        };
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3972,6 +5339,13 @@ export interface components {
             person_id: number;
             post_count: number;
         };
+        UserExtraField: {
+            id: number;
+            /** @example Pronouns */
+            label: string;
+            /** @example he/him, she/her, they/them, etc. */
+            text: string;
+        };
         Person: {
             /** @example https://piefed.social/u/rimu */
             actor_id: string;
@@ -3990,6 +5364,8 @@ export interface components {
             avatar?: string | null;
             /** Format: url */
             banner?: string | null;
+            extra_fields?: components["schemas"]["UserExtraField"][];
+            note?: string;
             flair?: string;
             /**
              * Format: datetime
@@ -4018,6 +5394,16 @@ export interface components {
              * @example https://piefed.social
              */
             actor_id: string;
+            /**
+             * Format: markdown
+             * @description The banner at the top of the home page
+             */
+            announcement_md?: string;
+            /**
+             * Format: html
+             * @description The banner at the top of the home page
+             */
+            announcement?: string;
             name: string;
             all_languages?: components["schemas"]["LanguageView"][];
             description?: string;
@@ -4047,6 +5433,7 @@ export interface components {
             local: boolean;
             name: string;
             nsfw: boolean;
+            ai_generated: boolean;
             /**
              * Format: datetime
              * @example 2025-06-07T02:29:07.980084Z
@@ -4056,6 +5443,7 @@ export interface components {
             restricted_to_mods: boolean;
             title: string;
             banned?: boolean;
+            question_answer?: boolean;
             /** Format: url */
             banner?: string | null;
             /** Format: markdown */
@@ -4099,14 +5487,52 @@ export interface components {
             person: components["schemas"]["Person"];
         };
         LocalUser: {
+            /**
+             * @description Accept private messages from nobody, local users only, "trusted" instances, or any instance
+             * @enum {string}
+             */
+            accept_private_messages: "None" | "Local" | "Trusted" | "All";
             /** @enum {string} */
-            default_comment_sort_type: "Hot" | "Top" | "New" | "Old";
+            bot_visibility: "Show" | "Blur" | "Hide" | "Transparent";
+            /** @enum {string} */
+            ai_visibility: "Show" | "Hide" | "Label" | "Transparent";
+            /** @description Filter out communities with these words in their name */
+            community_keyword_filter?: string[];
+            /** @enum {string} */
+            default_comment_sort_type: "Hot" | "Top" | "TopAll" | "New" | "Old" | "Controversial";
             /** @enum {string} */
             default_listing_type: "All" | "Local" | "Subscribed" | "Popular" | "Moderating" | "ModeratorView";
             /** @enum {string} */
-            default_sort_type?: "Active" | "Hot" | "New" | "Top" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopDay" | "TopWeek" | "TopMonth" | "TopThreeMonths" | "TopSixMonths" | "TopNineMonths" | "TopYear" | "TopAll" | "Scaled" | "Old";
+            default_sort_type?: "Active" | "Hot" | "New" | "Top" | "TopHour" | "TopSixHour" | "TopTwelveHour" | "TopDay" | "TopWeek" | "TopMonth" | "TopThreeMonths" | "TopSixMonths" | "TopNineMonths" | "TopYear" | "TopAll" | "Scaled" | "Old" | "Relevance" | "TopPosts" | "TopSubscribers" | "NewFederated" | "OldFederated";
+            /** @description Receive email about missed notifications (if set up by local admin) */
+            email_unread: boolean;
+            /** @description If false, votes are only counted on local instance instead of federated remotely */
+            federate_votes: boolean;
+            /** @description Automatically follow communities in a subscribed feed */
+            feed_auto_follow: boolean;
+            /** @description Automatically leave communities when unsubscribing from a feed. Does not impact communities joined outside of a feed auto-follow. */
+            feed_auto_leave: boolean;
+            /** @description Hide posts from communities marked as low-quality by the local instance admin */
+            hide_low_quality: boolean;
+            /** @description If posts can show up in search results */
+            indexable: boolean;
+            /** @description Subscribe to the email newsletter that the local instance admin can send */
+            newsletter: boolean;
+            /** @enum {string} */
+            nsfl_visibility: "Show" | "Blur" | "Hide" | "Transparent";
+            /** @enum {string} */
+            nsfw_visibility: "Show" | "Blur" | "Hide" | "Transparent";
+            /** @description Collapse replies with a score at or below this level */
+            reply_collapse_threshold: number;
+            /** @description Hide replies with a score at or below this level */
+            reply_hide_threshold: number;
+            /** @description If profile shows up in the user list on the instance */
+            searchable: boolean;
+            /** @description True for any visibility option other than Hide */
             show_bot_accounts: boolean;
+            /** @description True for any visibility option other than Hide */
             show_nsfl: boolean;
+            /** @description True for any visibility option other than Hide */
             show_nsfw: boolean;
             show_read_posts: boolean;
             show_scores: boolean;
@@ -4159,8 +5585,10 @@ export interface components {
             description: string;
             about: string;
             sidebar: string;
+            /** Format: url */
             logo_url: string;
             maturity: string;
+            /** Format: url */
             tos_url: string;
             mau: number;
             can_make_communities: boolean;
@@ -4176,8 +5604,10 @@ export interface components {
             description: string;
             about: string;
             sidebar: string;
+            /** Format: url */
             logo_url: string;
             maturity: string;
+            /** Format: url */
             tos_url: string;
             uptime: string;
             mau: number;
@@ -4261,8 +5691,88 @@ export interface components {
             reply_count?: number;
             community_name?: string;
         };
-        Post: {
+        Reactions: {
+            url?: string | null;
+            token?: string;
+            authors?: string[];
+            count?: number;
+        };
+        PostEvent: {
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            start: string;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            end: string;
+            /** @example America/New_York */
+            timezone?: string;
+            /** @default 0 */
+            max_attendees: number;
+            /** @default 0 */
+            participant_count: number;
+            /** @default false */
+            full: boolean;
             /** Format: url */
+            online_link?: string | null;
+            /**
+             * @description free, restricted, external, invite
+             * @example free
+             */
+            join_mode?: string;
+            /** Format: url */
+            external_participation_url?: string | null;
+            /** @default false */
+            anonymous_participation: boolean;
+            /** @default false */
+            online: boolean;
+            /** Format: url */
+            buy_tickets_link?: string | null;
+            /** @example USD */
+            event_fee_currency?: string;
+            /** @default 0 */
+            event_fee_amount: number;
+            /** @description JSON object containing location details */
+            location?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        PollChoice: {
+            id: number;
+            choice_text: string;
+            sort_order: number;
+            /**
+             * @description Value is ignored when creating/editing a poll
+             * @default 0
+             */
+            num_votes: number;
+        };
+        PostPoll: {
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            end_poll?: string;
+            /**
+             * @description single or multiple - determines whether people can vote for one or multiple options
+             * @example single
+             * @enum {string}
+             */
+            mode: "single" | "multiple";
+            /** @default false */
+            local_only: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            latest_vote?: string;
+            choices: components["schemas"]["PollChoice"][];
+            my_votes?: number[];
+        };
+        Post: {
             ap_id: string;
             community_id: number;
             deleted: boolean;
@@ -4271,6 +5781,7 @@ export interface components {
             local: boolean;
             locked: boolean;
             nsfw: boolean;
+            ai_generated: boolean;
             /**
              * Format: datetime
              * @example 2025-06-07T02:29:07.980084Z
@@ -4278,6 +5789,7 @@ export interface components {
             published: string;
             removed: boolean;
             sticky: boolean;
+            instance_sticky: boolean;
             title: string;
             user_id: number;
             alt_text?: string;
@@ -4296,6 +5808,13 @@ export interface components {
             url?: string;
             image_details?: components["schemas"]["WidthHeight"];
             cross_posts?: components["schemas"]["MiniCrossPosts"][];
+            /** @enum {string} */
+            post_type: "Link" | "Discussion" | "Image" | "Video" | "Poll" | "Event";
+            tags?: string | null;
+            flair?: string | null;
+            emoji_reactions?: components["schemas"]["Reactions"][] | null;
+            event?: components["schemas"]["PostEvent"];
+            poll?: components["schemas"]["PostPoll"];
         };
         PostView: {
             banned_from_community: boolean;
@@ -4313,8 +5832,11 @@ export interface components {
             subscribed: "Subscribed" | "NotSubscribed" | "Pending";
             unread_comments: number;
             activity_alert?: boolean;
+            alt_text?: string;
             my_vote?: number;
+            /** @description See also the simpler 'flair' on post which can be used when editing */
             flair_list?: components["schemas"]["CommunityFlair"][];
+            can_auth_user_moderate?: boolean;
         };
         Comment: {
             /** Format: url */
@@ -4341,6 +5863,10 @@ export interface components {
              */
             updated?: string;
             locked?: boolean;
+            answer?: boolean;
+            emoji_reactions?: components["schemas"]["Reactions"][] | null;
+        } & {
+            [key: string]: unknown;
         };
         CommentAggregates: {
             child_count: number;
@@ -4367,23 +5893,72 @@ export interface components {
             creator_is_moderator: boolean;
             post: components["schemas"]["Post"];
             saved: boolean;
-            subscribed: string;
+            /**
+             * @description Indicates whether auth'ed user is subscribed to the community this comment is in or not.
+             * @enum {string}
+             */
+            subscribed: "Subscribed" | "NotSubscribed" | "Pending";
             my_vote?: number;
             can_auth_user_moderate?: boolean;
         };
         SearchResponse: {
             /** @enum {string} */
-            type_: "Communities" | "Posts" | "Users" | "Url";
+            type_: "Communities" | "Posts" | "Users" | "Url" | "Comments";
             communities: components["schemas"]["CommunityView"][];
             posts: components["schemas"]["PostView"][];
             users: components["schemas"]["PersonView"][];
             comments: components["schemas"]["CommentView"][];
+        };
+        FeedView: {
+            /** Format: url */
+            actor_id: string;
+            ap_domain: string;
+            /** @description Always empty list for resolve_object endpoint */
+            children: components["schemas"]["FeedView"][];
+            /** @description Always empty list for resolve_object endpoint */
+            communities: components["schemas"]["Community"][];
+            communities_count: number;
+            id: number;
+            is_instance_feed: boolean;
+            local: boolean;
+            name: string;
+            nsfl: boolean;
+            nsfw: boolean;
+            /** @description Is the authorized user the creator of the feed? */
+            owner: boolean;
+            public: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            published: string;
+            show_posts_from_children: boolean;
+            subscribed: boolean;
+            subscriptions_count: number;
+            title: string;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            updated: string;
+            /** @description user_id of the feed creator/owner */
+            user_id: number;
+            /** Format: url */
+            banner?: string | null;
+            /** Format: markdown */
+            description?: string | null;
+            /** Format: html */
+            description_html?: string | null;
+            /** Format: url */
+            icon?: string | null;
+            parent_feed_id?: number | null;
         };
         ResolveObjectResponse: {
             comment?: components["schemas"]["CommentView"];
             post?: components["schemas"]["PostView"];
             community?: components["schemas"]["CommunityView"];
             person?: components["schemas"]["PersonView"];
+            feed?: components["schemas"]["FeedView"];
         };
         InstanceWithoutFederationState: {
             domain: string;
@@ -4409,6 +5984,290 @@ export interface components {
         GetFederatedInstancesResponse: {
             federated_instances?: components["schemas"]["FederatedInstancesView"];
         };
+        GetSuggestCompletionResponse: {
+            result: string[];
+        };
+        ModRemovePost: {
+            id: number;
+            mod_person_id: number | null;
+            post_id: number | null;
+            reason?: string | null;
+            removed: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        ModRemovePostView: {
+            mod_remove_post: components["schemas"]["ModRemovePost"];
+            moderator?: components["schemas"]["Person"] | null;
+            post?: components["schemas"]["Post"] | null;
+            community?: components["schemas"]["Community"] | null;
+        };
+        ModLockPost: {
+            id: number;
+            mod_person_id: number | null;
+            post_id: number | null;
+            locked: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        ModLockPostView: {
+            mod_lock_post: components["schemas"]["ModLockPost"];
+            moderator?: components["schemas"]["Person"] | null;
+            post?: components["schemas"]["Post"] | null;
+            community?: components["schemas"]["Community"] | null;
+        };
+        ModFeaturePost: {
+            id: number;
+            mod_person_id: number | null;
+            post_id: number | null;
+            featured: boolean;
+            is_featured_community: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        ModFeaturePostView: {
+            mod_feature_post: components["schemas"]["ModFeaturePost"];
+            moderator?: components["schemas"]["Person"] | null;
+            post?: components["schemas"]["Post"] | null;
+            community?: components["schemas"]["Community"] | null;
+        };
+        ModRemoveComment: {
+            id: number;
+            mod_person_id: number | null;
+            comment_id: number | null;
+            reason?: string | null;
+            removed: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        ModRemoveCommentView: {
+            mod_remove_comment: components["schemas"]["ModRemoveComment"];
+            moderator?: components["schemas"]["Person"] | null;
+            comment?: components["schemas"]["Comment"] | null;
+            commenter?: components["schemas"]["Person"] | null;
+            post?: components["schemas"]["Post"] | null;
+            community?: components["schemas"]["Community"] | null;
+        };
+        ModRemoveCommunity: {
+            id: number;
+            mod_person_id: number | null;
+            community_id: number | null;
+            reason?: string | null;
+            removed: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        ModRemoveCommunityView: {
+            mod_remove_community: components["schemas"]["ModRemoveCommunity"];
+            moderator?: components["schemas"]["Person"] | null;
+            community?: components["schemas"]["Community"] | null;
+        };
+        ModBanFromCommunity: {
+            id: number;
+            mod_person_id: number | null;
+            other_person_id: number | null;
+            community_id: number | null;
+            reason?: string | null;
+            banned: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            expires?: string | null;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        ModBanFromCommunityView: {
+            mod_ban_from_community: components["schemas"]["ModBanFromCommunity"];
+            moderator?: components["schemas"]["Person"] | null;
+            community?: components["schemas"]["Community"] | null;
+            banned_person?: components["schemas"]["Person"] | null;
+        };
+        ModBan: {
+            id: number;
+            mod_person_id: number | null;
+            other_person_id: number | null;
+            reason?: string | null;
+            banned: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            expires?: string | null;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        ModBanView: {
+            mod_ban: components["schemas"]["ModBan"];
+            moderator?: components["schemas"]["Person"] | null;
+            banned_person?: components["schemas"]["Person"] | null;
+        };
+        ModAddCommunity: {
+            id: number;
+            mod_person_id: number | null;
+            other_person_id: number | null;
+            community_id: number | null;
+            removed: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        ModAddCommunityView: {
+            mod_add_community: components["schemas"]["ModAddCommunity"];
+            moderator?: components["schemas"]["Person"] | null;
+            community?: components["schemas"]["Community"] | null;
+            modded_person?: components["schemas"]["Person"] | null;
+        };
+        ModTransferCommunity: {
+            id: number;
+            mod_person_id: number | null;
+            other_person_id: number | null;
+            community_id: number | null;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        ModTransferCommunityView: {
+            mod_transfer_community: components["schemas"]["ModTransferCommunity"];
+            moderator?: components["schemas"]["Person"] | null;
+            community: components["schemas"]["Community"];
+            modded_person?: components["schemas"]["Person"] | null;
+        };
+        ModAdd: {
+            id: number;
+            mod_person_id: number | null;
+            other_person_id: number | null;
+            removed: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        ModAddView: {
+            mod_add: components["schemas"]["ModAdd"];
+            moderator?: components["schemas"]["Person"] | null;
+            modded_person?: components["schemas"]["Person"] | null;
+        };
+        AdminPurgePerson: {
+            id: number;
+            admin_person_id: number;
+            reason?: string | null;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        AdminPurgePersonView: {
+            admin_purge_person: components["schemas"]["AdminPurgePerson"];
+            admin?: components["schemas"]["Person"];
+        };
+        AdminPurgeCommunity: {
+            id: number;
+            admin_person_id: number;
+            reason?: string | null;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        AdminPurgeCommunityView: {
+            admin_purge_community: components["schemas"]["AdminPurgeCommunity"];
+            admin?: components["schemas"]["Person"];
+        };
+        AdminPurgePost: {
+            id: number;
+            admin_person_id: number;
+            community_id: number | null;
+            reason?: string | null;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        AdminPurgePostView: {
+            admin_purge_post: components["schemas"]["AdminPurgePost"];
+            admin?: components["schemas"]["Person"];
+            community: components["schemas"]["Community"];
+        };
+        AdminPurgeComment: {
+            id: number;
+            admin_person_id: number;
+            post_id: number;
+            reason?: string | null;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        AdminPurgeCommentView: {
+            admin_purge_comment: components["schemas"]["AdminPurgeComment"];
+            admin?: components["schemas"]["Person"];
+            post: components["schemas"]["Post"];
+        };
+        ModHideCommunity: {
+            id: number;
+            community_id: number | null;
+            mod_person_id: number | null;
+            reason?: string | null;
+            hidden: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            when_: string;
+        };
+        ModHideCommunityView: {
+            mod_hide_community: components["schemas"]["ModHideCommunity"];
+            admin?: components["schemas"]["Person"];
+            community: components["schemas"]["Community"];
+        };
+        GetModLogResponse: {
+            removed_posts: components["schemas"]["ModRemovePostView"][];
+            locked_posts: components["schemas"]["ModLockPostView"][];
+            featured_posts: components["schemas"]["ModFeaturePostView"][];
+            removed_comments: components["schemas"]["ModRemoveCommentView"][];
+            removed_communities: components["schemas"]["ModRemoveCommunityView"][];
+            banned_from_community: components["schemas"]["ModBanFromCommunityView"][];
+            banned: components["schemas"]["ModBanView"][];
+            added_to_community: components["schemas"]["ModAddCommunityView"][];
+            transferred_to_community: components["schemas"]["ModTransferCommunityView"][];
+            added: components["schemas"]["ModAddView"][];
+            admin_purged_persons: components["schemas"]["AdminPurgePersonView"][];
+            admin_purged_communities: components["schemas"]["AdminPurgeCommunityView"][];
+            admin_purged_posts: components["schemas"]["AdminPurgePostView"][];
+            admin_purged_comments: components["schemas"]["AdminPurgeCommentView"][];
+            hidden_communities: components["schemas"]["ModHideCommunityView"][];
+        };
         GetCommunityResponse: {
             community_view: components["schemas"]["CommunityView"];
             discussion_languages: number[];
@@ -4426,6 +6285,15 @@ export interface components {
         CommunityResponse: {
             community_view: components["schemas"]["CommunityView"];
             discussion_languages: number[];
+        };
+        UserMeResponse: {
+            community_blocks: components["schemas"]["CommunityBlockView"][];
+            discussion_languages: components["schemas"]["LanguageView"][];
+            follows: components["schemas"]["CommunityFollowerView"][];
+            instance_blocks: components["schemas"]["InstanceBlockView"][];
+            local_user_view: components["schemas"]["LocalUserView"];
+            moderates: components["schemas"]["CommunityModeratorView"][];
+            person_blocks: components["schemas"]["PersonBlockView"][];
         };
         BlockCommunityRequest: {
             block: boolean;
@@ -4447,12 +6315,13 @@ export interface components {
             icon_url?: string | null;
             local_only?: boolean;
             nsfw?: boolean;
+            question_answer?: boolean;
             restricted_to_mods?: boolean;
             rules?: string;
         };
         EditCommunityRequest: {
             community_id: number;
-            title: string;
+            title?: string;
             /** Format: url */
             banner_url?: string | null;
             /** Format: markdown */
@@ -4463,6 +6332,7 @@ export interface components {
             local_only?: boolean;
             nsfw?: boolean;
             restricted_to_mods?: boolean;
+            question_answer?: boolean;
             rules?: string;
         };
         SubscribeCommunityRequest: {
@@ -4605,50 +6475,62 @@ export interface components {
             moderators: components["schemas"]["CommunityModeratorView"][];
             site?: components["schemas"]["Site"];
         };
-        FeedView: {
-            /** Format: url */
-            actor_id: string;
-            ap_domain: string;
-            children: components["schemas"]["FeedView"][];
-            communities: components["schemas"]["Community"][];
-            communities_count: number;
-            id: number;
-            is_instance_feed: boolean;
-            local: boolean;
-            name: string;
-            nsfl: boolean;
-            nsfw: boolean;
-            /** @description Is the authorized user the creator of the feed? */
-            owner: boolean;
-            public: boolean;
-            /**
-             * Format: datetime
-             * @example 2025-06-07T02:29:07.980084Z
-             */
-            published: string;
-            show_posts_from_children: boolean;
-            subscribed: boolean;
-            subscriptions_count: number;
-            title: string;
-            /**
-             * Format: datetime
-             * @example 2025-06-07T02:29:07.980084Z
-             */
-            updated: string;
-            /** @description user_id of the feed creator/owner */
-            user_id: number;
-            /** Format: url */
-            banner?: string | null;
-            /** Format: markdown */
-            description?: string | null;
-            /** Format: html */
-            description_html?: string | null;
-            /** Format: url */
-            icon?: string | null;
-            parent_feed_id?: number | null;
-        };
         FeedListResponse: {
             feeds: components["schemas"]["FeedView"][];
+        };
+        FollowFeedRequest: {
+            feed_id: number;
+            follow: boolean;
+        };
+        CreateFeedRequest: {
+            /** @description URL-safe name/slug for the feed */
+            name: string;
+            title: string;
+            /** Format: markdown */
+            description?: string;
+            /** Format: url */
+            icon_url?: string | null;
+            /** Format: url */
+            banner_url?: string | null;
+            nsfw?: boolean;
+            nsfl?: boolean;
+            /**
+             * @description Whether the feed is publicly visible
+             * @default true
+             */
+            public: boolean;
+            /** @description Newline-separated list of community ap_ids to include in the feed */
+            communities?: string;
+            /** @description Whether this is an instance-level feed (admin only) */
+            is_instance_feed?: boolean;
+            /** @description Whether to show posts from child feeds */
+            show_child_posts?: boolean;
+            /** @description ID of parent feed, if any */
+            parent_feed_id?: number | null;
+        };
+        EditFeedRequest: {
+            feed_id: number;
+            /** @description URL-safe name/slug for the feed */
+            url?: string;
+            title?: string;
+            /** Format: markdown */
+            description?: string;
+            /** Format: url */
+            icon_url?: string | null;
+            /** Format: url */
+            banner_url?: string | null;
+            nsfw?: boolean;
+            nsfl?: boolean;
+            public?: boolean;
+            /** @description Newline-separated list of community ap_ids; omit to keep existing communities */
+            communities?: string;
+            is_instance_feed?: boolean;
+            show_child_posts?: boolean;
+            parent_feed_id?: number | null;
+        };
+        DeleteFeedRequest: {
+            feed_id: number;
+            deleted: boolean;
         };
         TopicView: {
             children: components["schemas"]["TopicView"][];
@@ -4662,6 +6544,13 @@ export interface components {
         };
         TopicListResponse: {
             topics: components["schemas"]["TopicView"][];
+        };
+        DomainBlockRequest: {
+            block: boolean;
+            domain: string;
+        };
+        DomainBlockResponse: {
+            blocked: boolean;
         };
         GetUserResponse: {
             comments: components["schemas"]["CommentView"][];
@@ -4708,6 +6597,7 @@ export interface components {
             creator_blocked: boolean;
             creator_is_admin: boolean;
             creator_is_moderator: boolean;
+            distinguished?: boolean;
             my_vote: number;
             post: components["schemas"]["Post"];
             recipient: components["schemas"]["Person"];
@@ -4722,6 +6612,15 @@ export interface components {
         UserMentionsResponse: {
             next_page?: string | null;
             replies: components["schemas"]["CommentReplyView"][];
+        };
+        MediaView: {
+            /** Format: url */
+            url?: string;
+            name?: string;
+        };
+        UserMediaResponse: {
+            next_page?: string | null;
+            media: components["schemas"]["MediaView"][];
         };
         UserBlockRequest: {
             block: boolean;
@@ -4743,7 +6642,20 @@ export interface components {
             person_view: components["schemas"]["PersonView"];
             subscribed: boolean;
         };
+        NewUserExtraField: {
+            /** @description Pass an id of an existing extra field with null/missing/empty label or text to remove a field. Pass an id of an existing extra field with both label and text to edit an existing extra field. */
+            id?: number | null;
+            /** @description Pass a label and text without an id to create a new extra field. */
+            label?: string | null;
+            /** @description Pass a label and text without an id to create a new extra field. */
+            text?: string | null;
+        };
         UserSaveSettingsRequest: {
+            /**
+             * @description Accept private messages from nobody, local users only, "trusted" instances, or any instance
+             * @enum {string}
+             */
+            accept_private_messages?: "None" | "Local" | "Trusted" | "All";
             /**
              * Format: url
              * @description Pass a null value to remove the image
@@ -4751,6 +6663,12 @@ export interface components {
             avatar?: string | null;
             /** Format: markdown */
             bio?: string;
+            /** @description This user is a bot */
+            bot?: boolean;
+            /** @enum {string} */
+            bot_visibility?: "Show" | "Blur" | "Hide" | "Transparent";
+            /** @description Filter out communities with these words in their name. Pass null to remove any filters. */
+            community_keyword_filter?: string[] | null;
             /**
              * Format: url
              * @description Pass a null value to remove the image
@@ -4760,9 +6678,48 @@ export interface components {
             default_comment_sort_type?: "Hot" | "Top" | "New" | "Old";
             /** @enum {string} */
             default_sort_type?: "Hot" | "Top" | "New" | "Active" | "Old" | "Scaled";
+            /** @description Pass a null value to remove the display name */
+            display_name?: string | null;
+            /** @description Receive email about missed notifications (if set up by local admin) */
+            email_unread?: boolean;
+            /** @description A user can't have more than four total extra fields. */
+            extra_fields?: components["schemas"]["NewUserExtraField"][];
+            /** @description If false, votes are only counted on local instance instead of federated remotely */
+            federate_votes?: boolean;
+            /** @description Automatically follow communities in a subscribed feed */
+            feed_auto_follow?: boolean;
+            /** @description Automatically leave communities when unsubscribing from a feed. Does not impact communities joined outside of a feed auto-follow. */
+            feed_auto_leave?: boolean;
+            /** @description Hide posts from communities marked as low-quality by the local instance admin */
+            hide_low_quality?: boolean;
+            /** @description If posts can show up in search results */
+            indexable?: boolean;
+            /** @description Subscribe to the email newsletter that the local instance admin can send */
+            newsletter?: boolean;
+            /**
+             * @description Overrides the show_nsfl field if provided
+             * @enum {string}
+             */
+            nsfl_visibility?: "Show" | "Blur" | "Hide" | "Transparent";
+            /**
+             * @description Overrides the show_nsfw field if provided
+             * @enum {string}
+             */
+            nsfw_visibility?: "Show" | "Blur" | "Hide" | "Transparent";
+            /**
+             * @description Overrides the show_genai field if provided
+             * @enum {string}
+             */
+            genai_visibility?: "Show" | "Hide" | "Label" | "Transparent";
+            /** @description Collapse replies with a score at or below this level */
+            reply_collapse_threshold?: number;
+            /** @description Hide replies with a score at or below this level */
+            reply_hide_threshold?: number;
             show_nsfw?: boolean;
             show_nsfl?: boolean;
             show_read_posts?: boolean;
+            /** @description If profile shows up in the user list on the instance */
+            searchable?: boolean;
         };
         UserSaveSettingsResponse: {
             my_user?: components["schemas"]["MyUserInfo"];
@@ -4791,6 +6748,8 @@ export interface components {
             /** @description returned for notif_types: 3, 4, 6 (comment_mention subtype) */
             comment?: components["schemas"]["Comment"];
             /** @description returned for notif_types: 3, 4, 6 (comment_mention subtype) */
+            comment_view?: components["schemas"]["CommentView"];
+            /** @description returned for notif_types: 3, 4, 6 (comment_mention subtype) */
             comment_id?: number;
             /** @description returned for notif_type 1 */
             community?: components["schemas"]["Community"];
@@ -4803,7 +6762,7 @@ export interface components {
             counts: components["schemas"]["UserNotificationsCounts"];
             items: components["schemas"]["UserNotificationItemView"][];
             /** @enum {string} */
-            status: "All" | "Unread" | "Read";
+            status: "All" | "Unread" | "Read" | "New";
             username: string;
             next_page?: string | null;
         };
@@ -4827,6 +6786,51 @@ export interface components {
         UserSetFlairResponse: {
             person_view?: components["schemas"]["PersonView"];
         };
+        UserSetNoteRequest: {
+            person_id: number;
+            /** @description Pass a value of null to remove existing note */
+            note: string | null;
+        };
+        UserSetNoteResponse: {
+            person_view?: components["schemas"]["PersonView"];
+        };
+        UserBanRequest: {
+            person_id: number;
+            ban_ip_address: boolean | null;
+            purge_content: boolean | null;
+            /** @description Note to add to modlog */
+            reason: string | null;
+        };
+        UserBanResponse: {
+            person_view?: components["schemas"]["PersonView"];
+        };
+        UserUnbanRequest: {
+            person_id: number;
+        };
+        UserRegistrationRequest: {
+            username: string;
+            password: string;
+            password_verify: string;
+            show_nsfw?: boolean;
+            email?: string;
+            captcha_uuid?: string;
+            captcha_answer?: string;
+            honeypot?: string;
+            answer?: string;
+        };
+        UserRegistrationResponse: {
+            jwt?: string;
+            registration_created?: boolean;
+            verify_email_sent?: boolean;
+        };
+        CaptchaFields: {
+            png?: string;
+            wav?: string;
+            uuid?: string;
+        };
+        FetchCaptchaResponse: {
+            ok?: components["schemas"]["CaptchaFields"][];
+        };
         ListCommentsResponse: {
             comments: components["schemas"]["CommentView"][];
             next_page?: string | null;
@@ -4843,6 +6847,7 @@ export interface components {
              * @default false
              */
             private: boolean;
+            emoji?: string;
         };
         GetCommentResponse: {
             comment_view: components["schemas"]["CommentView"];
@@ -4890,7 +6895,10 @@ export interface components {
             creator_id: number;
             comment_id: number;
             original_comment_text?: string;
+            /** @description Categories of report selected by the reporter */
             reason?: string;
+            /** @description Any additional information provided by the reporter */
+            description?: string;
             resolved: boolean;
             /**
              * Format: datetime
@@ -4916,7 +6924,11 @@ export interface components {
             creator_is_moderator: boolean;
             post: components["schemas"]["Post"];
             saved: boolean;
-            subscribed: string;
+            /**
+             * @description Indicates whether auth'ed user is subscribed to the community this comment is in or not.
+             * @enum {string}
+             */
+            subscribed: "Subscribed" | "NotSubscribed" | "Pending";
             my_vote?: number;
             can_auth_user_moderate?: boolean;
             comment_report: components["schemas"]["CommentReport"];
@@ -4924,6 +6936,10 @@ export interface components {
         };
         GetCommentReportResponse: {
             comment_report_view: components["schemas"]["CommentReportView"];
+        };
+        GetCommentReportListResponse: {
+            comment_reports: components["schemas"]["CommentReportView"][];
+            next_page?: string | null;
         };
         RemoveCommentRequest: {
             comment_id: number;
@@ -4936,6 +6952,14 @@ export interface components {
         };
         GetCommentReplyResponse: {
             comment_reply_view: components["schemas"]["CommentReplyView"];
+        };
+        MarkCommentAsAnswerRequest: {
+            comment_reply_id: number;
+            answer: boolean;
+        };
+        MarkCommentAsDistinguishedRequest: {
+            comment_reply_id: number;
+            distinguished: boolean;
         };
         LockCommentRequest: {
             comment_id: number;
@@ -4974,7 +6998,11 @@ export interface components {
             creator_is_moderator: boolean;
             post?: components["schemas"]["Post"];
             saved: boolean;
-            subscribed: string;
+            /**
+             * @description Indicates whether auth'ed user is subscribed to the community this comment is in or not.
+             * @enum {string}
+             */
+            subscribed: "Subscribed" | "NotSubscribed" | "Pending";
             my_vote?: number;
             can_auth_user_moderate?: boolean;
             replies?: components["schemas"]["PostReplyView"][];
@@ -4983,11 +7011,20 @@ export interface components {
             comments?: components["schemas"]["PostReplyView"][];
             next_page?: string | null;
         };
+        SiteMetadataView: {
+            title?: string;
+            description?: string;
+            image?: string;
+            embed_video_url?: string;
+        };
+        GetSiteMetadataResponse: {
+            metadata: components["schemas"]["SiteMetadataView"];
+        };
         LikePostRequest: {
             post_id: number;
             score: number;
             private?: boolean;
-            auth?: string;
+            emoji?: string;
         };
         SavePostRequest: {
             post_id: number;
@@ -5000,20 +7037,36 @@ export interface components {
         CreatePostRequest: {
             title: string;
             community_id: number;
+            /** @description Will be used for image posts or link posts that point to images */
+            alt_text?: string;
             body?: string;
             /** Format: url */
             url?: string;
             nsfw?: boolean;
+            ai_generated?: boolean;
             language_id?: number;
+            event?: components["schemas"]["PostEvent"] | null;
+            poll?: components["schemas"]["PostPoll"] | null;
         };
         EditPostRequest: {
             post_id: number;
+            /** @description Pass null to remove the existing alt text */
+            alt_text?: string | null;
             title?: string;
             body?: string;
-            /** Format: url */
-            url?: string;
+            /**
+             * Format: url
+             * @description Pass value of null to remove the post url
+             */
+            url?: string | null;
             nsfw?: boolean;
             language_id?: number;
+            event?: components["schemas"]["PostEvent"] | null;
+            poll?: components["schemas"]["PostPoll"] | null;
+            /** @description Hashtags, separated by commas with no hash character */
+            tags?: string | null;
+            /** @description Flair, separated by commas with no hash character */
+            flair?: string | null;
         };
         DeletePostRequest: {
             post_id: number;
@@ -5022,6 +7075,12 @@ export interface components {
         ReportPostRequest: {
             post_id: number;
             reason: string;
+            description?: string;
+            /**
+             * @description Also send report to originating instance
+             * @default true
+             */
+            report_remote: boolean;
         };
         PostReport: {
             id: number;
@@ -5059,10 +7118,18 @@ export interface components {
             post_id: number;
             locked: boolean;
         };
+        HidePostRequest: {
+            post_id: number;
+            hidden: boolean;
+        };
         FeaturePostRequest: {
             post_id: number;
             featured: boolean;
-            feature_type: string;
+            /**
+             * @default Community
+             * @enum {string}
+             */
+            feature_type: "Community" | "Local";
         };
         RemovePostRequest: {
             post_id: number;
@@ -5108,8 +7175,19 @@ export interface components {
             subscribed: "Subscribed" | "NotSubscribed" | "Pending";
             unread_comments: number;
             activity_alert?: boolean;
+            alt_text?: string;
             my_vote?: number;
+            /** @description See also the simpler 'flair' on post which can be used when editing */
             flair_list?: components["schemas"]["CommunityFlair"][];
+            can_auth_user_moderate?: boolean;
+        };
+        PollVoteRequest: {
+            post_id: number;
+            /** @description Must have a length of 1 for a poll in single vote mode. */
+            choice_id: number[];
+        };
+        PollVoteResponse: {
+            post_view: components["schemas"]["PostView"];
         };
         ImageUploadRequest: {
             /** Format: binary */
@@ -5121,6 +7199,12 @@ export interface components {
             liked_only?: boolean;
             saved_only?: boolean;
             q?: string;
+        };
+        ImageDeleteRequest: {
+            file: string;
+        };
+        ImageDeleteResponse: {
+            result: string;
         };
         PrivateMessage: {
             id: number;
@@ -5142,12 +7226,16 @@ export interface components {
             private_message: components["schemas"]["PrivateMessage"];
             creator: components["schemas"]["Person"];
             recipient: components["schemas"]["Person"];
+            conversation_id?: number;
         };
         ListPrivateMessagesResponse: {
             private_messages: components["schemas"]["PrivateMessageView"][];
         };
         GetPrivateMessageConversationResponse: {
             private_messages: components["schemas"]["PrivateMessageView"][];
+        };
+        LeaveConversationRequest: {
+            conversation_id: number;
         };
         CreatePrivateMessageRequest: {
             content: string;
@@ -5172,10 +7260,40 @@ export interface components {
             private_message_id: number;
             reason: string;
         };
+        UserRegistration: {
+            answer: string | null;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            applied_at?: string;
+            country_code?: string;
+            email: string | null;
+            ip_address: string | null;
+            throwaway_email?: boolean;
+            user_id: number;
+            user_name: string;
+            /** @enum {string} */
+            status: "approved" | "awaiting review";
+            approved_by?: components["schemas"]["Person"];
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            approved_at?: string;
+            referrer?: string;
+        };
+        GetRegistrationListResponse: {
+            registrations: components["schemas"]["UserRegistration"][];
+        };
+        RegistrationApproveRequest: {
+            approve: boolean;
+            user_id: number;
+        };
     };
     responses: {
-        /** @description Unprocessable Content */
-        UNPROCESSABLE_CONTENT: {
+        /** @description Unprocessable Entity */
+        UNPROCESSABLE_ENTITY: {
             headers: {
                 [name: string]: unknown;
             };

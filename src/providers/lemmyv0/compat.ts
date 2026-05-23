@@ -4,16 +4,14 @@ import { InvalidPayloadError } from "../../errors";
 import { cleanThreadiverseParams } from "../../helpers";
 import * as types from "../../types";
 
-export function fromListingType(
-  type_?: types.ListingType,
-): LemmyV0.ListingType | undefined {
+export function fromListingType(type_?: types.ListingType) {
   if (!type_) return undefined;
-  const map: Record<types.ListingType, LemmyV0.ListingType> = {
+  const map = {
     all: "All",
     local: "Local",
     moderator_view: "ModeratorView",
     subscribed: "Subscribed",
-  };
+  } as const satisfies Record<types.ListingType, LemmyV0.ListingType>;
   return map[type_];
 }
 
