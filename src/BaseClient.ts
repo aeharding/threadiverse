@@ -178,12 +178,12 @@ export abstract class BaseClient {
   ): Promise<types.GetUnreadCountResponse>;
 
   abstract likeComment(
-    payload: { comment_id: number; score: number },
+    payload: { comment_id: number; is_upvote?: boolean },
     options?: RequestOptions
   ): Promise<{ comment_view: types.CommentView }>;
 
   abstract likePost(
-    payload: { post_id: number; score: number },
+    payload: { is_upvote?: boolean; post_id: number; },
     options?: RequestOptions
   ): Promise<{ post_view: types.PostView }>;
 
@@ -203,7 +203,7 @@ export abstract class BaseClient {
   ): Promise<types.ListPersonContentResponse>;
 
   abstract listPersonLiked(
-    payload: types.PageParams & { type: types.LikeType },
+    payload: types.PageParams & { like_type: types.LikeType },
     options?: RequestOptions
   ): Promise<types.ListPersonLikedResponse>;
 
@@ -303,7 +303,7 @@ export abstract class BaseClient {
   ): Promise<types.ListSearchResponse>;
 
   abstract uploadImage(
-    payload: { file: File },
+    payload: { image: File },
     options?: RequestOptions
   ): Promise<types.UploadImageResponse>;
 }

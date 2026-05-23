@@ -3,12 +3,10 @@ import type { z } from "zod/v4-mini";
 import * as schemas from "../schemas";
 
 export type Comment = z.infer<typeof schemas.Comment>;
-export type CommentAggregates = z.infer<typeof schemas.CommentAggregates>;
 export type CommentReport = z.infer<typeof schemas.CommentReport>;
 export type CommentReportView = z.infer<typeof schemas.CommentReportView>;
 export type CommentView = z.infer<typeof schemas.CommentView>;
 export type Community = z.infer<typeof schemas.Community>;
-export type CommunityAggregates = z.infer<typeof schemas.CommunityAggregates>;
 export type CommunityFollowerView = z.infer<
   typeof schemas.CommunityFollowerView
 >;
@@ -72,12 +70,10 @@ export type NotificationView = z.infer<typeof schemas.NotificationView>;
 export type PagableResponse = z.infer<typeof schemas.PagableResponse>;
 export type PageCursor = z.infer<typeof schemas.PageCursor>;
 export type Person = z.infer<typeof schemas.Person>;
-export type PersonAggregates = z.infer<typeof schemas.PersonAggregates>;
 export type PersonContentItem = z.infer<typeof schemas.PersonContentItem>;
 export type PersonMention = z.infer<typeof schemas.PersonMention>;
 export type PersonView = z.infer<typeof schemas.PersonView>;
 export type Post = z.infer<typeof schemas.Post>;
-export type PostAggregates = z.infer<typeof schemas.PostAggregates>;
 export type PostReport = z.infer<typeof schemas.PostReport>;
 export type PostReportView = z.infer<typeof schemas.PostReportView>;
 export type PostView = z.infer<typeof schemas.PostView>;
@@ -89,7 +85,6 @@ export type ResolveObjectResponse = z.infer<
 >;
 export type SearchItem = z.infer<typeof schemas.SearchItem>;
 export type Site = z.infer<typeof schemas.Site>;
-export type SiteAggregates = z.infer<typeof schemas.SiteAggregates>;
 export type SiteView = z.infer<typeof schemas.SiteView>;
 export type SubscribedType = z.infer<typeof schemas.SubscribedType>;
 export type UploadImageResponse = z.infer<typeof schemas.UploadImageResponse>;

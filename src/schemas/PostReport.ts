@@ -19,9 +19,9 @@ export const PostReport = z.object({
    */
   original_post_url: z.optional(z.string()),
   post_id: z.number(),
-  published: z.string(),
+  published_at: z.string(),
   reason: z.string(),
   resolved: z.boolean(),
   resolver_id: z.optional(z.number()),
-  updated: z.optional(z.string()),
+  updated_at: z.optional(z.string()),
 });

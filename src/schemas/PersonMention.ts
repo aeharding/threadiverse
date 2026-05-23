@@ -6,7 +6,7 @@ import { z } from "zod/v4-mini";
 export const PersonMention = z.object({
   comment_id: z.number(),
   id: z.number(),
-  published: z.string(),
+  published_at: z.string(),
   read: z.boolean(),
   recipient_id: z.number(),
 });

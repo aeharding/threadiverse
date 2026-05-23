@@ -12,7 +12,6 @@ import {
   LemmyResponseError,
   UnsupportedError,
 } from "../../errors";
-import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
 import * as compat from "./compat";
 import { isPostCommentReport } from "./helpers";
@@ -62,7 +61,15 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async blockInstance(
     ...params: Parameters<BaseClient["blockInstance"]>
   ): ReturnType<BaseClient["blockInstance"]> {
-    await unwrap(await this.#client.userBlockInstanceCommunities(...params));
+    // v1 split instance blocks into community-side and person-side. Block both
+    // so the threadiverse `blockInstance` semantic ("block all content from
+    // this instance") matches v0's behavior.
+    const [communities, persons] = await Promise.all([
+      this.#client.userBlockInstanceCommunities(...params),
+      this.#client.userBlockInstancePersons(...params),
+    ]);
+    unwrap(communities);
+    unwrap(persons);
   }
 
   async blockPerson(
@@ -224,7 +231,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
     const response = unwrap(
       await this.#client.getComments(
-        compat.fromPageParams(cleanThreadiverseParams(payload)),
+        compat.fromPageParams(payload),
         options
       )
     );
@@ -244,7 +251,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
     return {
       ...response,
       community_view: compat.toCommunityView(response.community_view),
-      moderators: response.moderators.map(compat.toCommunityModeratorView),
+      moderators: response.moderators,
     };
   }
 
@@ -301,7 +308,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
     return {
       ...response,
-      moderates: response.moderates.map(compat.toCommunityModeratorView),
+      moderates: response.moderates,
       person_view: compat.toPersonView(response.person_view),
     };
   }
@@ -326,10 +333,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
       );
 
     const response = unwrap(
-      await this.#client.getPosts(
-        cleanThreadiverseParams(compat.fromPageParams(payload)),
-        options
-      )
+      await this.#client.getPosts(compat.fromPageParams(payload), options)
     );
 
     return {
@@ -340,11 +344,12 @@ export class UnsafeLemmyV1Client implements BaseClient {
   }
 
   async getRandomCommunity(
-    ..._params: Parameters<BaseClient["getRandomCommunity"]>
+    ...params: Parameters<BaseClient["getRandomCommunity"]>
   ): ReturnType<BaseClient["getRandomCommunity"]> {
-    throw new UnsupportedError(
-      "Get random community is not supported by Lemmy v1"
-    );
+    const response = unwrap(await this.#client.getRandomCommunity(...params));
+    return {
+      community_view: compat.toCommunityView(response.community_view),
+    };
   }
 
   async getSite(options?: RequestOptions): ReturnType<BaseClient["getSite"]> {
@@ -442,7 +447,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
     const response = unwrap(
       await this.#client.listCommunities(
-        cleanThreadiverseParams(compat.fromPageParams(payload)),
+        compat.fromPageParams(payload),
         options
       )
     );
@@ -458,9 +463,12 @@ export class UnsafeLemmyV1Client implements BaseClient {
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["listPersonContent"]> {
+    // Threadiverse exposes `type`; v1's wire schema is `type_` (Rust avoids
+    // the reserved word). Same lowercase string values.
+    const { type, ...rest } = payload;
     const response = unwrap(
       await this.#client.listPersonContent(
-        compat.fromPageParams(payload),
+        { ...compat.fromPageParams(rest), type_: type },
         options
       )
     );
@@ -751,7 +759,9 @@ export class UnsafeLemmyV1Client implements BaseClient {
           listing_type: payload.listing_type,
           page_cursor: fromPaged.page_cursor,
           post_url_only: payload.post_url_only,
-          search_term: payload.q,
+          search_term: payload.search_term,
+          time_range_seconds:
+            payload.mode === "lemmyv1" ? payload.time_range_seconds : undefined,
           title_only: payload.title_only,
           type_: payload.type_,
         },
@@ -772,12 +782,9 @@ export class UnsafeLemmyV1Client implements BaseClient {
   }
 
   async uploadImage(
-    payload: Parameters<BaseClient["uploadImage"]>[0],
-    options?: RequestOptions
+    ...params: Parameters<BaseClient["uploadImage"]>
   ): ReturnType<BaseClient["uploadImage"]> {
-    const response = unwrap(
-      await this.#client.uploadImage({ image: payload.file }, options)
-    );
+    const response = unwrap(await this.#client.uploadImage(...params));
 
     return {
       delete_token: "",
@@ -788,22 +795,19 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
 /**
  * Lemmy v1's `LemmyError` puts the machine-readable error code (e.g.
- * "too_many_requests") in `.name` and leaves `.message` empty. Wrap it in a
- * `LemmyResponseError` so callers see a uniform `{ code, status, message,
- * cause }` shape — and can branch on software via `instanceof` if needed.
+ * "too_many_requests") on `.name` and the human description on `.message`.
+ * Threadiverse exposes the error code as `.message` (matching v0's behavior)
+ * so consumer code can do uniform `error.message === "code"` matching across
+ * providers. The original `LemmyError` is preserved on `.cause` if anyone
+ * needs the human description.
  */
 function normalizeError(err: unknown): unknown {
-  if (
-    err instanceof Error &&
-    !err.message &&
-    err.name &&
-    err.name !== "Error"
-  ) {
-    const status =
-      "status" in err && typeof err.status === "number"
-        ? err.status
-        : undefined;
-    return new LemmyResponseError(err.name, { cause: err, status });
+  // Only wrap errors from the server (`LemmyError` carries the response's
+  // `error` code on `.name`). Transport-level errors (`TypeError` from
+  // `fetch`, `AbortError`, etc.) must pass through unchanged — wrapping
+  // them would mis-classify a network failure as a Lemmy error code.
+  if (err instanceof LemmyV1.LemmyError) {
+    return new LemmyResponseError(err.name, { cause: err, status: err.status });
   }
   return err;
 }

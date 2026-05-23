@@ -1,6 +1,7 @@
 import { z } from "zod/v4-mini";
 
 import { CommentView } from "./CommentView";
+import { ModlogItem } from "./GetModlogResponse";
 import { NotificationDataType } from "./NotificationDataType";
 import { PostView } from "./PostView";
 import { PrivateMessageView } from "./PrivateMessageView";
@@ -28,6 +29,9 @@ export const NotificationView = z.object({
     }),
     z.extend(PrivateMessageView, {
       type_: z.literal("private_message"),
+    }),
+    z.extend(ModlogItem, {
+      type_: z.literal("mod_action"),
     }),
   ]),
   notification: Notification,

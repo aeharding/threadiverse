@@ -10,7 +10,6 @@ import {
   PiefedResponseError,
   UnsupportedError,
 } from "../../errors";
-import { cleanThreadiverseParams } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
 import * as types from "../../types";
 import {
@@ -335,8 +334,8 @@ export class UnsafePiefedClient implements BaseClient {
         `Connected to piefed, ${payload.mode} is not supported`
       );
 
-    const query = cleanThreadiverseParams(
-      compat.fromPageParams(payload)
+    const query = compat.fromPageParams(
+      payload
     ) satisfies paths["/api/alpha/comment/list"]["get"]["parameters"]["query"];
 
     const response = await this.#client.GET("/api/alpha/comment/list", {
@@ -367,7 +366,16 @@ export class UnsafePiefedClient implements BaseClient {
   ): ReturnType<BaseClient["getFederatedInstances"]> {
     const response = await this.#client.GET("/api/alpha/federated_instances");
 
-    return response.data!;
+    const federated = response.data!.federated_instances;
+    if (!federated) return { federated_instances: undefined };
+
+    return {
+      federated_instances: {
+        allowed: federated.allowed.map(compat.toInstanceWithFederationState),
+        blocked: federated.blocked.map(compat.toInstanceWithFederationState),
+        linked: federated.linked.map(compat.toInstanceWithFederationState),
+      },
+    };
   }
 
   async getModlog(
@@ -486,12 +494,10 @@ export class UnsafePiefedClient implements BaseClient {
         `Connected to piefed, ${payload.mode} is not supported`
       );
 
-    const { type_, ...rest } = cleanThreadiverseParams(
-      compat.fromPageParams(payload)
-    );
+    const { type_, ...rest } = compat.fromPageParams(payload);
     const query = {
       ...rest,
-      type_: compat.toListingType(type_),
+      type_: compat.fromListingType(type_),
     } satisfies paths["/api/alpha/post/list"]["get"]["parameters"]["query"];
 
     const response = await this.#client.GET("/api/alpha/post/list", {
@@ -524,19 +530,17 @@ export class UnsafePiefedClient implements BaseClient {
       admins: (response.data!.admins ?? []).map(compat.toPersonView),
       my_user: response.data!.my_user
         ? {
-            ...response.data!.my_user,
-            community_blocks: response.data!.my_user?.community_blocks.map(
+            community_blocks: response.data!.my_user.community_blocks.map(
               ({ community }) => compat.toCommunity(community!)
             ),
             follows: response.data!.my_user.follows.map((f) => ({
               community: compat.toCommunity(f.community),
               follower: compat.toPerson(f.follower),
             })),
-            instance_blocks: response.data!.my_user?.instance_blocks.map(
-              ({ instance }) => instance
+            instance_blocks: response.data!.my_user.instance_blocks.map(
+              ({ instance }) => compat.toInstance(instance)
             ),
             local_user_view: {
-              ...response.data!.my_user.local_user_view,
               local_user: {
                 admin: false, // TODO: piefed doesn't expose admin status in site response
                 show_nsfw:
@@ -549,7 +553,7 @@ export class UnsafePiefedClient implements BaseClient {
             moderates: response.data!.my_user.moderates.map(
               compat.toCommunityModeratorView
             ),
-            person_blocks: response.data!.my_user?.person_blocks.map(
+            person_blocks: response.data!.my_user.person_blocks.map(
               ({ target }) => compat.toPerson(target)
             ),
           }
@@ -582,8 +586,9 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.POST("/api/alpha/comment/like", {
       ...options,
       body: {
-        ...payload,
+        comment_id: payload.comment_id,
         private: false,
+        score: toScore(payload.is_upvote),
       },
     });
 
@@ -599,7 +604,8 @@ export class UnsafePiefedClient implements BaseClient {
     const response = await this.#client.POST("/api/alpha/post/like", {
       ...options,
       body: {
-        ...payload,
+        post_id: payload.post_id,
+        score: toScore(payload.is_upvote),
       },
     });
 
@@ -637,7 +643,7 @@ export class UnsafePiefedClient implements BaseClient {
     options?: RequestOptions
   ): Promise<ListPersonContentResponse> {
     switch (payload.type) {
-      case "All":
+      case "all":
       case undefined: {
         const response = await Promise.all([
           this.#listPersonPosts(payload, options),
@@ -658,10 +664,10 @@ export class UnsafePiefedClient implements BaseClient {
         };
       }
 
-      case "Comments":
+      case "comments":
         return this.#listPersonComments(payload, options);
 
-      case "Posts":
+      case "posts":
         return this.#listPersonPosts(payload, options);
     }
   }
@@ -685,7 +691,7 @@ export class UnsafePiefedClient implements BaseClient {
 
     const data = (() => {
       switch (payload.type) {
-        case "All":
+        case "all":
         case undefined:
           return [
             ...response.data!.posts.map(compat.toPostView),
@@ -695,9 +701,9 @@ export class UnsafePiefedClient implements BaseClient {
               getPostCommentItemCreatedDate(b) -
               getPostCommentItemCreatedDate(a)
           );
-        case "Comments":
+        case "comments":
           return response.data!.comments.map(compat.toCommentView);
-        case "Posts":
+        case "posts":
           return response.data!.posts.map(compat.toPostView);
       }
     })();
@@ -905,10 +911,11 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["search"]>[0],
     options?: RequestOptions
   ): ReturnType<BaseClient["search"]> {
+    const { search_term, ...rest } = compat.fromPageParams(payload);
     const response = await this.#client.GET("/api/alpha/search", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: compat.fromPageParams(payload) },
+      params: { query: { ...rest, q: search_term } },
     });
 
     return {
@@ -927,7 +934,7 @@ export class UnsafePiefedClient implements BaseClient {
     options?: RequestOptions
   ) {
     const formData = new FormData();
-    formData.append("file", payload.file);
+    formData.append("file", payload.image);
 
     // In Android, openapi-fetch internally calls new Request().
     // This is usually ok, but causes content-type in the form body
@@ -983,6 +990,12 @@ export class UnsafePiefedClient implements BaseClient {
       data: response.data!.posts.map(compat.toPostView),
     };
   }
+}
+
+function toScore(is_upvote: boolean | undefined): number {
+  if (is_upvote === true) return 1;
+  if (is_upvote === false) return -1;
+  return 0;
 }
 
 export default buildSafeClient(UnsafePiefedClient);

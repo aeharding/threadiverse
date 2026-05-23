@@ -6,8 +6,8 @@ import { z } from "zod/v4-mini";
 export const Instance = z.object({
   domain: z.string(),
   id: z.number(),
-  published: z.string(),
+  published_at: z.string(),
   software: z.optional(z.string()),
-  updated: z.optional(z.string()),
+  updated_at: z.optional(z.string()),
   version: z.optional(z.string()),
 });

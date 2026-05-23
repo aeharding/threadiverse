@@ -8,7 +8,6 @@ export * from "./CommentReport";
 export * from "./CommentReportView";
 export * from "./CommentView";
 export * from "./Community";
-export * from "./CommunityAggregates";
 export * from "./CommunityFollowerView";
 export * from "./CommunityModeratorView";
 export * from "./CommunityView";
@@ -43,7 +42,6 @@ export * from "./RegistrationMode";
 export * from "./ReportItemView";
 export * from "./ResolveObjectResponse";
 export * from "./SearchItem";
-export * from "./SiteAggregates";
 export * from "./SubscribedType";
 export * from "./UploadImageResponse";
 

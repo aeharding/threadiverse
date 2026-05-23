@@ -5,16 +5,14 @@ import { CommunityFollowerView } from "./CommunityFollowerView";
 import { CommunityModeratorView } from "./CommunityModeratorView";
 import { Instance } from "./Instance";
 import { Person } from "./Person";
-import { PersonAggregates, PersonView } from "./PersonView";
+import { PersonView } from "./PersonView";
 import { RegistrationMode } from "./RegistrationMode";
-import { SiteAggregates } from "./SiteAggregates";
 
 export const MyUserInfo = z.object({
   community_blocks: z.array(Community),
   follows: z.array(CommunityFollowerView),
   instance_blocks: z.array(Instance),
   local_user_view: z.object({
-    counts: PersonAggregates,
     local_user: z.object({
       admin: z.boolean(),
       show_nsfw: z.boolean(),
@@ -41,6 +39,9 @@ export const LocalSite = z.object({
    * What kind of comment upvotes your site allows.
    */
   comment_upvotes: FederationMode,
+  comments: z.number(),
+  communities: z.number(),
+  email_verification_required: z.boolean(),
   legal_information: z.optional(z.string()),
   /**
    * What kind of post downvotes your site allows.
@@ -50,22 +51,34 @@ export const LocalSite = z.object({
    * What kind of post upvotes your site allows.
    */
   post_upvotes: FederationMode,
+  posts: z.number(),
   registration_mode: RegistrationMode,
-  require_email_verification: z.boolean(),
+  users: z.number(),
+  users_active_day: z.number(),
+  users_active_half_year: z.number(),
+  users_active_month: z.number(),
+  users_active_week: z.number(),
 });
 
 export const Site = z.object({
-  actor_id: z.string(),
+  /**
+   * The federated activity id / ap_id.
+   */
+  ap_id: z.string(),
   banner: z.optional(z.string()),
-  description: z.optional(z.string()),
   icon: z.optional(z.string()),
   name: z.string(),
+  /**
+   * Long-form sidebar markdown.
+   */
   sidebar: z.optional(z.string()),
-  version: z.optional(z.string()),
+  /**
+   * Short one-line summary.
+   */
+  summary: z.optional(z.string()),
 });
 
 export const SiteView = z.object({
-  counts: z.optional(SiteAggregates),
   local_site: LocalSite,
   site: Site,
 });

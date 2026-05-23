@@ -13,12 +13,14 @@ export const Post = z.object({
    * An optional post body, in markdown.
    */
   body: z.optional(z.string()),
+  comments: z.number(),
   community_id: z.number(),
   creator_id: z.number(),
   /**
    * Whether the post is deleted.
    */
   deleted: z.boolean(),
+  downvotes: z.number(),
   /**
    * A description for the link.
    */
@@ -47,20 +49,25 @@ export const Post = z.object({
   locked: z.boolean(),
   name: z.string(),
   /**
+   * The time of the newest comment in the post.
+   */
+  newest_comment_time_at: z.optional(z.string()),
+  /**
    * Whether the post is NSFW.
    */
   nsfw: z.boolean(),
-  published: z.string(),
-
+  published_at: z.string(),
   /**
    * Whether the post is removed.
    */
   removed: z.boolean(),
+  score: z.number(),
   /**
    * A thumbnail picture url.
    */
   thumbnail_url: z.optional(z.string()),
-  updated: z.optional(z.string()),
+  updated_at: z.optional(z.string()),
+  upvotes: z.number(),
   /**
    * An optional link / url for the post.
    */

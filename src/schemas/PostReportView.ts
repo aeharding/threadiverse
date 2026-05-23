@@ -4,7 +4,6 @@ import { Community } from "./Community";
 import { Person } from "./Person";
 import { Post } from "./Post";
 import { PostReport } from "./PostReport";
-import { PostAggregates } from "./PostView";
 import { SubscribedType } from "./SubscribedType";
 import { Vote } from "./Vote";
 
@@ -13,7 +12,6 @@ import { Vote } from "./Vote";
  */
 export const PostReportView = z.object({
   community: Community,
-  counts: PostAggregates,
   creator: Person,
   creator_banned_from_community: z.boolean(),
   creator_blocked: z.boolean(),

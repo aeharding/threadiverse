@@ -36,9 +36,14 @@ export class UnsafeLemmyV0Client implements BaseClient {
   }
 
   async banFromCommunity(
-    ...params: Parameters<BaseClient["banFromCommunity"]>
+    payload: Parameters<BaseClient["banFromCommunity"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["banFromCommunity"]> {
-    await this.#client.banFromCommunity(...params);
+    const { expires_at, ...rest } = payload;
+    await this.#client.banFromCommunity(
+      { ...rest, expires: expires_at },
+      options,
+    );
   }
 
   async blockCommunity(
@@ -61,7 +66,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
   async blockPerson(
     ...params: Parameters<BaseClient["blockPerson"]>
   ): ReturnType<BaseClient["blockPerson"]> {
-    return this.#client.blockPerson(...params);
+    const response = await this.#client.blockPerson(...params);
+
+    return {
+      person_view: compat.toPersonView(response.person_view),
+    };
   }
 
   async createComment(
@@ -99,7 +108,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
   async createPrivateMessage(
     ...params: Parameters<BaseClient["createPrivateMessage"]>
   ): ReturnType<BaseClient["createPrivateMessage"]> {
-    return this.#client.createPrivateMessage(...params);
+    const response = await this.#client.createPrivateMessage(...params);
+
+    return {
+      private_message_view: compat.toPrivateMessageView(
+        response.private_message_view,
+      ),
+    };
   }
 
   async createPrivateMessageReport(
@@ -215,14 +230,12 @@ export class UnsafeLemmyV0Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const { type_, ...rest } = cleanThreadiverseParams(
-      compat.fromPageParams(payload),
-    );
+    const { type_, ...rest } = compat.fromPageParams(payload);
 
     const response = await this.#client.getComments(
       {
         ...rest,
-        type_: compat.toListingType(type_),
+        type_: compat.fromListingType(type_),
       },
       options,
     );
@@ -250,7 +263,23 @@ export class UnsafeLemmyV0Client implements BaseClient {
   async getFederatedInstances(
     ...params: Parameters<BaseClient["getFederatedInstances"]>
   ): ReturnType<BaseClient["getFederatedInstances"]> {
-    return this.#client.getFederatedInstances(...params);
+    const response = await this.#client.getFederatedInstances(...params);
+
+    if (!response.federated_instances) return { federated_instances: undefined };
+
+    return {
+      federated_instances: {
+        allowed: response.federated_instances.allowed.map(
+          compat.toInstanceWithFederationState,
+        ),
+        blocked: response.federated_instances.blocked.map(
+          compat.toInstanceWithFederationState,
+        ),
+        linked: response.federated_instances.linked.map(
+          compat.toInstanceWithFederationState,
+        ),
+      },
+    };
   }
 
   async getModlog(
@@ -348,8 +377,8 @@ export class UnsafeLemmyV0Client implements BaseClient {
     );
 
     return {
-      ...response,
       moderates: response.moderates.map(compat.toCommunityModeratorView),
+      person_view: compat.toPersonView(response.person_view),
     };
   }
 
@@ -384,7 +413,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
         // Do not call fromPageParams here!
         ...rest,
         page_cursor,
-        type_: compat.toListingType(type_),
+        type_: compat.fromListingType(type_),
       },
       options,
     );
@@ -413,11 +442,20 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const site = await this.#client.getSite(...params);
 
     return {
-      ...site,
+      admins: site.admins.map(compat.toPersonView),
       my_user: site.my_user
         ? {
-            ...site.my_user,
             follows: site.my_user.follows.map(compat.toCommunityFollowerView),
+            local_user_view: {
+              local_user: {
+                admin: site.my_user.local_user_view.local_user.admin,
+                show_nsfw: site.my_user.local_user_view.local_user.show_nsfw,
+              },
+              person: compat.toPerson(
+                site.my_user.local_user_view.person,
+                site.my_user.local_user_view.counts,
+              ),
+            },
             moderates: site.my_user.moderates.map(
               compat.toCommunityModeratorView,
             ),
@@ -425,9 +463,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
           }
         : undefined,
       site_view: {
-        ...site.site_view,
-        local_site: compat.toLocalSite(site.site_view.local_site),
+        local_site: compat.toLocalSite(
+          site.site_view.local_site,
+          site.site_view.counts,
+        ),
+        site: compat.toSite(site.site_view.site),
       },
+      version: site.version,
     };
   }
 
@@ -444,9 +486,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
   }
 
   async likeComment(
-    ...params: Parameters<BaseClient["likeComment"]>
+    payload: Parameters<BaseClient["likeComment"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["likeComment"]> {
-    const response = await this.#client.likeComment(...params);
+    const response = await this.#client.likeComment(
+      { comment_id: payload.comment_id, score: toScore(payload.is_upvote) },
+      options,
+    );
 
     return {
       comment_view: compat.toCommentView(response.comment_view),
@@ -454,9 +500,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
   }
 
   async likePost(
-    ...params: Parameters<BaseClient["likePost"]>
+    payload: Parameters<BaseClient["likePost"]>[0],
+    options?: RequestOptions,
   ): ReturnType<BaseClient["likePost"]> {
-    const response = await this.#client.likePost(...params);
+    const response = await this.#client.likePost(
+      { post_id: payload.post_id, score: toScore(payload.is_upvote) },
+      options,
+    );
 
     return {
       post_view: compat.toPostView(response.post_view),
@@ -487,14 +537,12 @@ export class UnsafeLemmyV0Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const { type_, ...rest } = cleanThreadiverseParams(
-      compat.fromPageParams(payload),
-    );
+    const { type_, ...rest } = compat.fromPageParams(payload);
 
     const response = await this.#client.listCommunities(
       {
         ...rest,
-        type_: compat.toListingType(type_),
+        type_: compat.fromListingType(type_),
       },
       options,
     );
@@ -516,7 +564,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
     const data = (() => {
       switch (payload.type) {
-        case "All":
+        case "all":
         case undefined:
           return [
             ...response.posts.map(compat.toPostView),
@@ -526,9 +574,9 @@ export class UnsafeLemmyV0Client implements BaseClient {
               getPostCommentItemCreatedDate(b) -
               getPostCommentItemCreatedDate(a),
           );
-        case "Comments":
+        case "comments":
           return response.comments.map(compat.toCommentView);
-        case "Posts":
+        case "posts":
           return response.posts.map(compat.toPostView);
       }
     })();
@@ -540,13 +588,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
   }
 
   async listPersonLiked(
-    { type, ...payload }: Parameters<BaseClient["listPersonLiked"]>[0],
+    { like_type, ...payload }: Parameters<BaseClient["listPersonLiked"]>[0],
     options?: RequestOptions,
   ): Promise<ListPersonLikedResponse> {
     const v0Payload: LemmyV0.GetComments & LemmyV0.GetPosts = {
       ...compat.fromPageParams(payload),
-      disliked_only: type === "Downvoted",
-      liked_only: type === "Upvoted",
+      disliked_only: like_type === "disliked_only",
+      liked_only: like_type === "liked_only",
       show_read: true,
     };
 
@@ -719,13 +767,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
     const response = await this.#client.resolveObject(payload, options);
 
     return {
-      ...response,
       comment: response.comment
         ? compat.toCommentView(response.comment)
         : undefined,
       community: response.community
         ? compat.toCommunityView(response.community)
         : undefined,
+      person: response.person ? compat.toPersonView(response.person) : undefined,
       post: response.post ? compat.toPostView(response.post) : undefined,
     };
   }
@@ -771,15 +819,15 @@ export class UnsafeLemmyV0Client implements BaseClient {
         `Connected to lemmyv1, ${payload.mode} is not supported`,
       );
 
-    const { listing_type, type_, ...rest } = cleanThreadiverseParams(
-      compat.fromPageParams(payload),
-    );
+    const { listing_type, search_term, type_, ...rest } =
+      compat.fromPageParams(payload);
 
     const response = await this.#client.search(
       {
         ...rest,
-        listing_type: compat.toListingType(listing_type),
-        type_: compat.toSearchType(type_),
+        listing_type: compat.fromListingType(listing_type),
+        q: search_term,
+        type_: compat.fromSearchType(type_),
       },
       options,
     );
@@ -790,19 +838,15 @@ export class UnsafeLemmyV0Client implements BaseClient {
         ...response.comments.map(compat.toCommentView),
         ...response.posts.map(compat.toPostView),
         ...response.communities.map(compat.toCommunityView),
-        ...response.users,
+        ...response.users.map(compat.toPersonView),
       ],
     };
   }
 
   async uploadImage(
-    payload: Parameters<BaseClient["uploadImage"]>[0],
-    options?: RequestOptions,
+    ...params: Parameters<BaseClient["uploadImage"]>
   ): ReturnType<BaseClient["uploadImage"]> {
-    const response = await this.#client.uploadImage(
-      { image: payload.file },
-      options,
-    );
+    const response = await this.#client.uploadImage(...params);
 
     const fileResponse = response.files?.[0];
 
@@ -815,6 +859,16 @@ export class UnsafeLemmyV0Client implements BaseClient {
       url: response.url,
     };
   }
+}
+
+/**
+ * v0 uses a tri-state `score: 1 | 0 | -1`; threadiverse exposes v1's
+ * `is_upvote?: boolean` (true=upvote, false=downvote, undefined=clear).
+ */
+function toScore(is_upvote: boolean | undefined): number {
+  if (is_upvote === true) return 1;
+  if (is_upvote === false) return -1;
+  return 0;
 }
 
 /**
