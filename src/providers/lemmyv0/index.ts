@@ -560,8 +560,10 @@ export class UnsafeLemmyV0Client implements BaseClient {
   ): ReturnType<BaseClient["listPersonContent"]> {
     const response = await this.#client.getPersonDetails(
       {
-        ...compat.fromPageParams(payload),
+        // Default to New when the caller didn't pick a sort; otherwise
+        // honor what they chose (spread comes after to take precedence).
         sort: "New",
+        ...compat.fromPageParams(payload),
       },
       options,
     );

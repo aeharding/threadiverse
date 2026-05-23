@@ -993,7 +993,8 @@ export class UnsafePiefedClient implements BaseClient {
   ) {
     const response = await this.#client.GET("/api/alpha/comment/list", {
       ...options,
-      params: { query: { ...compat.fromPageParams(payload), sort: "New" } },
+      // Default to New; caller's `sort` overrides via the trailing spread.
+      params: { query: { sort: "New", ...compat.fromPageParams(payload) } },
     });
 
     return {
@@ -1008,7 +1009,8 @@ export class UnsafePiefedClient implements BaseClient {
   ) {
     const response = await this.#client.GET("/api/alpha/post/list", {
       ...options,
-      params: { query: { ...compat.fromPageParams(payload), sort: "New" } },
+      // Default to New; caller's `sort` overrides via the trailing spread.
+      params: { query: { sort: "New", ...compat.fromPageParams(payload) } },
     });
 
     return {
