@@ -607,7 +607,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
   ): ReturnType<BaseClient["markNotificationAsRead"]> {
     await unwrap(
       await this.#client.markNotificationAsRead(
-        { notification_id: payload.notification.id, read: payload.read },
+        { notification_id: payload.notification_id, read: payload.read },
         options,
       ),
     );
