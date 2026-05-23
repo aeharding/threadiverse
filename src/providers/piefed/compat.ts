@@ -4,6 +4,7 @@ import { components } from "./schema";
 
 export const toPageResponse = lemmyCompat.toPageResponse;
 export const fromPageParams = lemmyCompat.fromPageParams;
+export const fromSearchType = lemmyCompat.fromSearchType;
 
 type PiefedComment = components["schemas"]["Comment"];
 type PiefedCommentAggregates = components["schemas"]["CommentAggregates"];

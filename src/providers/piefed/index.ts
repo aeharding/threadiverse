@@ -343,9 +343,11 @@ export class UnsafePiefedClient implements BaseClient {
         `Connected to piefed, ${payload.mode} is not supported`,
       );
 
-    const query = compat.fromPageParams(
-      payload,
-    ) satisfies paths["/api/alpha/comment/list"]["get"]["parameters"]["query"];
+    const { type_, ...rest } = compat.fromPageParams(payload);
+    const query = {
+      ...rest,
+      ...(type_ && { type_: compat.fromListingType(type_) }),
+    } satisfies paths["/api/alpha/comment/list"]["get"]["parameters"]["query"];
 
     const response = await this.#client.GET("/api/alpha/comment/list", {
       ...options,
@@ -635,10 +637,11 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["listCommunities"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["listCommunities"]> {
+    const { type_, ...rest } = compat.fromPageParams(payload);
     const response = await this.#client.GET("/api/alpha/community/list", {
       ...options,
       // @ts-expect-error TODO: fix this
-      params: { query: compat.fromPageParams(payload) },
+      params: { query: { ...rest, type_: compat.fromListingType(type_) } },
     });
 
     return {
@@ -920,11 +923,19 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["search"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["search"]> {
-    const { search_term, ...rest } = compat.fromPageParams(payload);
+    const { listing_type, search_term, type_, ...rest } =
+      compat.fromPageParams(payload);
     const response = await this.#client.GET("/api/alpha/search", {
       ...options,
-      // @ts-expect-error TODO: fix this
-      params: { query: { ...rest, q: search_term } },
+      params: {
+        query: {
+          ...rest,
+          listing_type: compat.fromListingType(listing_type),
+          q: search_term,
+          // @ts-expect-error piefed's SearchType is narrower than ours; we pass through whatever the caller sent
+          type_: compat.fromSearchType(type_),
+        },
+      },
     });
 
     return {
