@@ -17,16 +17,7 @@ type PiefedPost = components["schemas"]["Post"];
 type PiefedPostAggregates = components["schemas"]["PostAggregates"];
 type PiefedPrivateMessage = components["schemas"]["PrivateMessage"];
 
-export function fromListingType(
-  listingType: types.ListingType | undefined,
-):
-  | "All"
-  | "Local"
-  | "Moderating"
-  | "ModeratorView"
-  | "Popular"
-  | "Subscribed"
-  | undefined {
+export function fromListingType(listingType: types.ListingType | undefined) {
   switch (listingType) {
     case "all":
       return "All";
