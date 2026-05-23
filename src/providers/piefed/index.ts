@@ -781,13 +781,13 @@ export class UnsafePiefedClient implements BaseClient {
     payload: Parameters<BaseClient["markNotificationAsRead"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["markNotificationAsRead"]> {
-    const { notification, read } = payload;
-    switch (notification.kind) {
+    const { kind, notification_id, read } = payload;
+    switch (kind) {
       case "mention":
       case "reply":
         await this.#client.POST("/api/alpha/comment/mark_as_read", {
           ...options,
-          body: { comment_reply_id: notification.id, read },
+          body: { comment_reply_id: notification_id, read },
         });
         return;
       case "mod_action":
@@ -796,7 +796,7 @@ export class UnsafePiefedClient implements BaseClient {
       case "private_message":
         await this.#client.POST("/api/alpha/private_message/mark_as_read", {
           ...options,
-          body: { private_message_id: notification.id, read },
+          body: { private_message_id: notification_id, read },
         });
         return;
     }

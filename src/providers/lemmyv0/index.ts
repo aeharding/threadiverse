@@ -700,11 +700,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
     payload: Parameters<BaseClient["markNotificationAsRead"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["markNotificationAsRead"]> {
-    const { notification, read } = payload;
-    switch (notification.kind) {
+    const { kind, notification_id, read } = payload;
+    switch (kind) {
       case "mention":
         await this.#client.markPersonMentionAsRead(
-          { person_mention_id: notification.id, read },
+          { person_mention_id: notification_id, read },
           options,
         );
         return;
@@ -713,13 +713,13 @@ export class UnsafeLemmyV0Client implements BaseClient {
         return;
       case "private_message":
         await this.#client.markPrivateMessageAsRead(
-          { private_message_id: notification.id, read },
+          { private_message_id: notification_id, read },
           options,
         );
         return;
       case "reply":
         await this.#client.markCommentReplyAsRead(
-          { comment_reply_id: notification.id, read },
+          { comment_reply_id: notification_id, read },
           options,
         );
         return;
