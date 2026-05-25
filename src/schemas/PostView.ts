@@ -3,6 +3,7 @@ import { z } from "zod/v4-mini";
 import { Community } from "./Community";
 import { Person } from "./Person";
 import { Post } from "./Post";
+import { PostNotificationsMode } from "./PostNotificationsMode";
 import { SubscribedType } from "./SubscribedType";
 import { Vote } from "./Vote";
 
@@ -16,6 +17,7 @@ export const PostView = z.object({
   creator_is_moderator: z.boolean(),
   hidden: z.boolean(),
   my_vote: z.optional(Vote),
+  notifications: PostNotificationsMode,
   post: Post,
   read: z.boolean(),
   saved: z.boolean(),

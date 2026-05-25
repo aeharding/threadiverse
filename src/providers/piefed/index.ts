@@ -283,6 +283,14 @@ export class UnsafePiefedClient implements BaseClient {
     };
   }
 
+  async editCommunityNotifications(
+    ..._params: Parameters<BaseClient["editCommunityNotifications"]>
+  ): ReturnType<BaseClient["editCommunityNotifications"]> {
+    throw new UnsupportedError(
+      "Edit community notifications is not supported by piefed",
+    );
+  }
+
   async editPost(
     payload: Parameters<BaseClient["editPost"]>[0],
     options?: RequestOptions,
@@ -298,6 +306,14 @@ export class UnsafePiefedClient implements BaseClient {
     return {
       post_view: compat.toPostView(response.data!.post_view),
     };
+  }
+
+  async editPostNotifications(
+    ..._params: Parameters<BaseClient["editPostNotifications"]>
+  ): ReturnType<BaseClient["editPostNotifications"]> {
+    throw new UnsupportedError(
+      "Edit post notifications is not supported by piefed",
+    );
   }
 
   async featurePost(

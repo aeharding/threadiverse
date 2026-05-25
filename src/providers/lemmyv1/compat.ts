@@ -49,6 +49,7 @@ export function toCommunityView(v: LemmyV1.CommunityView): types.CommunityView {
   return {
     ...v,
     blocked: !!v.community_actions?.blocked_at,
+    notifications: v.community_actions?.notifications ?? "replies_and_mentions",
     subscribed: toFollowState(v.community_actions?.follow_state),
   };
 }
@@ -149,6 +150,7 @@ export function toPostView(v: LemmyV1.PostView): types.PostView {
     creator_blocked: !!v.person_actions?.blocked_at,
     hidden: !!v.post_actions?.hidden_at,
     my_vote: toVote(v.post_actions),
+    notifications: v.post_actions?.notifications ?? "replies_and_mentions",
     read: !!v.post_actions?.read_at,
     saved: !!v.post_actions?.saved_at,
     subscribed: toFollowState(v.community_actions?.follow_state),
@@ -233,9 +235,22 @@ export function toSupportedNotificationView(
       };
     }
     case "subscribed":
-      // "Someone posted/commented in a community you subscribe to." Voyager
-      // already surfaces these via the home feed; not shown in inbox.
-      return;
+      switch (item.data.type_) {
+        case "comment":
+          return {
+            ...item,
+            data: { type_: "comment", ...toCommentView(item.data) },
+            notification,
+          };
+        case "post":
+          return {
+            ...item,
+            data: { type_: "post", ...toPostView(item.data) },
+            notification,
+          };
+        default:
+          return undefined;
+      }
   }
 }
 

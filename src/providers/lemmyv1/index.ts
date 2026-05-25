@@ -184,6 +184,12 @@ export class UnsafeLemmyV1Client implements BaseClient {
     };
   }
 
+  async editCommunityNotifications(
+    ...params: Parameters<BaseClient["editCommunityNotifications"]>
+  ): ReturnType<BaseClient["editCommunityNotifications"]> {
+    unwrap(await this.#client.editCommunityNotifications(...params));
+  }
+
   async editPost(
     ...params: Parameters<BaseClient["editPost"]>
   ): ReturnType<BaseClient["editPost"]> {
@@ -192,6 +198,12 @@ export class UnsafeLemmyV1Client implements BaseClient {
     return {
       post_view: compat.toPostView(response.post_view),
     };
+  }
+
+  async editPostNotifications(
+    ...params: Parameters<BaseClient["editPostNotifications"]>
+  ): ReturnType<BaseClient["editPostNotifications"]> {
+    unwrap(await this.#client.editPostNotifications(...params));
   }
 
   async featurePost(

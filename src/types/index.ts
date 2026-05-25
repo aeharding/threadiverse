@@ -13,6 +13,9 @@ export type CommunityFollowerView = z.infer<
 export type CommunityModeratorView = z.infer<
   typeof schemas.CommunityModeratorView
 >;
+export type CommunityNotificationsMode = z.infer<
+  typeof schemas.CommunityNotificationsMode
+>;
 export type CommunityView = z.infer<typeof schemas.CommunityView>;
 export type CommunityVisibility = z.infer<typeof schemas.CommunityVisibility>;
 export type FederatedInstances = z.infer<typeof schemas.FederatedInstances>;
@@ -75,6 +78,9 @@ export type PersonMention = z.infer<typeof schemas.PersonMention>;
 export type PersonView = z.infer<typeof schemas.PersonView>;
 export type PiefedErrorResponse = z.infer<typeof schemas.PiefedErrorResponse>;
 export type Post = z.infer<typeof schemas.Post>;
+export type PostNotificationsMode = z.infer<
+  typeof schemas.PostNotificationsMode
+>;
 export type PostReport = z.infer<typeof schemas.PostReport>;
 export type PostReportView = z.infer<typeof schemas.PostReportView>;
 export type PostView = z.infer<typeof schemas.PostView>;
@@ -100,7 +106,9 @@ export type * from "./CommunitySortType";
 export type * from "./CreateComment";
 export type * from "./CreatePost";
 export type * from "./EditComment";
+export type * from "./EditCommunityNotifications";
 export type * from "./EditPost";
+export type * from "./EditPostNotifications";
 export type * from "./GetComments";
 export type * from "./GetCommunity";
 export type * from "./GetModlog";

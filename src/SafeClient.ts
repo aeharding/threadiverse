@@ -102,9 +102,21 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
       return { comment_view: schemas.CommentView.parse(comment_view) };
     }
 
+    async editCommunityNotifications(
+      ...params: Parameters<BaseClient["editCommunityNotifications"]>
+    ) {
+      await super.editCommunityNotifications(...params);
+    }
+
     async editPost(...params: Parameters<BaseClient["editPost"]>) {
       const { post_view } = await super.editPost(...params);
       return { post_view: schemas.PostView.parse(post_view) };
+    }
+
+    async editPostNotifications(
+      ...params: Parameters<BaseClient["editPostNotifications"]>
+    ) {
+      await super.editPostNotifications(...params);
     }
 
     async featurePost(...params: Parameters<BaseClient["featurePost"]>) {

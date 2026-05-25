@@ -176,6 +176,14 @@ export class UnsafeLemmyV0Client implements BaseClient {
     };
   }
 
+  async editCommunityNotifications(
+    ..._params: Parameters<BaseClient["editCommunityNotifications"]>
+  ): ReturnType<BaseClient["editCommunityNotifications"]> {
+    throw new UnsupportedError(
+      "Edit community notifications is not supported by Lemmy v0",
+    );
+  }
+
   async editPost(
     ...params: Parameters<BaseClient["editPost"]>
   ): ReturnType<BaseClient["editPost"]> {
@@ -184,6 +192,14 @@ export class UnsafeLemmyV0Client implements BaseClient {
     return {
       post_view: compat.toPostView(response.post_view),
     };
+  }
+
+  async editPostNotifications(
+    ..._params: Parameters<BaseClient["editPostNotifications"]>
+  ): ReturnType<BaseClient["editPostNotifications"]> {
+    throw new UnsupportedError(
+      "Edit post notifications is not supported by Lemmy v0",
+    );
   }
 
   async featurePost(
