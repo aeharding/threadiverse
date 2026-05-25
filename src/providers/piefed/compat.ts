@@ -114,6 +114,7 @@ export function toCommunityView(
   return {
     blocked: v.blocked,
     community: toCommunity(v.community, v.counts),
+    notifications: "replies_and_mentions",
     subscribed: toSubscribedType(v.subscribed),
   };
 }
@@ -249,6 +250,7 @@ export function toPostView(
     creator_is_moderator: v.creator_is_moderator,
     hidden: v.hidden,
     my_vote: v.my_vote,
+    notifications: "replies_and_mentions",
     post: toPost(v.post, v.counts),
     read: v.read,
     saved: v.saved,

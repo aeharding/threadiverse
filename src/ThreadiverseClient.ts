@@ -147,9 +147,23 @@ export default class ThreadiverseClient implements BaseClient {
     return client.editComment(...params);
   }
 
+  async editCommunityNotifications(
+    ...params: Parameters<BaseClient["editCommunityNotifications"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.editCommunityNotifications(...params);
+  }
+
   async editPost(...params: Parameters<BaseClient["editPost"]>) {
     const client = await this.ensureClient();
     return client.editPost(...params);
+  }
+
+  async editPostNotifications(
+    ...params: Parameters<BaseClient["editPostNotifications"]>
+  ) {
+    const client = await this.ensureClient();
+    return client.editPostNotifications(...params);
   }
 
   async featurePost(...params: Parameters<BaseClient["featurePost"]>) {

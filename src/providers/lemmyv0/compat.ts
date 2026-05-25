@@ -203,6 +203,7 @@ export function toCommunityView(v: LemmyV0.CommunityView): types.CommunityView {
   return {
     blocked: false,
     community: toCommunityWithCounts(v.community, v.counts),
+    notifications: "replies_and_mentions",
     subscribed: v.subscribed,
   };
 }
@@ -630,6 +631,7 @@ export function toPostView(v: LemmyV0.PostView): types.PostView {
     creator_is_moderator: v.creator_is_moderator,
     hidden: v.hidden ?? false, // v0.13.3
     my_vote: toVote(v.my_vote),
+    notifications: "replies_and_mentions",
     post: toPost(v.post, v.counts),
     read: v.read,
     saved: v.saved,

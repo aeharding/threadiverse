@@ -99,10 +99,20 @@ export abstract class BaseClient {
     options?: RequestOptions,
   ): Promise<{ comment_view: types.CommentView }>;
 
+  abstract editCommunityNotifications(
+    payload: types.EditCommunityNotifications,
+    options?: RequestOptions,
+  ): Promise<void>;
+
   abstract editPost(
     payload: types.EditPost,
     options?: RequestOptions,
   ): Promise<{ post_view: types.PostView }>;
+
+  abstract editPostNotifications(
+    payload: types.EditPostNotifications,
+    options?: RequestOptions,
+  ): Promise<void>;
 
   abstract featurePost(
     payload: {
