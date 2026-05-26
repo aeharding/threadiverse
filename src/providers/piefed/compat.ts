@@ -255,6 +255,10 @@ export function toPostView(
     read: v.read,
     saved: v.saved,
     subscribed: toSubscribedType(v.subscribed),
+    tags: (v.flair_list ?? []).map((f) => ({
+      color: f.background_color,
+      name: f.flair_title,
+    })),
     unread_comments: v.counts.comments,
   };
 }
