@@ -3,7 +3,9 @@ import { z } from "zod/v4-mini";
 import { Community } from "./Community";
 import { Person } from "./Person";
 import { Post } from "./Post";
+import { PostNotificationsMode } from "./PostNotificationsMode";
 import { PostReport } from "./PostReport";
+import { PostTag } from "./PostTag";
 import { SubscribedType } from "./SubscribedType";
 import { Vote } from "./Vote";
 
@@ -19,6 +21,7 @@ export const PostReportView = z.object({
   creator_is_moderator: z.boolean(),
   hidden: z.boolean(),
   my_vote: z.optional(Vote),
+  notifications: PostNotificationsMode,
   post: Post,
   post_creator: Person,
   post_report: PostReport,
@@ -26,5 +29,6 @@ export const PostReportView = z.object({
   resolver: z.optional(Person),
   saved: z.boolean(),
   subscribed: SubscribedType,
+  tags: z.array(PostTag),
   unread_comments: z.number(),
 });

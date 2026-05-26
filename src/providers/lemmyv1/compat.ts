@@ -136,9 +136,13 @@ export function toPostReportView(
     creator_blocked: !!v.person_actions?.blocked_at,
     hidden: !!v.post_actions?.hidden_at,
     my_vote: toVote(v.post_actions),
+    notifications: v.post_actions?.notifications ?? "replies_and_mentions",
     read: !!v.post_actions?.read_at,
     saved: !!v.post_actions?.saved_at,
     subscribed: toFollowState(v.community_actions?.follow_state),
+    // Lemmy v1 PostReportView doesn't carry tags. See
+    // https://github.com/LemmyNet/lemmy/issues/6527
+    tags: [],
     unread_comments: toUnreadComments(v.post, v.post_actions),
   };
 }
