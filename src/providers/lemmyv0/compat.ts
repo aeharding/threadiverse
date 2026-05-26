@@ -609,6 +609,7 @@ export function toPostReportView(
     creator_is_moderator: v.creator_is_moderator,
     hidden: v.hidden,
     my_vote: toVote(v.my_vote),
+    notifications: "replies_and_mentions",
     post: toPost(v.post, v.counts),
     post_creator: toPerson(v.post_creator),
     post_report: toPostReport(v.post_report),
@@ -616,6 +617,7 @@ export function toPostReportView(
     resolver: v.resolver ? toPerson(v.resolver) : undefined,
     saved: v.saved,
     subscribed: v.subscribed,
+    tags: [],
     unread_comments: v.unread_comments,
   };
 }
