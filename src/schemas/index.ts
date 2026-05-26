@@ -36,6 +36,7 @@ export * from "./Post";
 export * from "./PostNotificationsMode";
 export * from "./PostReport";
 export * from "./PostReportView";
+export * from "./PostTag";
 export * from "./PostView";
 export * from "./PrivateMessage";
 export * from "./PrivateMessageView";

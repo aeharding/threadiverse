@@ -4,6 +4,7 @@ import { Community } from "./Community";
 import { Person } from "./Person";
 import { Post } from "./Post";
 import { PostNotificationsMode } from "./PostNotificationsMode";
+import { PostTag } from "./PostTag";
 import { SubscribedType } from "./SubscribedType";
 import { Vote } from "./Vote";
 
@@ -22,5 +23,6 @@ export const PostView = z.object({
   read: z.boolean(),
   saved: z.boolean(),
   subscribed: SubscribedType,
+  tags: z.array(PostTag),
   unread_comments: z.number(),
 });

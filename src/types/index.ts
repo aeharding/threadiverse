@@ -83,6 +83,7 @@ export type PostNotificationsMode = z.infer<
 >;
 export type PostReport = z.infer<typeof schemas.PostReport>;
 export type PostReportView = z.infer<typeof schemas.PostReportView>;
+export type PostTag = z.infer<typeof schemas.PostTag>;
 export type PostView = z.infer<typeof schemas.PostView>;
 export type PrivateMessage = z.infer<typeof schemas.PrivateMessage>;
 export type PrivateMessageView = z.infer<typeof schemas.PrivateMessageView>;

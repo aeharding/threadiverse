@@ -636,6 +636,7 @@ export function toPostView(v: LemmyV0.PostView): types.PostView {
     read: v.read,
     saved: v.saved,
     subscribed: v.subscribed,
+    tags: [],
     unread_comments: v.unread_comments,
   };
 }
