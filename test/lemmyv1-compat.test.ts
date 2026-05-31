@@ -107,6 +107,32 @@ describe("v1 compat - my_vote derivation", () => {
     } as any);
     expect(v.my_vote).toBeUndefined();
   });
+
+  it("PostView: surfaces read_comments_at from post_actions", () => {
+    const v = toPostView({
+      ...basePostView(),
+      post_actions: {
+        read_comments_amount: 1,
+        read_comments_at: NOW,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+    expect(v.read_comments_at).toBe(NOW);
+  });
+
+  it("PostView: read_comments_at null/absent → undefined", () => {
+    const nulled = toPostView({
+      ...basePostView(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      post_actions: { read_comments_at: null as any },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+    expect(nulled.read_comments_at).toBeUndefined();
+
+    const absent = toPostView(basePostView() as never);
+    expect(absent.read_comments_at).toBeUndefined();
+  });
 });
 
 describe("v1 compat - toSupportedNotificationView normalizes null id fields", () => {
