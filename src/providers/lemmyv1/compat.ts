@@ -156,6 +156,7 @@ export function toPostView(v: LemmyV1.PostView): types.PostView {
     my_vote: toVote(v.post_actions),
     notifications: v.post_actions?.notifications ?? "replies_and_mentions",
     read: !!v.post_actions?.read_at,
+    read_comments_at: nullToUndef(v.post_actions?.read_comments_at),
     saved: !!v.post_actions?.saved_at,
     subscribed: toFollowState(v.community_actions?.follow_state),
     unread_comments: toUnreadComments(v.post, v.post_actions),

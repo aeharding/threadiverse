@@ -21,6 +21,12 @@ export const PostView = z.object({
   notifications: PostNotificationsMode,
   post: Post,
   read: z.boolean(),
+  /**
+   * When the current user last read the comments on this post (ISO 8601).
+   * Comments published after this can be treated as unread. Only provided by
+   * providers that track it (Lemmy v1); `undefined` otherwise.
+   */
+  read_comments_at: z.optional(z.string()),
   saved: z.boolean(),
   subscribed: SubscribedType,
   tags: z.array(PostTag),
