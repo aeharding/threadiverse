@@ -127,4 +127,57 @@ describe("ThreadiverseClient - Caching", () => {
     // Verify total number of calls (2 discovery calls + 3 getPosts calls = 5)
     expect(mockFetch).toHaveBeenCalledTimes(5);
   });
+
+  it("scopes discovery to a provided discoveryCache instead of the global one", async () => {
+    const HOST = "https://lemmy-scoped-cache.example.com";
+
+    const mockFetch = vi.fn(async (url: unknown) => {
+      const urlStr = typeof url === "string" ? url : (url as Request).url;
+
+      if (urlStr === `${HOST}/.well-known/nodeinfo`)
+        return Response.json({
+          links: [
+            {
+              href: `${HOST}/nodeinfo/2.1`,
+              rel: "http://nodeinfo.diaspora.software/ns/schema/2.1",
+            },
+          ],
+        });
+      if (urlStr === `${HOST}/nodeinfo/2.1`)
+        return Response.json({
+          software: { name: "lemmy", version: "0.19.6" },
+        });
+      if (urlStr.startsWith(`${HOST}/api/v3/post/list`))
+        return Response.json({ posts: [] });
+      throw new Error(`Unexpected fetch call: ${urlStr}`);
+    });
+
+    const discoveryCache = new Map<
+      string,
+      Promise<{ name: string; version: string }>
+    >();
+
+    const client1 = new ThreadiverseClient(HOST, {
+      discoveryCache,
+      fetchFunction: mockFetch,
+    });
+    await client1.getPosts({});
+
+    expect(discoveryCache.size).toBe(1);
+
+    // A second client with its own fresh cache must re-discover (proving the
+    // global cache was not consulted or populated)
+    const client2 = new ThreadiverseClient(HOST, {
+      discoveryCache: new Map(),
+      fetchFunction: mockFetch,
+    });
+    await client2.getPosts({});
+
+    const discoveryCalls = mockFetch.mock.calls.filter((call) =>
+      String(
+        typeof call[0] === "string" ? call[0] : (call[0] as Request).url,
+      ).endsWith("/.well-known/nodeinfo"),
+    );
+    expect(discoveryCalls).toHaveLength(2);
+  });
 });
