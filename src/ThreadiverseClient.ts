@@ -8,9 +8,22 @@ import LemmyV1Client from "./providers/lemmyv1";
 import PiefedClient from "./providers/piefed";
 import { Nodeinfo21Payload, resolveSoftware } from "./wellknown";
 
-// Global cache for software discovery promises by hostname
-// TODO: some way to reset this for server-side/testing usage
-const discoveryCache = new Map<string, ReturnType<typeof resolveSoftware>>();
+// Default (global) cache for software discovery promises by hostname.
+// Pass `discoveryCache` in options to scope discovery per client instead
+// (e.g. for server-side or test usage).
+const globalDiscoveryCache = new Map<
+  string,
+  ReturnType<typeof resolveSoftware>
+>();
+
+export interface ThreadiverseClientOptions extends BaseClientOptions {
+  /**
+   * Where to cache software discovery (`.well-known/nodeinfo`) results,
+   * keyed by hostname. Defaults to a cache shared by all clients in the
+   * process; pass your own `Map` to scope it (server-side, tests).
+   */
+  discoveryCache?: Map<string, Promise<Nodeinfo21Payload["software"]>>;
+}
 
 type AnyMethod = (...params: unknown[]) => Promise<unknown>;
 
@@ -59,13 +72,16 @@ class ThreadiverseClient {
     | Awaited<ReturnType<typeof resolveSoftware>>
     | undefined;
 
+  private discoveryCache: Map<string, ReturnType<typeof resolveSoftware>>;
+
   private hostname: string;
 
   private options: BaseClientOptions;
 
-  constructor(hostname: string, options: BaseClientOptions) {
+  constructor(hostname: string, options: ThreadiverseClientOptions = {}) {
     this.hostname = hostname;
     this.options = options;
+    this.discoveryCache = options.discoveryCache ?? globalDiscoveryCache;
   }
 
   static resolveClient(software: Nodeinfo21Payload["software"]) {
@@ -103,18 +119,18 @@ class ThreadiverseClient {
     }
 
     if (!this.discoveredSoftware) {
-      if (!discoveryCache.has(this.hostname)) {
+      if (!this.discoveryCache.has(this.hostname)) {
         const resolver = resolveSoftware(this.hostname, this.options);
-        discoveryCache.set(this.hostname, resolver);
+        this.discoveryCache.set(this.hostname, resolver);
 
         try {
           await resolver;
         } catch (e) {
-          discoveryCache.delete(this.hostname);
+          this.discoveryCache.delete(this.hostname);
           throw e;
         }
       }
-      this.discoveredSoftware = await discoveryCache.get(this.hostname)!;
+      this.discoveredSoftware = await this.discoveryCache.get(this.hostname)!;
     }
 
     const delegateClient = (() => {
@@ -137,9 +153,9 @@ class ThreadiverseClient {
 
 export default ThreadiverseClient;
 
-// Function to clear the discovery cache (mainly for testing)
+// Function to clear the global discovery cache (mainly for testing)
 export function clearCache(): void {
-  discoveryCache.clear();
+  globalDiscoveryCache.clear();
 }
 
 export function getBaseClientConstructor(client: BaseClient) {
