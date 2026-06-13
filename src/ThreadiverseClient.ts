@@ -1,22 +1,55 @@
 import { satisfies } from "compare-versions";
 
 import { BaseClient, BaseClientOptions, ProviderInfo } from "./BaseClient";
+import { endpoints } from "./endpoints";
 import { UnsupportedSoftwareError } from "./errors";
 import LemmyV0Client from "./providers/lemmyv0";
 import LemmyV1Client from "./providers/lemmyv1";
 import PiefedClient from "./providers/piefed";
 import { Nodeinfo21Payload, resolveSoftware } from "./wellknown";
 
-// Global cache for software discovery promises by hostname
-// TODO: some way to reset this for server-side/testing usage
-const discoveryCache = new Map<string, ReturnType<typeof resolveSoftware>>();
+// Default (global) cache for software discovery promises by hostname.
+// Pass `discoveryCache` in options to scope discovery per client instead
+// (e.g. for server-side or test usage).
+const globalDiscoveryCache = new Map<
+  string,
+  ReturnType<typeof resolveSoftware>
+>();
 
-export default class ThreadiverseClient implements BaseClient {
+export interface ThreadiverseClientOptions extends BaseClientOptions {
+  /**
+   * Where to cache software discovery (`.well-known/nodeinfo`) results,
+   * keyed by hostname. Defaults to a cache shared by all clients in the
+   * process; pass your own `Map` to scope it (server-side, tests).
+   */
+  discoveryCache?: Map<string, Promise<Nodeinfo21Payload["software"]>>;
+}
+
+type AnyMethod = (...params: unknown[]) => Promise<unknown>;
+
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging --
+ * Endpoint methods are installed onto the prototype from the endpoint table
+ * (`./endpoints.ts`) in the class's static block; this merged interface
+ * declares their types. */
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface ThreadiverseClient extends BaseClient {}
+
+class ThreadiverseClient {
   /**
    * Important: First match wins.
    */
   static get supportedSoftware() {
     return [LemmyV1Client, LemmyV0Client, PiefedClient] as const;
+  }
+  static {
+    for (const endpoint of Object.keys(endpoints) as (keyof BaseClient)[]) {
+      (this.prototype as unknown as Record<string, AnyMethod>)[endpoint] =
+        async function (this: ThreadiverseClient, ...params) {
+          const client = await this.ensureClient();
+          return (client[endpoint] as AnyMethod).apply(client, params);
+        };
+    }
   }
   get software(): ProviderInfo {
     if (
@@ -34,17 +67,21 @@ export default class ThreadiverseClient implements BaseClient {
     };
   }
   private delegateClient: BaseClient | undefined;
+
   private discoveredSoftware:
     | Awaited<ReturnType<typeof resolveSoftware>>
     | undefined;
+
+  private discoveryCache: Map<string, ReturnType<typeof resolveSoftware>>;
 
   private hostname: string;
 
   private options: BaseClientOptions;
 
-  constructor(hostname: string, options: BaseClientOptions) {
+  constructor(hostname: string, options: ThreadiverseClientOptions = {}) {
     this.hostname = hostname;
     this.options = options;
+    this.discoveryCache = options.discoveryCache ?? globalDiscoveryCache;
   }
 
   static resolveClient(software: Nodeinfo21Payload["software"]) {
@@ -60,193 +97,9 @@ export default class ThreadiverseClient implements BaseClient {
     }
   }
 
-  async banFromCommunity(
-    ...params: Parameters<BaseClient["banFromCommunity"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.banFromCommunity(...params);
-  }
-
-  async blockCommunity(...params: Parameters<BaseClient["blockCommunity"]>) {
-    const client = await this.ensureClient();
-    return client.blockCommunity(...params);
-  }
-
-  async blockInstance(...params: Parameters<BaseClient["blockInstance"]>) {
-    const client = await this.ensureClient();
-    return client.blockInstance(...params);
-  }
-
-  async blockPerson(...params: Parameters<BaseClient["blockPerson"]>) {
-    const client = await this.ensureClient();
-    return client.blockPerson(...params);
-  }
-
-  async createComment(...params: Parameters<BaseClient["createComment"]>) {
-    const client = await this.ensureClient();
-    return client.createComment(...params);
-  }
-
-  async createCommentReport(
-    ...params: Parameters<BaseClient["createCommentReport"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.createCommentReport(...params);
-  }
-
-  async createPost(...params: Parameters<BaseClient["createPost"]>) {
-    const client = await this.ensureClient();
-    return client.createPost(...params);
-  }
-
-  async createPostReport(
-    ...params: Parameters<BaseClient["createPostReport"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.createPostReport(...params);
-  }
-
-  async createPrivateMessage(
-    ...params: Parameters<BaseClient["createPrivateMessage"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.createPrivateMessage(...params);
-  }
-
-  async createPrivateMessageReport(
-    ...params: Parameters<BaseClient["createPrivateMessageReport"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.createPrivateMessageReport(...params);
-  }
-
-  async deleteComment(...params: Parameters<BaseClient["deleteComment"]>) {
-    const client = await this.ensureClient();
-    return client.deleteComment(...params);
-  }
-
-  async deleteImage(...params: Parameters<BaseClient["deleteImage"]>) {
-    const client = await this.ensureClient();
-    return client.deleteImage(...params);
-  }
-
-  async deletePost(...params: Parameters<BaseClient["deletePost"]>) {
-    const client = await this.ensureClient();
-    return client.deletePost(...params);
-  }
-
-  async distinguishComment(
-    ...params: Parameters<BaseClient["distinguishComment"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.distinguishComment(...params);
-  }
-
-  async editComment(...params: Parameters<BaseClient["editComment"]>) {
-    const client = await this.ensureClient();
-    return client.editComment(...params);
-  }
-
-  async editCommunityNotifications(
-    ...params: Parameters<BaseClient["editCommunityNotifications"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.editCommunityNotifications(...params);
-  }
-
-  async editPost(...params: Parameters<BaseClient["editPost"]>) {
-    const client = await this.ensureClient();
-    return client.editPost(...params);
-  }
-
-  async editPostNotifications(
-    ...params: Parameters<BaseClient["editPostNotifications"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.editPostNotifications(...params);
-  }
-
-  async featurePost(...params: Parameters<BaseClient["featurePost"]>) {
-    const client = await this.ensureClient();
-    return client.featurePost(...params);
-  }
-
-  async followCommunity(...params: Parameters<BaseClient["followCommunity"]>) {
-    const client = await this.ensureClient();
-    return client.followCommunity(...params);
-  }
-
-  async getCaptcha(...params: Parameters<BaseClient["getCaptcha"]>) {
-    const client = await this.ensureClient();
-    return client.getCaptcha(...params);
-  }
-
-  async getComments(...params: Parameters<BaseClient["getComments"]>) {
-    const client = await this.ensureClient();
-    return client.getComments(...params);
-  }
-
-  async getCommunity(...params: Parameters<BaseClient["getCommunity"]>) {
-    const client = await this.ensureClient();
-    return client.getCommunity(...params);
-  }
-
-  async getFederatedInstances(
-    ...params: Parameters<BaseClient["getFederatedInstances"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.getFederatedInstances(...params);
-  }
-
   async getMode() {
     const client = await this.ensureClient();
     return getBaseClientConstructor(client).mode;
-  }
-
-  async getModlog(...params: Parameters<BaseClient["getModlog"]>) {
-    const client = await this.ensureClient();
-    return client.getModlog(...params);
-  }
-
-  async getNotifications(
-    ...params: Parameters<BaseClient["getNotifications"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.getNotifications(...params);
-  }
-
-  async getPersonDetails(
-    ...params: Parameters<BaseClient["getPersonDetails"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.getPersonDetails(...params);
-  }
-
-  async getPost(...params: Parameters<BaseClient["getPost"]>) {
-    const client = await this.ensureClient();
-    return client.getPost(...params);
-  }
-
-  async getPosts(...params: Parameters<BaseClient["getPosts"]>) {
-    const client = await this.ensureClient();
-    return client.getPosts(...params);
-  }
-
-  async getRandomCommunity(
-    ...params: Parameters<BaseClient["getRandomCommunity"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.getRandomCommunity(...params);
-  }
-
-  async getSite(...params: Parameters<BaseClient["getSite"]>) {
-    const client = await this.ensureClient();
-    return client.getSite(...params);
-  }
-
-  async getSiteMetadata(...params: Parameters<BaseClient["getSiteMetadata"]>) {
-    const client = await this.ensureClient();
-    return client.getSiteMetadata(...params);
   }
 
   async getSoftware(): Promise<ProviderInfo> {
@@ -260,171 +113,24 @@ export default class ThreadiverseClient implements BaseClient {
     };
   }
 
-  async getUnreadCount(...params: Parameters<BaseClient["getUnreadCount"]>) {
-    const client = await this.ensureClient();
-    return client.getUnreadCount(...params);
-  }
-
-  async likeComment(...params: Parameters<BaseClient["likeComment"]>) {
-    const client = await this.ensureClient();
-    return client.likeComment(...params);
-  }
-
-  async likePost(...params: Parameters<BaseClient["likePost"]>) {
-    const client = await this.ensureClient();
-    return client.likePost(...params);
-  }
-
-  async listCommentReports(
-    ...params: Parameters<BaseClient["listCommentReports"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.listCommentReports(...params);
-  }
-
-  async listCommunities(...params: Parameters<BaseClient["listCommunities"]>) {
-    const client = await this.ensureClient();
-    return client.listCommunities(...params);
-  }
-
-  async listPersonContent(
-    ...params: Parameters<BaseClient["listPersonContent"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.listPersonContent(...params);
-  }
-
-  async listPersonLiked(...params: Parameters<BaseClient["listPersonLiked"]>) {
-    const client = await this.ensureClient();
-    return client.listPersonLiked(...params);
-  }
-
-  async listPersonSaved(...params: Parameters<BaseClient["listPersonSaved"]>) {
-    const client = await this.ensureClient();
-    return client.listPersonSaved(...params);
-  }
-
-  async listPostReports(...params: Parameters<BaseClient["listPostReports"]>) {
-    const client = await this.ensureClient();
-    return client.listPostReports(...params);
-  }
-
-  async listReports(...params: Parameters<BaseClient["listReports"]>) {
-    const client = await this.ensureClient();
-    return client.listReports(...params);
-  }
-
-  async lockPost(...params: Parameters<BaseClient["lockPost"]>) {
-    const client = await this.ensureClient();
-    return client.lockPost(...params);
-  }
-
-  async login(...params: Parameters<BaseClient["login"]>) {
-    const client = await this.ensureClient();
-    return client.login(...params);
-  }
-
-  async logout(...params: Parameters<BaseClient["logout"]>) {
-    const client = await this.ensureClient();
-    return client.logout(...params);
-  }
-
-  async markAllAsRead(...params: Parameters<BaseClient["markAllAsRead"]>) {
-    const client = await this.ensureClient();
-    return client.markAllAsRead(...params);
-  }
-
-  async markNotificationAsRead(
-    ...params: Parameters<BaseClient["markNotificationAsRead"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.markNotificationAsRead(...params);
-  }
-
-  async markPostAsRead(...params: Parameters<BaseClient["markPostAsRead"]>) {
-    const client = await this.ensureClient();
-    return client.markPostAsRead(...params);
-  }
-
-  async register(...params: Parameters<BaseClient["register"]>) {
-    const client = await this.ensureClient();
-    return client.register(...params);
-  }
-
-  async removeComment(...params: Parameters<BaseClient["removeComment"]>) {
-    const client = await this.ensureClient();
-    return client.removeComment(...params);
-  }
-
-  async removePost(...params: Parameters<BaseClient["removePost"]>) {
-    const client = await this.ensureClient();
-    return client.removePost(...params);
-  }
-
-  async resolveCommentReport(
-    ...params: Parameters<BaseClient["resolveCommentReport"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.resolveCommentReport(...params);
-  }
-
-  async resolveObject(...params: Parameters<BaseClient["resolveObject"]>) {
-    const client = await this.ensureClient();
-    return client.resolveObject(...params);
-  }
-
-  async resolvePostReport(
-    ...params: Parameters<BaseClient["resolvePostReport"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.resolvePostReport(...params);
-  }
-
-  async saveComment(...params: Parameters<BaseClient["saveComment"]>) {
-    const client = await this.ensureClient();
-    return client.saveComment(...params);
-  }
-
-  async savePost(...params: Parameters<BaseClient["savePost"]>) {
-    const client = await this.ensureClient();
-    return client.savePost(...params);
-  }
-
-  async saveUserSettings(
-    ...params: Parameters<BaseClient["saveUserSettings"]>
-  ) {
-    const client = await this.ensureClient();
-    return client.saveUserSettings(...params);
-  }
-
-  async search(...params: Parameters<BaseClient["search"]>) {
-    const client = await this.ensureClient();
-    return client.search(...params);
-  }
-
-  async uploadImage(...params: Parameters<BaseClient["uploadImage"]>) {
-    const client = await this.ensureClient();
-    return client.uploadImage(...params);
-  }
-
   private async ensureClient(): Promise<BaseClient> {
     if (this.delegateClient) {
       return this.delegateClient;
     }
 
     if (!this.discoveredSoftware) {
-      if (!discoveryCache.has(this.hostname)) {
+      if (!this.discoveryCache.has(this.hostname)) {
         const resolver = resolveSoftware(this.hostname, this.options);
-        discoveryCache.set(this.hostname, resolver);
+        this.discoveryCache.set(this.hostname, resolver);
 
         try {
           await resolver;
         } catch (e) {
-          discoveryCache.delete(this.hostname);
+          this.discoveryCache.delete(this.hostname);
           throw e;
         }
       }
-      this.discoveredSoftware = await discoveryCache.get(this.hostname)!;
+      this.discoveredSoftware = await this.discoveryCache.get(this.hostname)!;
     }
 
     const delegateClient = (() => {
@@ -445,9 +151,11 @@ export default class ThreadiverseClient implements BaseClient {
   }
 }
 
-// Function to clear the discovery cache (mainly for testing)
+export default ThreadiverseClient;
+
+// Function to clear the global discovery cache (mainly for testing)
 export function clearCache(): void {
-  discoveryCache.clear();
+  globalDiscoveryCache.clear();
 }
 
 export function getBaseClientConstructor(client: BaseClient) {
