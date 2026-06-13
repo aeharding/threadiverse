@@ -50,10 +50,12 @@ export type Responder =
 
 /** Structural subset of Playwright's `Page` */
 interface PageLike {
+  // Promise<unknown> because the return type varies by Playwright version
+  // (void, then Disposable)
   route(
     url: string,
     handler: (route: RouteLike) => Promise<void>,
-  ): Promise<void>;
+  ): Promise<unknown>;
 }
 
 /** Structural subset of Playwright's `Route`, to avoid a Playwright dependency */
