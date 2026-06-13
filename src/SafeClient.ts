@@ -24,12 +24,13 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
   class SafeClient extends Client {}
 
   for (const [endpoint, schema] of Object.entries(endpoints)) {
-    const unsafeMethod = Client.prototype[
-      endpoint as keyof typeof endpoints
-    ] as AnyMethod;
-
     (SafeClient.prototype as unknown as Record<string, AnyMethod>)[endpoint] =
       async function (...params) {
+        // Resolved at call time (like `super.<endpoint>()` would be)
+        const unsafeMethod = Client.prototype[
+          endpoint as keyof typeof endpoints
+        ] as AnyMethod;
+
         const response = await unsafeMethod.apply(this, params);
         return schema ? schema.parse(response) : response;
       };
