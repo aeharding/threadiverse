@@ -579,6 +579,7 @@ export class UnsafePiefedClient implements BaseClient {
               },
               person: compat.toPerson(
                 response.data!.my_user.local_user_view.person,
+                response.data!.my_user.local_user_view.counts,
               ),
             },
             moderates: response.data!.my_user.moderates.map(
