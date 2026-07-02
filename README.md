@@ -60,10 +60,12 @@ instance.mock("GET /api/v4/post/list", {
   ]),
 });
 
-// Unit tests: pass instance.fetch as fetchFunction
-const client = new ThreadiverseClient(instance.origin, {
-  fetchFunction: instance.fetch,
-});
+// Unit tests: clientOptions() routes fetch through the fake and keeps
+// software discovery isolated from other tests
+const client = new ThreadiverseClient(
+  instance.origin,
+  instance.clientOptions(),
+);
 
 // Playwright: route all traffic for the fake host
 await instance.install(page);

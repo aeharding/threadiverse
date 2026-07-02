@@ -5,15 +5,21 @@ import type { BaseClient } from "./BaseClient";
 import * as schemas from "./schemas";
 
 /**
- * Every endpoint must map to a schema validating the full resolved response
- * (or `null` when the endpoint resolves with no data to validate). The
- * schema's output must be assignable to the return type declared on
- * `BaseClient` — that contract is enforced here at compile time.
+ * Every endpoint must map to a schema validating the full resolved response;
+ * `null` (skip validation) is only permitted — and required — for endpoints
+ * that resolve with `void`. The schema's output must be assignable to the
+ * return type declared on `BaseClient`, and every `BaseClient` member must
+ * be an async method (the install loops wrap everything in `async`) — all
+ * enforced here at compile time.
  */
 type EndpointTable = {
-  [K in keyof BaseClient]: null | z.ZodMiniType<
-    Awaited<ReturnType<BaseClient[K]>>
-  >;
+  [K in keyof BaseClient]: BaseClient[K] extends (
+    ...params: never[]
+  ) => Promise<infer Response>
+    ? [Response] extends [void]
+      ? null
+      : z.ZodMiniType<Response>
+    : never;
 };
 
 const CommentViewResponse = z.object({ comment_view: schemas.CommentView });
@@ -99,3 +105,29 @@ export const endpoints = {
 } satisfies EndpointTable;
 
 export type EndpointName = keyof typeof endpoints;
+
+type AnyMethod = (...params: unknown[]) => Promise<unknown>;
+
+type EndpointSchema = (typeof endpoints)[EndpointName];
+
+/**
+ * Install a method for every endpoint in the table onto a prototype.
+ * `Object.defineProperty` keeps the methods non-enumerable, matching
+ * class-method semantics (so `for...in` over a client stays clean).
+ */
+export function installEndpointMethods(
+  prototype: object,
+  build: (endpoint: EndpointName, schema: EndpointSchema) => AnyMethod,
+): void {
+  for (const [endpoint, schema] of Object.entries(endpoints) as [
+    EndpointName,
+    EndpointSchema,
+  ][]) {
+    Object.defineProperty(prototype, endpoint, {
+      configurable: true,
+      enumerable: false,
+      value: build(endpoint, schema),
+      writable: true,
+    });
+  }
+}

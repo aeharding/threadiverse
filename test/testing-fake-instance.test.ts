@@ -31,10 +31,10 @@ function setup() {
     ]),
   });
 
-  const client = new ThreadiverseClient(instance.origin, {
-    discoveryCache: new Map(),
-    fetchFunction: instance.fetch,
-  });
+  const client = new ThreadiverseClient(
+    instance.origin,
+    instance.clientOptions(),
+  );
 
   return { alex, client, instance, posts };
 }
@@ -139,5 +139,58 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
     instance.mock("GET /api/v4/post/list", { abort: "failed" });
 
     await expect(client.getPosts({})).rejects.toThrow(TypeError);
+  });
+
+  it("records and allows overriding discovery routes", async () => {
+    const { client, instance } = setup();
+
+    instance.mock("GET /.well-known/nodeinfo", { abort: "failed" });
+
+    await expect(client.getPosts({})).rejects.toThrow(TypeError);
+    expect(instance.calls("GET /.well-known/nodeinfo")).toHaveLength(1);
+  });
+
+  it("isolates same-host instances via clientOptions()", async () => {
+    const first = new FakeLemmyV1Instance();
+    const second = new FakeLemmyV1Instance({ version: "1.2.0" });
+
+    const firstClient = new ThreadiverseClient(
+      first.origin,
+      first.clientOptions(),
+    );
+    const secondClient = new ThreadiverseClient(
+      second.origin,
+      second.clientOptions(),
+    );
+
+    expect((await firstClient.getSoftware()).version).toBe("1.0.0-beta.1");
+    expect((await secondClient.getSoftware()).version).toBe("1.2.0");
+  });
+
+  it("serves null-body statuses through the fetch adapter", async () => {
+    const { instance } = setup();
+
+    instance.mock("POST /api/v4/post/mark_as_read", {
+      json: null,
+      status: 204,
+    });
+
+    const response = await instance.fetch(
+      `${instance.origin}/api/v4/post/mark_as_read`,
+      { method: "POST" },
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.body).toBeNull();
+  });
+
+  it("waitForCall resolves for an in-flight request without polling", async () => {
+    const { client, instance } = setup();
+
+    const pendingCall = instance.waitForCall("GET /api/v4/post/list");
+    await client.getPosts({ limit: 5 });
+
+    const call = await pendingCall;
+    expect(call.query.get("limit")).toBe("5");
   });
 });

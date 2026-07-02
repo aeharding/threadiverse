@@ -7,15 +7,21 @@
  * adapters for `fetch` (vitest / `fetchFunction`) and Playwright
  * (`page.route`).
  *
- * Software-specific factories (e.g. `createFakeLemmyV1Instance`) construct
- * one of these pre-seeded with that software's wire-format defaults.
+ * Software-specific factories (e.g. `FakeLemmyV1Instance`) construct one of
+ * these pre-seeded with that software's wire-format defaults.
  */
+
+import type { z } from "zod/v4-mini";
+
+import type { ThreadiverseClientOptions } from "../ThreadiverseClient";
+
+import { DiscoveryCache, Nodeinfo21Payload, NodeinfoLink } from "../wellknown";
 
 export interface FakeInstanceOptions {
   /** Bare hostname (no scheme), e.g. `"v1.test.lemmy"` */
   host: string;
   /** Served via nodeinfo discovery, e.g. `{ name: "lemmy", version: "1.0.0-beta.1" }` */
-  software: { name: string; version: string };
+  software: Nodeinfo21Payload["software"];
 }
 
 export type FakeRequest = {
@@ -48,6 +54,9 @@ export type Responder =
   | ((call: RecordedCall) => FakeResponse | Promise<FakeResponse>)
   | FakeResponse;
 
+/** Response statuses that must not carry a body (fetch `Response` throws) */
+const NULL_BODY_STATUSES = [204, 205, 304];
+
 /** Structural subset of Playwright's `Page` */
 interface PageLike {
   // Promise<unknown> because the return type varies by Playwright version
@@ -61,7 +70,11 @@ interface PageLike {
 /** Structural subset of Playwright's `Route`, to avoid a Playwright dependency */
 interface RouteLike {
   abort(errorCode?: string): Promise<void>;
-  fulfill(response: { json?: unknown; status?: number }): Promise<void>;
+  fulfill(response: {
+    body?: string;
+    json?: unknown;
+    status?: number;
+  }): Promise<void>;
   request(): {
     headers(): Record<string, string>;
     method(): string;
@@ -70,24 +83,51 @@ interface RouteLike {
   };
 }
 
+interface Waiter {
+  matcher: Matcher;
+  predicate: (call: RecordedCall) => boolean;
+  resolve: (call: RecordedCall) => void;
+}
+
 export class FakeInstance {
   readonly host: string;
 
   readonly origin: string;
 
-  readonly software: { name: string; version: string };
+  readonly software: Nodeinfo21Payload["software"];
 
   #calls: RecordedCall[] = [];
 
+  #discoveryCache: DiscoveryCache = new Map();
+
   #handlers = new Map<Matcher, Responder>();
+
+  #waiters: Waiter[] = [];
 
   constructor(options: FakeInstanceOptions) {
     this.host = options.host;
     this.origin = `https://${options.host}`;
     this.software = options.software;
+
+    // Discovery is seeded through the ordinary route table, so tests can
+    // override it (e.g. simulate an unreachable or unsupported instance)
+    // and assert on discovery requests like any other call
+    this.mock("GET /.well-known/nodeinfo", {
+      json: {
+        links: [
+          {
+            href: `${this.origin}/nodeinfo/2.1`,
+            rel: "http://nodeinfo.diaspora.software/ns/schema/2.1",
+          } satisfies z.input<typeof NodeinfoLink>,
+        ],
+      },
+    });
+    this.mock("GET /nodeinfo/2.1", {
+      json: { software: this.software, version: "2.1" },
+    });
   }
 
-  /** All recorded API requests matching `"METHOD /path"` (query ignored). */
+  /** All recorded requests matching `"METHOD /path"` (query ignored). */
   calls(matcher: Matcher): RecordedCall[] {
     return this.#calls.filter(
       (call) => `${call.method} ${call.pathname}` === matcher,
@@ -95,8 +135,25 @@ export class FakeInstance {
   }
 
   /**
-   * `fetch`-compatible adapter. Pass as `fetchFunction` to a
-   * `ThreadiverseClient`, or install as a global fetch mock in unit tests.
+   * Options for a `ThreadiverseClient` scoped to this fake: routes fetch
+   * through the instance and isolates software discovery from the
+   * process-global cache (so multiple fakes for the same host — e.g.
+   * different versions across tests — can't contaminate each other).
+   *
+   * ```ts
+   * const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
+   * ```
+   */
+  clientOptions(): ThreadiverseClientOptions {
+    return {
+      discoveryCache: this.#discoveryCache,
+      fetchFunction: this.fetch,
+    };
+  }
+
+  /**
+   * `fetch`-compatible adapter. Prefer `clientOptions()` when constructing a
+   * `ThreadiverseClient`; use this directly to install a global fetch mock.
    * Unrouted requests and `{ abort }` responses throw `TypeError`, like a
    * real network failure.
    */
@@ -119,11 +176,16 @@ export class FakeInstance {
     if ("abort" in result)
       throw new TypeError(`fetch failed: simulated abort (${result.abort})`);
 
-    return Response.json(result.json, { status: result.status ?? 200 });
+    const status = result.status ?? 200;
+
+    if (NULL_BODY_STATUSES.includes(status))
+      return new Response(null, { status });
+
+    return Response.json(result.json, { status });
   };
 
   /**
-   * Resolve a request against discovery routes and the mock table.
+   * Resolve a request against the route table.
    *
    * Returns `undefined` for requests to other origins (callers decide
    * whether to pass those through). Unmocked same-origin requests are
@@ -134,21 +196,6 @@ export class FakeInstance {
 
     if (url.origin !== this.origin) return undefined;
 
-    if (request.method === "GET" && url.pathname === "/.well-known/nodeinfo")
-      return {
-        json: {
-          links: [
-            {
-              href: `${this.origin}/nodeinfo/2.1`,
-              rel: "http://nodeinfo.diaspora.software/ns/schema/2.1",
-            },
-          ],
-        },
-      };
-
-    if (request.method === "GET" && url.pathname === "/nodeinfo/2.1")
-      return { json: { software: this.software, version: "2.1" } };
-
     const call: RecordedCall = {
       body: parseBody(request.body ?? null),
       headers: request.headers ?? {},
@@ -157,6 +204,7 @@ export class FakeInstance {
       query: url.searchParams,
     };
     this.#calls.push(call);
+    this.#notifyWaiters(call);
 
     const responder = this.#handlers.get(
       `${request.method} ${url.pathname}` as Matcher,
@@ -195,7 +243,12 @@ export class FakeInstance {
 
       if ("abort" in result) return route.abort(result.abort);
 
-      return route.fulfill({ json: result.json, status: result.status ?? 200 });
+      const status = result.status ?? 200;
+
+      if (NULL_BODY_STATUSES.includes(status))
+        return route.fulfill({ body: "", status });
+
+      return route.fulfill({ json: result.json, status });
     });
   }
 
@@ -204,23 +257,53 @@ export class FakeInstance {
     this.#handlers.set(matcher, responder);
   }
 
-  /** Wait until a matching request is recorded, then return the latest. */
+  /**
+   * Wait until a matching request is recorded, then return the latest.
+   * Resolution is push-based (no polling), so pending waiters settle the
+   * moment the request lands — only the timeout path needs real timers.
+   */
   async waitForCall(
     matcher: Matcher,
     predicate: (call: RecordedCall) => boolean = () => true,
     { timeoutMs = 5000 } = {},
   ): Promise<RecordedCall> {
-    const deadline = Date.now() + timeoutMs;
+    const existing = this.calls(matcher).filter(predicate).at(-1);
+    if (existing) return existing;
 
-    for (;;) {
-      const match = this.calls(matcher).filter(predicate).at(-1);
-      if (match) return match;
+    return new Promise<RecordedCall>((resolve, reject) => {
+      const waiter: Waiter = {
+        matcher,
+        predicate,
+        resolve: (call) => {
+          clearTimeout(timer);
+          resolve(call);
+        },
+      };
 
-      if (Date.now() > deadline)
-        throw new Error(`Timed out waiting for ${matcher}`);
+      const timer = setTimeout(() => {
+        this.#removeWaiter(waiter);
+        reject(new Error(`Timed out waiting for ${matcher}`));
+      }, timeoutMs);
 
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      this.#waiters.push(waiter);
+    });
+  }
+
+  #notifyWaiters(call: RecordedCall): void {
+    for (const waiter of [...this.#waiters]) {
+      if (
+        `${call.method} ${call.pathname}` === waiter.matcher &&
+        waiter.predicate(call)
+      ) {
+        this.#removeWaiter(waiter);
+        waiter.resolve(call);
+      }
     }
+  }
+
+  #removeWaiter(waiter: Waiter): void {
+    const index = this.#waiters.indexOf(waiter);
+    if (index !== -1) this.#waiters.splice(index, 1);
   }
 }
 

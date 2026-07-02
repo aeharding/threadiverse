@@ -1,6 +1,6 @@
 import type { UnsafePiefedClient } from "./providers/piefed";
 
-import { endpoints } from "./endpoints";
+import { installEndpointMethods } from "./endpoints";
 import { UnsafeLemmyV0Client } from "./providers/lemmyv0";
 import { UnsafeLemmyV1Client } from "./providers/lemmyv1";
 
@@ -8,8 +8,6 @@ type AnyClient =
   | typeof UnsafeLemmyV0Client
   | typeof UnsafeLemmyV1Client
   | typeof UnsafePiefedClient;
-
-type AnyMethod = (...params: unknown[]) => Promise<unknown>;
 
 /**
  * Wraps a provider class so that every endpoint's response is validated
@@ -23,18 +21,19 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
 
   class SafeClient extends Client {}
 
-  for (const [endpoint, schema] of Object.entries(endpoints)) {
-    (SafeClient.prototype as unknown as Record<string, AnyMethod>)[endpoint] =
-      async function (...params) {
+  installEndpointMethods(
+    SafeClient.prototype,
+    (endpoint, schema) =>
+      async function (this: InstanceType<AnyClient>, ...params) {
         // Resolved at call time (like `super.<endpoint>()` would be)
-        const unsafeMethod = Client.prototype[
-          endpoint as keyof typeof endpoints
-        ] as AnyMethod;
+        const unsafeMethod = Client.prototype[endpoint] as (
+          ...params: unknown[]
+        ) => Promise<unknown>;
 
         const response = await unsafeMethod.apply(this, params);
         return schema ? schema.parse(response) : response;
-      };
-  }
+      },
+  );
 
   return SafeClient;
 }
