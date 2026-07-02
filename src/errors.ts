@@ -1,4 +1,16 @@
+import type { LemmyErrorType } from "lemmy-js-client-v0";
+
 import { PiefedErrorResponse } from "./types";
+
+/**
+ * Machine-readable error codes a fediverse server may return (e.g.
+ * "incorrect_login", "too_many_requests"), exposed on `ResponseError.code`.
+ *
+ * The known union gives autocomplete/exhaustiveness for the codes Lemmy
+ * emits; software may emit codes outside it (PieFed, future Lemmy versions),
+ * so any string is accepted. Match with `isErrorCode`.
+ */
+export type ResponseErrorCode = LemmyErrorType["error"] | (string & {});
 
 export class FediverseError extends Error {
   constructor(message: string, errorOptions?: ErrorOptions) {
@@ -28,7 +40,7 @@ export class InvalidPayloadError extends FediverseError {
  * error (e.g. lemmy-js-client's `LemmyError`) is attached as `.cause`.
  */
 export class ResponseError extends FediverseError {
-  code: string;
+  code: ResponseErrorCode;
   status?: number;
 
   constructor(code: string, options?: { cause?: unknown; status?: number }) {
@@ -87,4 +99,17 @@ export class UnsupportedSoftwareError extends UnsupportedError {
     super(message);
     this.name = "UnsupportedSoftwareError";
   }
+}
+
+/**
+ * Whether `error` is a server error response carrying the given
+ * machine-readable code.
+ *
+ * Also matches on `.message` for non-`ResponseError` errors, preserving
+ * legacy `error.message === "code"` semantics.
+ */
+export function isErrorCode(error: unknown, code: ResponseErrorCode): boolean {
+  if (error instanceof ResponseError) return error.code === code;
+  if (error instanceof Error) return error.message === code;
+  return false;
 }

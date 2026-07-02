@@ -127,5 +127,9 @@ export type * from "./Search";
 export type * from "./SearchSortType";
 export type * from "./SearchType";
 
-// TODO: unified error handling in threadiverse project
+/**
+ * @deprecated Leaks lemmy-js-client-v0's type into the public API; use
+ * `ResponseErrorCode` (+ `isErrorCode`) from the package root instead.
+ * Will be removed in a future release.
+ */
 export type { LemmyErrorType } from "lemmy-js-client-v0";
