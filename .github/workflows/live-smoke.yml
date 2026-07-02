@@ -1,0 +1,24 @@
+name: live-smoke
+
+# Read-only smoke tests against live instances (see test/live-smoke.test.ts).
+# Catches upstream API drift on a schedule instead of in consumer bug reports.
+
+on:
+  schedule:
+    - cron: "0 12 * * 1" # Mondays 12:00 UTC
+  workflow_dispatch:
+
+jobs:
+  live-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm i -fg corepack && corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install
+      - run: pnpm vitest run test/live-smoke.test.ts
+        env:
+          LIVE_SMOKE: "1"
