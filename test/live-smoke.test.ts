@@ -15,7 +15,16 @@ const INSTANCES = [
   // TODO: add a Lemmy v1 instance once a stable public one exists
 ] as const;
 
-const OPTIONS = { timeout: 30_000 };
+const OPTIONS = { retry: 2, timeout: 30_000 };
+
+// If the workflow and this gate ever drift apart (e.g. the env var is
+// renamed in one place), the scheduled run would stay green forever while
+// testing nothing. Fail loudly instead.
+it.runIf(
+  process.env.GITHUB_WORKFLOW === "live-smoke" && !process.env.LIVE_SMOKE,
+)("live-smoke workflow must set LIVE_SMOKE", () => {
+  expect.unreachable("live-smoke gate misconfigured");
+});
 
 describe.runIf(process.env.LIVE_SMOKE)("live smoke", () => {
   describe.each(INSTANCES)("$url", ({ software, url }) => {
@@ -55,7 +64,7 @@ describe.runIf(process.env.LIVE_SMOKE)("live smoke", () => {
         type_: "communities",
       });
 
-      expect(Array.isArray(data)).toBe(true);
+      expect(data.length).toBeGreaterThan(0);
     });
   });
 });
