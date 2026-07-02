@@ -28,16 +28,14 @@ describe("ThreadiverseClient - Basic", () => {
       // Accessing the name getter should throw before initialization
       const name = client.software;
       return name;
-    }).toThrow(
-      "Client not initialized. Wait for getSoftware() or any other async method to resolve first",
-    );
+    }).toThrow("Client not initialized. Await connect() first");
   });
 
   it("should throw error when software getter is called before initialization", async () => {
     const client = new ThreadiverseClient("example.com", mockOptions);
 
     expect(() => client.software).toThrow(
-      "Client not initialized. Wait for getSoftware() or any other async method to resolve first",
+      "Client not initialized. Await connect() first",
     );
   });
 });

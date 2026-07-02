@@ -1,6 +1,11 @@
 import { satisfies } from "compare-versions";
 
-import { BaseClient, BaseClientOptions, ProviderInfo } from "./BaseClient";
+import {
+  BaseClient,
+  BaseClientOptions,
+  ProviderInfo,
+  ThreadiverseMode,
+} from "./BaseClient";
 import { installEndpointMethods } from "./endpoints";
 import { UnsupportedSoftwareError } from "./errors";
 import LemmyV0Client from "./providers/lemmyv0";
@@ -18,6 +23,13 @@ export type { DiscoveryCache } from "./wellknown";
 // Pass `discoveryCache` in options to scope discovery per client instead
 // (e.g. for server-side or test usage).
 const globalDiscoveryCache: DiscoveryCache = new Map();
+
+export interface ClientConnection {
+  /** Which compat mode the client selected, e.g. `"lemmyv1"` */
+  mode: ThreadiverseMode;
+  /** The instance's software as reported by nodeinfo */
+  software: ProviderInfo;
+}
 
 export interface ThreadiverseClientOptions extends BaseClientOptions {
   /**
@@ -55,15 +67,27 @@ class ThreadiverseClient {
         },
     );
   }
+  /**
+   * Which compat mode the client selected. Sync — requires an established
+   * connection (`await connect()`, or any resolved API call).
+   */
+  get mode(): ThreadiverseMode {
+    if (!this.delegateClient)
+      throw new Error("Client not initialized. Await connect() first");
+
+    return getBaseClientConstructor(this.delegateClient).mode;
+  }
+  /**
+   * The instance's software as reported by nodeinfo. Sync — requires an
+   * established connection (`await connect()`, or any resolved API call).
+   */
   get software(): ProviderInfo {
     if (
       !this.delegateClient ||
       !getBaseClientConstructor(this.delegateClient).softwareName ||
       !this.discoveredSoftware
     )
-      throw new Error(
-        "Client not initialized. Wait for getSoftware() or any other async method to resolve first",
-      );
+      throw new Error("Client not initialized. Await connect() first");
 
     return {
       name: getBaseClientConstructor(this.delegateClient).softwareName,
@@ -101,14 +125,26 @@ class ThreadiverseClient {
     }
   }
 
-  async getMode() {
-    const client = await this.ensureClient();
-    return getBaseClientConstructor(client).mode;
+  /**
+   * Resolve the instance's software (cached nodeinfo discovery) and prepare
+   * the underlying provider. Idempotent; after it resolves, the sync `mode`
+   * and `software` getters work. Any API call connects implicitly — use
+   * this when you need introspection before (or without) making requests.
+   */
+  async connect(): Promise<ClientConnection> {
+    await this.ensureClient();
+
+    return { mode: this.mode, software: this.software };
   }
 
+  /** @deprecated Use `connect()` (or the sync `mode` getter once connected) */
+  async getMode(): Promise<ThreadiverseMode> {
+    return (await this.connect()).mode;
+  }
+
+  /** @deprecated Use `connect()` (or the sync `software` getter once connected) */
   async getSoftware(): Promise<ProviderInfo> {
-    await this.ensureClient();
-    return this.software;
+    return (await this.connect()).software;
   }
 
   private async ensureClient(): Promise<BaseClient> {
