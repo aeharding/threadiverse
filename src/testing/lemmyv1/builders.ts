@@ -21,6 +21,8 @@ export interface LemmyV1BuildersOptions {
 export const DEFAULT_NOW = "2026-05-21T12:00:00.000Z";
 export const DEFAULT_VERSION = "1.0.0-beta.1";
 
+const DEFAULT_COMMUNITY_ID = 111;
+
 export type LemmyV1Builders = ReturnType<typeof createLemmyV1Builders>;
 
 export function createLemmyV1Builders({
@@ -35,9 +37,6 @@ export function createLemmyV1Builders({
   }): Wire<LemmyV1.Person> {
     return {
       ap_id: `https://${host}/u/${over.name}`,
-      avatar: undefined,
-      banner: undefined,
-      bio: undefined,
       bot_account: false,
       comment_count: 0,
       deleted: false,
@@ -46,11 +45,9 @@ export function createLemmyV1Builders({
       instance_id: 1,
       last_refreshed_at: now,
       local: true,
-      matrix_user_id: undefined,
       name: over.name,
       post_count: 0,
       published_at: now,
-      updated_at: undefined,
     };
   }
 
@@ -61,11 +58,9 @@ export function createLemmyV1Builders({
 
     return {
       ap_id: `https://${host}/c/${name}`,
-      banner: undefined,
       comments: 0,
       deleted: false,
-      icon: undefined,
-      id: over.id ?? 111,
+      id: over.id ?? DEFAULT_COMMUNITY_ID,
       instance_id: 1,
       last_refreshed_at: now,
       local: true,
@@ -77,13 +72,10 @@ export function createLemmyV1Builders({
       published_at: now,
       removed: false,
       report_count: 0,
-      sidebar: undefined,
       subscribers: 1,
       subscribers_local: 1,
-      summary: undefined,
       title: over.title ?? "Test Community",
       unresolved_report_count: 0,
-      updated_at: undefined,
       users_active_day: 0,
       users_active_half_year: 0,
       users_active_month: 0,
@@ -101,17 +93,13 @@ export function createLemmyV1Builders({
     url?: string;
   }): Wire<LemmyV1.Post> {
     return {
-      alt_text: undefined,
       ap_id: `https://${host}/post/${over.id}`,
       body: over.body,
       comments: 0,
-      community_id: (over.community ?? community()).id,
+      community_id: over.community?.id ?? DEFAULT_COMMUNITY_ID,
       creator_id: over.creator.id,
       deleted: false,
       downvotes: 0,
-      embed_description: undefined,
-      embed_title: undefined,
-      embed_video_url: undefined,
       featured_community: false,
       featured_local: false,
       federation_pending: false,
@@ -126,12 +114,9 @@ export function createLemmyV1Builders({
       removed: false,
       report_count: 0,
       score: 1,
-      thumbnail_url: undefined,
       unresolved_report_count: 0,
-      updated_at: undefined,
       upvotes: 1,
       url: over.url,
-      url_content_type: undefined,
     };
   }
 
@@ -143,21 +128,17 @@ export function createLemmyV1Builders({
     name: string;
     url?: string;
   }): Wire<LemmyV1.PostView> {
+    const resolvedCommunity = over.community ?? community();
+
     return {
       can_mod: false,
-      community: over.community ?? community(),
-      community_actions: undefined,
+      community: resolvedCommunity,
       creator: over.creator,
-      creator_ban_expires_at: undefined,
       creator_banned: false,
       creator_banned_from_community: false,
-      creator_community_ban_expires_at: undefined,
       creator_is_admin: false,
       creator_is_moderator: false,
-      image_details: undefined,
-      person_actions: undefined,
-      post: post(over),
-      post_actions: undefined,
+      post: post({ ...over, community: resolvedCommunity }),
       tags: [],
     };
   }
@@ -195,20 +176,14 @@ export function createLemmyV1Builders({
         report_count: 0,
         score: 1,
         unresolved_report_count: 0,
-        updated_at: undefined,
         upvotes: 1,
       },
-      comment_actions: undefined,
       community: over.post.community,
-      community_actions: undefined,
       creator,
-      creator_ban_expires_at: undefined,
       creator_banned: false,
       creator_banned_from_community: false,
-      creator_community_ban_expires_at: undefined,
       creator_is_admin: false,
       creator_is_moderator: false,
-      person_actions: undefined,
       post: over.post.post,
       tags: [],
     };
@@ -233,7 +208,6 @@ export function createLemmyV1Builders({
         published_at: now,
         recipient_id: over.recipient.id,
         removed: false,
-        updated_at: undefined,
       },
       recipient: over.recipient,
     };
@@ -263,7 +237,6 @@ export function createLemmyV1Builders({
       },
       target_comment: over.target_comment,
       target_community: over.target_community,
-      target_instance: undefined,
       target_person: over.target_person,
       target_post: over.target_post,
     };
@@ -284,8 +257,6 @@ export function createLemmyV1Builders({
       default_items_per_page: 50,
       default_listing_type: "all",
       default_post_sort_type: "active",
-      default_post_time_range_seconds: undefined,
-      email: undefined,
       email_verified: false,
       hide_media: false,
       id: over.person_id,
@@ -324,7 +295,6 @@ export function createLemmyV1Builders({
       instance_persons_blocks: [],
       keyword_blocks: [],
       local_user_view: {
-        ban_expires_at: undefined,
         banned: false,
         local_user: localUser({
           admin: over.admin,
@@ -346,13 +316,10 @@ export function createLemmyV1Builders({
       moderates: [],
       multi_communities_created: [],
       person_view: {
-        ban_expires_at: undefined,
         banned: false,
         is_admin: false,
         person: subject,
-        person_actions: undefined,
       },
-      site: undefined,
     };
   }
 
@@ -364,12 +331,10 @@ export function createLemmyV1Builders({
       community_view: {
         can_mod: false,
         community: over.community ?? community(),
-        community_actions: undefined,
         tags: [],
       },
       discussion_languages: [],
       moderators: [],
-      site: undefined,
     };
   }
 
@@ -385,7 +350,6 @@ export function createLemmyV1Builders({
       blocked_urls: [],
       captcha_enabled: false,
       discussion_languages: [],
-      last_application_duration_seconds: undefined,
       oauth_providers: [],
       site_view: {
         instance: {
@@ -393,12 +357,10 @@ export function createLemmyV1Builders({
           id: 1,
           published_at: now,
           software: "lemmy",
-          updated_at: undefined,
           version,
         },
         local_site: {
           application_email_admins: false,
-          application_question: undefined,
           comment_downvotes: "all",
           comment_upvotes: "all",
           comments: 0,
@@ -409,7 +371,6 @@ export function createLemmyV1Builders({
           default_post_listing_mode: "list",
           default_post_listing_type: "all",
           default_post_sort_type: "active",
-          default_post_time_range_seconds: undefined,
           default_theme: "browser",
           email_notifications_disabled: false,
           email_verification_required: false,
@@ -422,10 +383,8 @@ export function createLemmyV1Builders({
           image_max_thumbnail_size: 256,
           image_max_upload_size: 50_000_000,
           image_mode: "store_link_previews",
-          image_proxy_bypass_domains: undefined,
           image_upload_disabled: false,
           image_upload_timeout_seconds: 30,
-          legal_information: undefined,
           nsfw_content_disallowed: false,
           oauth_registration: false,
           post_downvotes: "all",
@@ -437,9 +396,6 @@ export function createLemmyV1Builders({
           reports_email_admins: false,
           site_id: 1,
           site_setup: true,
-          slur_filter_regex: undefined,
-          suggested_multi_community_id: undefined,
-          updated_at: undefined,
           users: 1,
           users_active_day: 1,
           users_active_half_year: 1,
@@ -463,25 +419,17 @@ export function createLemmyV1Builders({
           register_max_requests: 3,
           search_interval_seconds: 600,
           search_max_requests: 60,
-          updated_at: undefined,
         },
         site: {
           ap_id: `https://${host}/`,
-          banner: undefined,
-          content_warning: undefined,
-          icon: undefined,
           id: 1,
           inbox_url: `https://${host}/site_inbox`,
           instance_id: 1,
           last_refreshed_at: now,
           name: over.name ?? "Test v1 site",
           published_at: now,
-          sidebar: undefined,
-          summary: undefined,
-          updated_at: undefined,
         },
       },
-      tagline: undefined,
       version,
     };
   }

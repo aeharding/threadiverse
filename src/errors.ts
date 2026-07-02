@@ -69,8 +69,8 @@ export class PiefedResponseError extends ResponseError {
 }
 
 export class UnexpectedResponseError extends FediverseError {
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, errorOptions?: ErrorOptions) {
+    super(message, errorOptions);
     this.name = "UnexpectedResponseError";
   }
 }

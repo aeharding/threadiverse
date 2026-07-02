@@ -1,20 +1,23 @@
 import { satisfies } from "compare-versions";
 
 import { BaseClient, BaseClientOptions, ProviderInfo } from "./BaseClient";
-import { endpoints } from "./endpoints";
+import { installEndpointMethods } from "./endpoints";
 import { UnsupportedSoftwareError } from "./errors";
 import LemmyV0Client from "./providers/lemmyv0";
 import LemmyV1Client from "./providers/lemmyv1";
 import PiefedClient from "./providers/piefed";
-import { Nodeinfo21Payload, resolveSoftware } from "./wellknown";
+import {
+  DiscoveryCache,
+  Nodeinfo21Payload,
+  resolveSoftware,
+} from "./wellknown";
+
+export type { DiscoveryCache } from "./wellknown";
 
 // Default (global) cache for software discovery promises by hostname.
 // Pass `discoveryCache` in options to scope discovery per client instead
 // (e.g. for server-side or test usage).
-const globalDiscoveryCache = new Map<
-  string,
-  ReturnType<typeof resolveSoftware>
->();
+const globalDiscoveryCache: DiscoveryCache = new Map();
 
 export interface ThreadiverseClientOptions extends BaseClientOptions {
   /**
@@ -22,10 +25,8 @@ export interface ThreadiverseClientOptions extends BaseClientOptions {
    * keyed by hostname. Defaults to a cache shared by all clients in the
    * process; pass your own `Map` to scope it (server-side, tests).
    */
-  discoveryCache?: Map<string, Promise<Nodeinfo21Payload["software"]>>;
+  discoveryCache?: DiscoveryCache;
 }
-
-type AnyMethod = (...params: unknown[]) => Promise<unknown>;
 
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging --
  * Endpoint methods are installed onto the prototype from the endpoint table
@@ -43,13 +44,16 @@ class ThreadiverseClient {
     return [LemmyV1Client, LemmyV0Client, PiefedClient] as const;
   }
   static {
-    for (const endpoint of Object.keys(endpoints) as (keyof BaseClient)[]) {
-      (this.prototype as unknown as Record<string, AnyMethod>)[endpoint] =
+    installEndpointMethods(
+      this.prototype,
+      (endpoint) =>
         async function (this: ThreadiverseClient, ...params) {
           const client = await this.ensureClient();
-          return (client[endpoint] as AnyMethod).apply(client, params);
-        };
-    }
+          return (
+            client[endpoint] as (...params: unknown[]) => Promise<unknown>
+          ).apply(client, params);
+        },
+    );
   }
   get software(): ProviderInfo {
     if (
@@ -72,7 +76,7 @@ class ThreadiverseClient {
     | Awaited<ReturnType<typeof resolveSoftware>>
     | undefined;
 
-  private discoveryCache: Map<string, ReturnType<typeof resolveSoftware>>;
+  private discoveryCache: DiscoveryCache;
 
   private hostname: string;
 
@@ -103,14 +107,8 @@ class ThreadiverseClient {
   }
 
   async getSoftware(): Promise<ProviderInfo> {
-    const client = await this.ensureClient();
-
-    if (!this.discoveredSoftware) throw new Error("Internal error");
-
-    return {
-      name: getBaseClientConstructor(client).softwareName,
-      version: this.discoveredSoftware.version,
-    };
+    await this.ensureClient();
+    return this.software;
   }
 
   private async ensureClient(): Promise<BaseClient> {
