@@ -37,3 +37,37 @@ const client = new ThreadiverseClient("https://lemmy.world");
 
 const posts = await client.getPosts();
 ```
+
+## Testing your app
+
+`threadiverse/testing` provides a fake instance for consumer test suites, so
+you don't have to hand-maintain wire-format fixtures or discovery mocks. Wire
+shapes are type-checked against the same upstream API types the compat layer
+uses, so fixtures can't silently drift.
+
+```ts
+import { FakeLemmyV1Instance } from "threadiverse/testing";
+
+const instance = new FakeLemmyV1Instance({ host: "fake.lemmy.test" });
+
+instance.mock("GET /api/v4/post/list", {
+  json: instance.build.pagedResponse([
+    instance.build.postView({
+      id: 1,
+      name: "Hello world",
+      creator: instance.build.person({ id: 100, name: "alex" }),
+    }),
+  ]),
+});
+
+// Unit tests: pass instance.fetch as fetchFunction
+const client = new ThreadiverseClient(instance.origin, {
+  fetchFunction: instance.fetch,
+});
+
+// Playwright: route all traffic for the fake host
+await instance.install(page);
+
+// Assert on outgoing requests
+const call = await instance.waitForCall("GET /api/v4/post/list");
+```

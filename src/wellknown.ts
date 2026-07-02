@@ -1,20 +1,25 @@
+import { z } from "zod/v4-mini";
+
 import { BaseClientOptions } from "./BaseClient";
+import { UnexpectedResponseError } from "./errors";
 
-export interface Nodeinfo21Payload {
-  software: {
-    name: string;
-    version: string;
-  };
-}
+const NodeinfoLinksPayload = z.object({
+  links: z.array(
+    z.object({
+      href: z.string(),
+      rel: z.string(),
+    }),
+  ),
+});
 
-interface NodeinfoLink {
-  href: string;
-  rel: string;
-}
+const Nodeinfo21Payload = z.object({
+  software: z.object({
+    name: z.string(),
+    version: z.string(),
+  }),
+});
 
-interface NodeinfoLinksPayload {
-  links: NodeinfoLink[];
-}
+export type Nodeinfo21Payload = z.infer<typeof Nodeinfo21Payload>;
 
 export async function resolveSoftware(
   url: string,
@@ -31,23 +36,24 @@ export async function resolveSoftware(
 
   const response = await fetch(`${url}/.well-known/nodeinfo`, fetchOptions);
 
-  const data = await response.json();
+  const data = NodeinfoLinksPayload.parse(await response.json());
 
   const nodeinfoLink = resolveNodeinfoLink(data);
 
-  if (nodeinfoLink) {
-    const nodeinfoResponse = await fetch(nodeinfoLink, fetchOptions);
+  if (!nodeinfoLink)
+    throw new UnexpectedResponseError("No supported nodeinfo (2.x) found");
 
-    const nodeinfoData = (await nodeinfoResponse.json()) as Nodeinfo21Payload;
+  const nodeinfoResponse = await fetch(nodeinfoLink, fetchOptions);
 
-    return nodeinfoData.software;
-  }
+  const nodeinfoData = Nodeinfo21Payload.parse(await nodeinfoResponse.json());
 
-  throw new Error("No supported nodeinfo (2.1 or 2.0) found");
+  return nodeinfoData.software;
 }
 
 // {"links":[{"rel":"http://nodeinfo.diaspora.software/ns/schema/2.1","href":"https://lemmy.zip/nodeinfo/2.1"}]}
-function resolveNodeinfoLink(data: NodeinfoLinksPayload): string | undefined {
+function resolveNodeinfoLink(
+  data: z.infer<typeof NodeinfoLinksPayload>,
+): string | undefined {
   return data.links.find((link) =>
     link.rel.match(
       /^http:\/\/nodeinfo\.diaspora\.software\/ns\/schema\/2\.\d+$/,
