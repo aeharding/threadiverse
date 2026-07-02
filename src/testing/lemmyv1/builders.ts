@@ -213,6 +213,57 @@ export function createLemmyV1Builders({
     };
   }
 
+  /**
+   * NotificationView for a comment-based notification (reply/mention/
+   * subscribed). Inapplicable `*_id` fields are JSON `null` on the real
+   * wire (not omitted) — kept here to exercise that normalization.
+   */
+  function commentNotification(over: {
+    comment: Wire<LemmyV1.CommentView>;
+    id: number;
+    kind: "mention" | "reply" | "subscribed";
+    read?: boolean;
+    recipient_id: number;
+  }): Wire<LemmyV1.NotificationView> {
+    return {
+      data: { type_: "comment", ...over.comment },
+      notification: {
+        comment_id: over.comment.comment.id,
+        creator_id: over.comment.creator.id,
+        id: over.id,
+        kind: over.kind,
+        modlog_id: null,
+        post_id: over.comment.post.id,
+        private_message_id: null,
+        published_at: over.comment.comment.published_at,
+        read: over.read ?? false,
+        recipient_id: over.recipient_id,
+      },
+    };
+  }
+
+  function privateMessageNotification(over: {
+    id: number;
+    message: Wire<LemmyV1.PrivateMessageView>;
+    read?: boolean;
+  }): Wire<LemmyV1.NotificationView> {
+    return {
+      data: { type_: "private_message", ...over.message },
+      notification: {
+        comment_id: null,
+        creator_id: over.message.creator.id,
+        id: over.id,
+        kind: "private_message",
+        modlog_id: null,
+        post_id: null,
+        private_message_id: over.message.private_message.id,
+        published_at: over.message.private_message.published_at,
+        read: over.read ?? false,
+        recipient_id: over.message.recipient.id,
+      },
+    };
+  }
+
   function modlogView(over: {
     id: number;
     kind: LemmyV1.ModlogKind;
@@ -442,6 +493,7 @@ export function createLemmyV1Builders({
   }
 
   return {
+    commentNotification,
     commentView,
     community,
     communityResponse,
@@ -454,6 +506,7 @@ export function createLemmyV1Builders({
     personResponse,
     post,
     postView,
+    privateMessageNotification,
     privateMessageView,
   };
 }
