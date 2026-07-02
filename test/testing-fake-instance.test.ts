@@ -193,4 +193,16 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
     const call = await pendingCall;
     expect(call.query.get("limit")).toBe("5");
   });
+
+  it("rejects waitForCall (not the request) when a predicate throws", async () => {
+    const { client, instance } = setup();
+
+    const pending = instance.waitForCall("GET /api/v4/post/list", () => {
+      throw new Error("bad predicate");
+    });
+
+    // The request under test must be unaffected by the waiter's bug
+    await expect(client.getPosts({})).resolves.toBeTruthy();
+    await expect(pending).rejects.toThrow("bad predicate");
+  });
 });

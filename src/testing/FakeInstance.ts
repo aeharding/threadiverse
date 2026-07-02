@@ -86,6 +86,7 @@ interface RouteLike {
 interface Waiter {
   matcher: Matcher;
   predicate: (call: RecordedCall) => boolean;
+  reject: (error: unknown) => void;
   resolve: (call: RecordedCall) => void;
 }
 
@@ -274,6 +275,10 @@ export class FakeInstance {
       const waiter: Waiter = {
         matcher,
         predicate,
+        reject: (error) => {
+          clearTimeout(timer);
+          reject(error);
+        },
         resolve: (call) => {
           clearTimeout(timer);
           resolve(call);
@@ -291,10 +296,20 @@ export class FakeInstance {
 
   #notifyWaiters(call: RecordedCall): void {
     for (const waiter of [...this.#waiters]) {
-      if (
-        `${call.method} ${call.pathname}` === waiter.matcher &&
-        waiter.predicate(call)
-      ) {
+      if (`${call.method} ${call.pathname}` !== waiter.matcher) continue;
+
+      let matches: boolean;
+      try {
+        matches = waiter.predicate(call);
+      } catch (error) {
+        // A throwing predicate is the waiter's bug — reject that waiter
+        // instead of failing the unrelated request being handled
+        this.#removeWaiter(waiter);
+        waiter.reject(error);
+        continue;
+      }
+
+      if (matches) {
         this.#removeWaiter(waiter);
         waiter.resolve(call);
       }
