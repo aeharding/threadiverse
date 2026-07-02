@@ -99,6 +99,44 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
     expect(person_view.person.name).toBe("alex");
   });
 
+  it("getNotifications passes canonical validation (incl. null id fields)", async () => {
+    const { alex, client, instance, posts } = setup();
+
+    const other = instance.build.person({ id: 200, name: "other" });
+
+    instance.mock("GET /api/v4/account/notification/list", {
+      json: instance.build.pagedResponse([
+        instance.build.commentNotification({
+          comment: instance.build.commentView({
+            content: "someone replied",
+            creator: other,
+            id: 31,
+            post: posts[0]!,
+          }),
+          id: 301,
+          kind: "reply",
+          recipient_id: alex.id,
+        }),
+        instance.build.privateMessageNotification({
+          id: 303,
+          message: instance.build.privateMessageView({
+            content: "psst",
+            creator: other,
+            id: 41,
+            recipient: alex,
+          }),
+        }),
+      ]),
+    });
+
+    const { data } = await client.getNotifications({});
+
+    expect(data.map((view) => view.notification.kind)).toEqual([
+      "reply",
+      "private_message",
+    ]);
+  });
+
   it("records calls with query for assertions", async () => {
     const { client, instance } = setup();
 
