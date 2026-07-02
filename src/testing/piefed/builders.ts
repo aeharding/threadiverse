@@ -9,6 +9,8 @@
 import type { components } from "../../providers/piefed/schema";
 import type { Wire } from "../wire";
 
+import { DEFAULT_NOW } from "../lemmyv1/builders";
+
 export interface PiefedBuildersOptions {
   /** Bare hostname used in generated actor ids, e.g. `"piefed.test"` */
   host: string;
@@ -28,7 +30,7 @@ export type PiefedBuilders = ReturnType<typeof createPiefedBuilders>;
 
 export function createPiefedBuilders({
   host,
-  now = "2026-05-21T12:00:00.000Z",
+  now = DEFAULT_NOW,
   version = DEFAULT_PIEFED_VERSION,
 }: PiefedBuildersOptions) {
   function person(over: {
@@ -260,7 +262,24 @@ export function createPiefedBuilders({
     };
   }
 
+  /** `GET /api/alpha/post/list` (getPosts) response envelope */
+  function postListResponse(
+    posts: Wire<Schemas["PostView"]>[],
+    nextPage: null | string = null,
+  ): Wire<Schemas["ListPostsResponse"]> {
+    return { next_page: nextPage, posts };
+  }
+
+  /** `GET /api/alpha/comment/list` (getComments) response envelope */
+  function commentListResponse(
+    comments: Wire<Schemas["CommentView"]>[],
+    nextPage: null | string = null,
+  ): Wire<Schemas["ListCommentsResponse"]> {
+    return { comments, next_page: nextPage };
+  }
+
   return {
+    commentListResponse,
     commentView,
     community,
     communityResponse,
@@ -269,6 +288,7 @@ export function createPiefedBuilders({
     person,
     personView,
     post,
+    postListResponse,
     postView,
     userResponse,
   };

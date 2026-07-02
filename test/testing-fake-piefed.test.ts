@@ -19,19 +19,16 @@ function setup() {
   ];
 
   instance.mock("GET /api/alpha/post/list", {
-    json: { next_page: null, posts },
+    json: instance.build.postListResponse(posts),
   });
   instance.mock("GET /api/alpha/comment/list", {
-    json: {
-      comments: [
-        instance.build.commentView({
-          body: "A piefed comment",
-          id: 5001,
-          post: posts[0]!,
-        }),
-      ],
-      next_page: null,
-    },
+    json: instance.build.commentListResponse([
+      instance.build.commentView({
+        body: "A piefed comment",
+        id: 5001,
+        post: posts[0]!,
+      }),
+    ]),
   });
 
   const client = new ThreadiverseClient(

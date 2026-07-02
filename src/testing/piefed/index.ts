@@ -19,9 +19,13 @@ export interface FakePiefedInstanceOptions {
  *
  * ```ts
  * fake.mock("GET /api/alpha/post/list", {
- *   json: { next_page: null, posts: [fake.build.postView({ ... })] },
+ *   json: fake.build.postListResponse([fake.build.postView({ ... })]),
  * });
  * ```
+ *
+ * Not yet default-mocked (no typed builders yet — unmocked requests 404
+ * loudly): the notification fan-out (`GET /api/alpha/user/replies`,
+ * `GET /api/alpha/user/mentions`, `GET /api/alpha/private_message/list`).
  */
 export class FakePiefedInstance extends FakeInstance {
   /** Wire-format builders bound to this instance's host */
@@ -43,10 +47,10 @@ export class FakePiefedInstance extends FakeInstance {
       json: build.getSiteResponse(),
     }));
     this.mock("GET /api/alpha/post/list", () => ({
-      json: { next_page: null, posts: [] },
+      json: build.postListResponse([]),
     }));
     this.mock("GET /api/alpha/comment/list", () => ({
-      json: { comments: [], next_page: null },
+      json: build.commentListResponse([]),
     }));
   }
 }
