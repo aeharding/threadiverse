@@ -36,6 +36,15 @@ export type Instance = z.infer<typeof schemas.Instance>;
 export type InstanceWithFederationState = z.infer<
   typeof schemas.InstanceWithFederationState
 >;
+/**
+ * @deprecated Leaks lemmy-js-client-v0's type into the public API; use
+ * `ResponseErrorCode` (+ `isErrorCode`) from the package root instead.
+ * Will be removed in a future release.
+ *
+ * (Declared as an alias rather than a re-export so the deprecation JSDoc
+ * survives dts bundling.)
+ */
+export type LemmyErrorType = import("lemmy-js-client-v0").LemmyErrorType;
 export type LinkMetadata = z.infer<typeof schemas.LinkMetadata>;
 export type ListCommentReportsResponse = z.infer<
   typeof schemas.ListCommentReportsResponse
@@ -126,6 +135,3 @@ export type * from "./Register";
 export type * from "./Search";
 export type * from "./SearchSortType";
 export type * from "./SearchType";
-
-// TODO: unified error handling in threadiverse project
-export type { LemmyErrorType } from "lemmy-js-client-v0";
