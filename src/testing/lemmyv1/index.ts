@@ -117,7 +117,8 @@ const LEMMY_V1_OPERATIONS = {
       return {
         community_name: q.community_name,
         limit: numberish(q.limit),
-        type_: q.type_?.toLowerCase() as Payload<"getPosts">["type_"],
+        // v1 wire listing types are already canonical lowercase
+        type_: q.type_ as Payload<"getPosts">["type_"],
       };
     },
     route: "GET /api/v4/post/list",
@@ -169,12 +170,15 @@ const LEMMY_V1_OPERATIONS = {
       return {
         limit: numberish(q.limit),
         search_term: q.search_term,
-        type_: q.type_?.toLowerCase() as Payload<"search">["type_"],
+        // v1 wire search types are already canonical lowercase
+        type_: q.type_ as Payload<"search">["type_"],
       };
     },
     route: "GET /api/v4/search",
   },
-} satisfies Record<string, OperationDef>;
+} satisfies {
+  [K in keyof BaseClient]?: OperationDef<Partial<Parameters<BaseClient[K]>[0]>>;
+};
 
 export interface FakeLemmyV1InstanceOptions {
   /** Bare hostname (no scheme) the fake instance answers for */

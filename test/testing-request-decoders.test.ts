@@ -20,6 +20,18 @@ const SCENARIOS = [
     operation: "likePost",
   },
   {
+    // Unvote: is_upvote omitted must survive the round trip
+    expected: { post_id: 42 },
+    invoke: (c: ThreadiverseClient) => c.likePost({ post_id: 42 }),
+    operation: "likePost",
+  },
+  {
+    expected: { limit: 7, type_: "moderator_view" },
+    invoke: (c: ThreadiverseClient) =>
+      c.getPosts({ limit: 7, type_: "moderator_view" }),
+    operation: "getPosts",
+  },
+  {
     expected: { comment_id: 7, is_upvote: false },
     invoke: (c: ThreadiverseClient) =>
       c.likeComment({ comment_id: 7, is_upvote: false }),
@@ -169,7 +181,7 @@ describe.each([
 
       const payloads = fake.callsTo(operation);
       expect(payloads).toHaveLength(1);
-      expect(payloads[0]).toMatchObject(expected);
+      expect(payloads[0]).toEqual(expected);
     },
   );
 
@@ -191,7 +203,7 @@ describe("lemmyv1-only request decoders", () => {
 
       const payloads = fake.callsTo(operation);
       expect(payloads).toHaveLength(1);
-      expect(payloads[0]).toMatchObject(expected);
+      expect(payloads[0]).toEqual(expected);
     },
   );
 });

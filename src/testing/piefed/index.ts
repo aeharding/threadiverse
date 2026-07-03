@@ -30,6 +30,14 @@ const body =
   (call: RecordedCall) =>
     call.body as Payload<K>;
 
+// Inverse of compat's fromListingType
+const LISTING_TYPE_FROM_WIRE: Record<string, Payload<"getPosts">["type_"]> = {
+  All: "all",
+  Local: "local",
+  ModeratorView: "moderator_view",
+  Subscribed: "subscribed",
+};
+
 function fromScore(score: number | undefined): boolean | undefined {
   if (score === 1) return true;
   if (score === -1) return false;
@@ -53,16 +61,9 @@ function query(call: RecordedCall): Record<string, string> {
 const PIEFED_OPERATIONS = {
   createComment: {
     decode: (call: RecordedCall): Payload<"createComment"> => {
-      const wire = call.body as {
-        body: string;
-        parent_id?: number;
-        post_id: number;
-      };
-      return {
-        content: wire.body,
-        parent_id: wire.parent_id,
-        post_id: wire.post_id,
-      };
+      // wire = canonical (spread) with content also duplicated as `body`
+      const { body, ...payload } = call.body as { body: string };
+      return { ...payload, content: body };
     },
     route: "POST /api/alpha/comment",
   },
@@ -89,8 +90,9 @@ const PIEFED_OPERATIONS = {
   },
   editComment: {
     decode: (call: RecordedCall): Payload<"editComment"> => {
-      const wire = call.body as { body: string; comment_id: number };
-      return { comment_id: wire.comment_id, content: wire.body };
+      // wire = canonical (spread) with content also duplicated as `body`
+      const { body, ...payload } = call.body as { body: string };
+      return { ...payload, content: body };
     },
     route: "PUT /api/alpha/comment",
   },
@@ -142,7 +144,8 @@ const PIEFED_OPERATIONS = {
       return {
         community_name: q.community_name,
         limit: numberish(q.limit),
-        type_: q.type_?.toLowerCase() as Payload<"getPosts">["type_"],
+        type_:
+          q.type_ === undefined ? undefined : LISTING_TYPE_FROM_WIRE[q.type_],
       };
     },
     route: "GET /api/alpha/post/list",
@@ -196,7 +199,9 @@ const PIEFED_OPERATIONS = {
     },
     route: "GET /api/alpha/search",
   },
-} satisfies Record<string, OperationDef>;
+} satisfies {
+  [K in keyof BaseClient]?: OperationDef<Partial<Parameters<BaseClient[K]>[0]>>;
+};
 
 export type PiefedOperation = keyof typeof PIEFED_OPERATIONS;
 
