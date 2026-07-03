@@ -1,4 +1,5 @@
 export * from "./BaseClient";
+export * from "./errorMessages";
 export * from "./errors";
 export * from "./providers";
 export {
