@@ -205,6 +205,7 @@ const CONDITION_BY_CODE: Record<string, ResponseErrorConstructor> = {
   incorrect_totp_token: Incorrect2faError,
   invalid_bot_action: InvalidBotActionError,
   missing_totp_token: Missing2faError,
+  "No object found.": NotFoundError,
   "No row was found when one was required": NotFoundError,
   not_found: NotFoundError,
   rate_limit_error: RateLimitedError,

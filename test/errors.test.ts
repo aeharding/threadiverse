@@ -50,6 +50,10 @@ describe("createResponseError", () => {
       NotFoundError,
     );
     expect(createResponseError("not_found")).toBeInstanceOf(NotFoundError);
+    // PieFed's resolve_object miss
+    expect(createResponseError("No object found.")).toBeInstanceOf(
+      NotFoundError,
+    );
   });
 
   it("falls back to the base class for unmapped codes", () => {
