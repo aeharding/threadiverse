@@ -1,6 +1,9 @@
 # threadiverse/testing — design & roadmap
 
-Status: seed layer in progress on `testing-seed-layer` (2026-07-02).
+Status (2026-07-02): layers 1–3 implemented (seed store + derived routes,
+`on`/`once`/`callsTo` with canonical error injection, provider-matrix test
+green on lemmyv1 + piefed; error condition taxonomy in #53). Next: fidelity
+suite, then Voyager adoption.
 Owners: consumer test devex for Voyager and other clients.
 
 ## Goal
