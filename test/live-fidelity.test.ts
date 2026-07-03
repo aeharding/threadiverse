@@ -55,7 +55,7 @@ async function captureError(promise: Promise<unknown>): Promise<Error> {
     await promise;
   } catch (error) {
     if (error instanceof Error) return error;
-    throw new Error(`Non-Error thrown: ${String(error)}`);
+    throw new Error(`Non-Error thrown: ${String(error)}`, { cause: error });
   }
   throw new Error("Expected the scenario to reject, but it resolved");
 }
