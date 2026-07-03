@@ -6,8 +6,8 @@ import {
   RequestOptions,
 } from "../../BaseClient";
 import {
+  createResponseError,
   InvalidPayloadError,
-  PiefedResponseError,
   UnsupportedError,
 } from "../../errors";
 import buildSafeClient from "../../SafeClient";
@@ -44,8 +44,9 @@ async function validateResponse(response: Response) {
       // Non-JSON body (e.g., HTML error page from an upstream proxy).
       // Fall back to statusText already set above.
     }
-    throw new PiefedResponseError(code, {
+    throw createResponseError(code, {
       response: payload,
+      software: "piefed",
       status: response.status,
     });
   }
