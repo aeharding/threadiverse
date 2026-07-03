@@ -33,7 +33,7 @@ describe.runIf(process.env.LIVE_SMOKE)("live smoke", () => {
     });
 
     it("discovers software", OPTIONS, async () => {
-      expect((await client.getSoftware()).name).toBe(software);
+      expect((await client.connect()).software.name).toBe(software);
     });
 
     it("getSite passes canonical validation", OPTIONS, async () => {

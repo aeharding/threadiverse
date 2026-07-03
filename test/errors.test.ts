@@ -4,7 +4,6 @@ import {
   createResponseError,
   IncorrectLoginError,
   isErrorCode,
-  LemmyResponseError,
   NotFoundError,
   RateLimitedError,
   ResponseError,
@@ -61,10 +60,10 @@ describe("isErrorCode", () => {
     expect(isErrorCode(error, "too_many_requests")).toBe(false);
   });
 
-  it("matches subclasses by code", () => {
+  it("matches condition subclasses by code", () => {
     expect(
       isErrorCode(
-        new LemmyResponseError("rate_limit_error"),
+        createResponseError("rate_limit_error", { software: "lemmy" }),
         "rate_limit_error",
       ),
     ).toBe(true);

@@ -136,34 +136,11 @@ export class InvalidPayloadError extends FediverseError {
   }
 }
 
-/**
- * @deprecated Branch on the condition subclasses (`NotFoundError`, ...) or
- * `error.software` instead. No longer thrown; retained for compatibility.
- */
-export class LemmyResponseError extends ResponseError {
-  constructor(code: string, options?: ResponseErrorOptions) {
-    super(code, { ...options, software: "lemmy" });
-    this.name = "LemmyResponseError";
-  }
-}
-
 /** The requested entity (post, comment, community, person...) doesn't exist */
 export class NotFoundError extends ResponseError {
   constructor(code: string, options?: ResponseErrorOptions) {
     super(code, options);
     this.name = "NotFoundError";
-  }
-}
-
-/**
- * @deprecated Branch on the condition subclasses (`NotFoundError`, ...) or
- * `error.software` instead (raw payload is on `error.response`). No longer
- * thrown; retained for compatibility.
- */
-export class PiefedResponseError extends ResponseError {
-  constructor(code: string, options?: ResponseErrorOptions) {
-    super(code, { ...options, software: "piefed" });
-    this.name = "PiefedResponseError";
   }
 }
 
