@@ -1,11 +1,57 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createResponseError,
+  IncorrectLoginError,
   isErrorCode,
   LemmyResponseError,
+  NotFoundError,
+  RateLimitedError,
   ResponseError,
   UnsupportedError,
 } from "../src/errors";
+
+describe("createResponseError", () => {
+  it("maps known codes to condition subclasses", () => {
+    const error = createResponseError("incorrect_login", {
+      software: "lemmy",
+      status: 401,
+    });
+
+    expect(error).toBeInstanceOf(IncorrectLoginError);
+    expect(error).toBeInstanceOf(ResponseError);
+    expect(error.code).toBe("incorrect_login");
+    expect(error.message).toBe("incorrect_login");
+    expect(error.software).toBe("lemmy");
+    expect(error.status).toBe(401);
+  });
+
+  it("maps equivalent codes across versions to one condition", () => {
+    expect(createResponseError("rate_limit_error")).toBeInstanceOf(
+      RateLimitedError,
+    );
+    expect(createResponseError("too_many_requests")).toBeInstanceOf(
+      RateLimitedError,
+    );
+  });
+
+  it("maps lemmy ≤0.19 entity-specific not-found codes", () => {
+    expect(createResponseError("couldnt_find_person")).toBeInstanceOf(
+      NotFoundError,
+    );
+    expect(createResponseError("not_found")).toBeInstanceOf(NotFoundError);
+  });
+
+  it("falls back to the base class for unmapped codes", () => {
+    const error = createResponseError("some_new_code", {
+      software: "piefed",
+    });
+
+    expect(error.constructor).toBe(ResponseError);
+    expect(error.code).toBe("some_new_code");
+    expect(error.software).toBe("piefed");
+  });
+});
 
 describe("isErrorCode", () => {
   it("matches ResponseError by code", () => {

@@ -6,8 +6,8 @@ import {
   RequestOptions,
 } from "../../BaseClient";
 import {
+  createResponseError,
   InvalidPayloadError,
-  LemmyResponseError,
   UnexpectedResponseError,
   UnsupportedError,
 } from "../../errors";
@@ -898,23 +898,19 @@ function toScore(is_upvote: boolean | undefined): number {
 /**
  * Wrap every method on the lemmy-js-client-v0 instance so that any thrown
  * `Error` (whose `.message` carries the server error code) becomes a
- * `LemmyResponseError`. Consumers can then `instanceof LemmyResponseError`
- * uniformly across v0 and v1, and the original error is preserved as `.cause`.
+ * `ResponseError` (condition subclass where the code maps to one).
+ * Consumers can then `instanceof` uniformly across v0 and v1, and the
+ * original error is preserved as `.cause`.
  */
 function wrapLemmyV0Errors(client: LemmyV0.LemmyHttp): LemmyV0.LemmyHttp {
   // The v0 client throws `new Error(json.error ?? statusText)` for server
   // error responses — i.e. plain `Error`, not a subclass. Transport-level
   // failures (e.g. `TypeError("Failed to fetch")` from the network) bubble up
-  // as their own subclass and should NOT be coerced into `LemmyResponseError`,
+  // as their own subclass and should NOT be coerced into `ResponseError`,
   // which is reserved for actual server responses.
   function normalize(err: unknown): never {
-    if (
-      err instanceof Error &&
-      err.constructor === Error &&
-      !(err instanceof LemmyResponseError) &&
-      err.message
-    ) {
-      throw new LemmyResponseError(err.message, { cause: err });
+    if (err instanceof Error && err.constructor === Error && err.message) {
+      throw createResponseError(err.message, { cause: err, software: "lemmy" });
     }
     throw err;
   }

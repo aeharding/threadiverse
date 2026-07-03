@@ -8,8 +8,8 @@ import {
   RequestOptions,
 } from "../../BaseClient";
 import {
+  createResponseError,
   InvalidPayloadError,
-  LemmyResponseError,
   UnsupportedError,
 } from "../../errors";
 import buildSafeClient from "../../SafeClient";
@@ -810,7 +810,11 @@ function normalizeError(err: unknown): unknown {
   // `fetch`, `AbortError`, etc.) must pass through unchanged — wrapping
   // them would mis-classify a network failure as a Lemmy error code.
   if (err instanceof LemmyV1.LemmyError) {
-    return new LemmyResponseError(err.name, { cause: err, status: err.status });
+    return createResponseError(err.name, {
+      cause: err,
+      software: "lemmy",
+      status: err.status,
+    });
   }
   return err;
 }
