@@ -11,6 +11,7 @@ import {
   SeedCommunity,
   SeedPerson,
   SeedPost,
+  SeedPrivateMessage,
   SeedStore,
 } from "../seed";
 import {
@@ -239,11 +240,11 @@ export interface FakePiefedInstanceOptions {
  * fake.seed.post({ name: "Hello **world**", creator: alex });
  * ```
  *
- * Derived: site, post list/detail, comment list, community, person. Use
- * `mock()` for error injection or endpoints outside this set (notably the
- * notification fan-out — `GET /api/alpha/user/replies`, `/user/mentions`,
- * `/private_message/list` — which has no typed builders yet and 404s
- * loudly when unmocked). Wire-level builders stay available on `build`.
+ * Derived: site, post list/detail, comment list, community, person,
+ * unread counts, the notification fan-out (replies/mentions/private
+ * messages), and mark-as-read writes (which mutate the seed store). Use
+ * `mock()` for error injection or endpoints outside this set. Wire-level
+ * builders stay available on `build`.
  */
 export class FakePiefedInstance extends FakeInstance {
   /** Wire-format builders bound to this instance's host */
@@ -328,6 +329,32 @@ export class FakePiefedInstance extends FakeInstance {
     // Seed misses render PieFed's real error responses as observed live
     // (piefed.social 2026-07-02): 400s whose message is prose, mapped to
     // NotFoundError in the condition table. Verified by the fidelity suite.
+    // seed → wire, notifications. PieFed reuses CommentReplyView for both
+    // replies and mentions; canonical notification identity is
+    // comment_reply.id (mapped from the seed notification id).
+    const commentReplyView = (subject: {
+      comment: SeedComment;
+      id: number;
+      read: boolean;
+    }) =>
+      build.commentReplyView({
+        comment: commentView(subject.comment),
+        id: subject.id,
+        read: subject.read,
+        recipient: person(seed.loggedInPerson ?? { id: 0, name: "nobody" }),
+      });
+    const privateMessageView = (subject: {
+      message: SeedPrivateMessage;
+      read: boolean;
+    }) =>
+      build.privateMessageView({
+        content: subject.message.content,
+        creator: person(subject.message.creator),
+        id: subject.message.id,
+        read: subject.read,
+        recipient: person(subject.message.recipient),
+      });
+
     const notFound = {
       json: {
         code: 400,
@@ -424,6 +451,78 @@ export class FakePiefedInstance extends FakeInstance {
           ).length,
         },
       };
+    });
+
+    const unreadOnly = (call: RecordedCall) =>
+      call.query.get("unread_only") === "true";
+
+    const repliesOf = (kind: "mention" | "reply", onlyUnread: boolean) =>
+      seed.notifications.flatMap((notification) =>
+        notification.kind === kind && (!onlyUnread || !notification.read)
+          ? [commentReplyView(notification)]
+          : [],
+      );
+
+    this.mock("GET /api/alpha/user/replies", (call) =>
+      seed.loggedInPerson
+        ? { json: build.repliesResponse(repliesOf("reply", unreadOnly(call))) }
+        : unauthenticated,
+    );
+
+    this.mock("GET /api/alpha/user/mentions", (call) =>
+      seed.loggedInPerson
+        ? {
+            json: build.repliesResponse(repliesOf("mention", unreadOnly(call))),
+          }
+        : unauthenticated,
+    );
+
+    this.mock("GET /api/alpha/private_message/list", (call) =>
+      seed.loggedInPerson
+        ? {
+            json: build.privateMessageListResponse(
+              seed.notifications.flatMap((notification) =>
+                notification.kind === "private_message" &&
+                (!unreadOnly(call) || !notification.read)
+                  ? [privateMessageView(notification)]
+                  : [],
+              ),
+            ),
+          }
+        : unauthenticated,
+    );
+
+    // Mark-as-read writes mutate the seed store, so derived unread counts
+    // and lists reflect them. The piefed adapter maps canonical
+    // notification_id onto comment_reply_id / private_message_id.
+    this.mock("POST /api/alpha/comment/mark_as_read", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { comment_reply_id, read } = call.body as {
+        comment_reply_id: number;
+        read: boolean;
+      };
+      const notification = seed.notifications.find(
+        (candidate) =>
+          candidate.kind !== "private_message" &&
+          candidate.id === comment_reply_id,
+      );
+      if (notification) notification.read = read;
+      return { json: { success: true } };
+    });
+
+    this.mock("POST /api/alpha/private_message/mark_as_read", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { private_message_id, read } = call.body as {
+        private_message_id: number;
+        read: boolean;
+      };
+      const notification = seed.notifications.find(
+        (candidate) =>
+          candidate.kind === "private_message" &&
+          candidate.message.id === private_message_id,
+      );
+      if (notification) notification.read = read;
+      return { json: { success: true } };
     });
 
     this.mock("GET /api/alpha/user", (call) => {

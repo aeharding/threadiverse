@@ -262,6 +262,81 @@ export function createPiefedBuilders({
     };
   }
 
+  /**
+   * `GET /api/alpha/user/replies` / `/user/mentions` item. PieFed reuses
+   * CommentReplyView for both; the notification identity is
+   * `comment_reply.id`.
+   */
+  function commentReplyView(over: {
+    comment: Wire<Schemas["CommentView"]>;
+    id: number;
+    read?: boolean;
+    recipient: Wire<Schemas["Person"]>;
+  }): Wire<Schemas["CommentReplyView"]> {
+    return {
+      activity_alert: false,
+      comment: over.comment.comment,
+      comment_reply: {
+        comment_id: over.comment.comment.id,
+        id: over.id,
+        published: over.comment.comment.published,
+        read: over.read ?? false,
+        recipient_id: over.recipient.id,
+      },
+      community: over.comment.community,
+      counts: over.comment.counts,
+      creator: over.comment.creator,
+      creator_banned_from_community: false,
+      creator_blocked: false,
+      creator_is_admin: false,
+      creator_is_moderator: false,
+      my_vote: 0,
+      post: over.comment.post,
+      recipient: over.recipient,
+      saved: false,
+      subscribed: "NotSubscribed",
+    };
+  }
+
+  function privateMessageView(over: {
+    content: string;
+    creator: Wire<Schemas["Person"]>;
+    id: number;
+    read?: boolean;
+    recipient: Wire<Schemas["Person"]>;
+  }): Wire<Schemas["PrivateMessageView"]> {
+    return {
+      creator: over.creator,
+      private_message: {
+        ap_id: `https://${host}/private_message/${over.id}`,
+        content: over.content,
+        creator_id: over.creator.id,
+        deleted: false,
+        id: over.id,
+        local: true,
+        published: now,
+        read: over.read ?? false,
+        recipient_id: over.recipient.id,
+      },
+      recipient: over.recipient,
+    };
+  }
+
+  /** `GET /api/alpha/user/replies` + `/user/mentions` response envelope */
+  function repliesResponse(
+    replies: Wire<Schemas["CommentReplyView"]>[],
+    nextPage: null | string = null,
+  ): Wire<Schemas["UserRepliesResponse"]> {
+    return { next_page: nextPage, replies };
+  }
+
+  /** `GET /api/alpha/private_message/list` response envelope */
+  function privateMessageListResponse(
+    private_messages: Wire<Schemas["PrivateMessageView"]>[],
+  ): Wire<Schemas["ListPrivateMessagesResponse"]> {
+    return { private_messages };
+  }
+
   /** `GET /api/alpha/post/list` (getPosts) response envelope */
   function postListResponse(
     posts: Wire<Schemas["PostView"]>[],
@@ -280,6 +355,7 @@ export function createPiefedBuilders({
 
   return {
     commentListResponse,
+    commentReplyView,
     commentView,
     community,
     communityResponse,
@@ -290,6 +366,9 @@ export function createPiefedBuilders({
     post,
     postListResponse,
     postView,
+    privateMessageListResponse,
+    privateMessageView,
+    repliesResponse,
     userResponse,
   };
 }

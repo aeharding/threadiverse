@@ -142,6 +142,54 @@ describe.each([
     expect(data).toHaveLength(0);
   });
 
+  it("derives the inbox from seeded notifications", async () => {
+    const { client, fake, post } = setup();
+    const seed = fake.seed;
+
+    const me = seed.person({ name: "me" });
+    const other = seed.person({ name: "other" });
+    seed.loggedInAs(me);
+
+    seed.reply({
+      comment: seed.comment({ content: "a reply", creator: other, post }),
+      id: 301,
+    });
+    seed.mention({
+      comment: seed.comment({ content: "a mention", creator: other, post }),
+      id: 302,
+      read: true,
+    });
+    seed.privateMessage({ content: "psst", creator: other });
+
+    const { data } = await client.getNotifications({});
+    expect(data.map((view) => view.notification.kind).sort()).toEqual([
+      "mention",
+      "private_message",
+      "reply",
+    ]);
+
+    const { data: unreadOnly } = await client.getNotifications({
+      unread_only: true,
+    });
+    expect(unreadOnly.map((view) => view.notification.kind).sort()).toEqual([
+      "private_message",
+      "reply",
+    ]);
+
+    // Marking read mutates seed state on every provider
+    await client.markNotificationAsRead({
+      kind: "reply",
+      notification_id: 301,
+      read: true,
+    });
+    const { data: afterRead } = await client.getNotifications({
+      unread_only: true,
+    });
+    expect(afterRead.map((view) => view.notification.kind)).toEqual([
+      "private_message",
+    ]);
+  });
+
   it("listPersonContent only returns the person's content", async () => {
     const { alex, client, fake, post } = setup();
 
