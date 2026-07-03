@@ -1,4 +1,4 @@
-import { FakeInstance } from "../FakeInstance";
+import { FakeInstance, Matcher, OperationApi } from "../FakeInstance";
 import {
   SeedComment,
   SeedCommunity,
@@ -11,6 +11,46 @@ import {
   DEFAULT_PIEFED_VERSION,
   PiefedBuilders,
 } from "./builders";
+
+/**
+ * Operation → route map (threadiverse `BaseClient` endpoint names; routes
+ * from the piefed adapter). Powers `on`/`once`/`callsTo`.
+ */
+const PIEFED_ROUTES = {
+  createComment: "POST /api/alpha/comment",
+  createPost: "POST /api/alpha/post",
+  createPrivateMessage: "POST /api/alpha/private_message",
+  deleteComment: "POST /api/alpha/comment/delete",
+  deletePost: "POST /api/alpha/post/delete",
+  editComment: "PUT /api/alpha/comment",
+  editPost: "PUT /api/alpha/post",
+  followCommunity: "POST /api/alpha/community/follow",
+  getComments: "GET /api/alpha/comment/list",
+  getCommunity: "GET /api/alpha/community",
+  getPersonDetails: "GET /api/alpha/user",
+  getPost: "GET /api/alpha/post",
+  getPosts: "GET /api/alpha/post/list",
+  getSite: "GET /api/alpha/site",
+  getUnreadCount: "GET /api/alpha/user/unread_count",
+  likeComment: "POST /api/alpha/comment/like",
+  likePost: "POST /api/alpha/post/like",
+  login: "POST /api/alpha/user/login",
+  markPostAsRead: "POST /api/alpha/post/mark_as_read",
+  resolveObject: "GET /api/alpha/resolve_object",
+  saveComment: "PUT /api/alpha/comment/save",
+  savePost: "PUT /api/alpha/post/save",
+  search: "GET /api/alpha/search",
+} satisfies Record<string, Matcher>;
+
+export type PiefedOperation = keyof typeof PIEFED_ROUTES;
+
+const STATUS_TEXT: Record<number, string> = {
+  400: "Bad Request",
+  401: "Unauthorized",
+  403: "Forbidden",
+  404: "Not Found",
+  429: "Too Many Requests",
+};
 
 export interface FakePiefedInstanceOptions {
   /** Bare hostname (no scheme) the fake instance answers for */
@@ -39,8 +79,20 @@ export class FakePiefedInstance extends FakeInstance {
   /** Wire-format builders bound to this instance's host */
   readonly build: PiefedBuilders;
 
+  /** Recorded requests for an operation (by name, not route) */
+  readonly callsTo: OperationApi<PiefedOperation>["callsTo"];
+
+  /** Override an operation's response (canonical `{ error }` supported) */
+  readonly on: OperationApi<PiefedOperation>["on"];
+
+  /** Override an operation's next response only, then fall back */
+  readonly once: OperationApi<PiefedOperation>["once"];
+
   /** Semantic content store the default routes are derived from */
   readonly seed = new SeedStore();
+
+  /** Wait until a request for an operation is recorded */
+  readonly waitForCallTo: OperationApi<PiefedOperation>["waitForCallTo"];
 
   constructor({
     host = "piefed.test",
@@ -51,6 +103,22 @@ export class FakePiefedInstance extends FakeInstance {
     const build = createPiefedBuilders({ host, version });
     this.build = build;
     const seed = this.seed;
+
+    const api = this.buildOperationApi(PIEFED_ROUTES, (error) => {
+      const status = error.status ?? 400;
+      return {
+        json: {
+          code: status,
+          message: error.code,
+          status: STATUS_TEXT[status] ?? "Error",
+        },
+        status,
+      };
+    });
+    this.callsTo = api.callsTo;
+    this.on = api.on;
+    this.once = api.once;
+    this.waitForCallTo = api.waitForCallTo;
 
     // seed → wire
     const person = (subject: SeedPerson) =>

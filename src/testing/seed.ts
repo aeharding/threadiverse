@@ -73,13 +73,13 @@ export class SeedStore {
   posts: SeedPost[] = [];
   siteName = "Test site";
 
+  get unreadNotificationCount(): number {
+    return this.notifications.filter((notification) => !notification.read)
+      .length;
+  }
+
   // High start so explicit ids in tests never collide with generated ones
   #nextId = 1000;
-
-  /** Comments on the given post (in seed order) */
-  commentsFor(post: SeedPost): SeedComment[] {
-    return this.comments.filter((comment) => comment.post === post);
-  }
 
   comment(over: {
     childCount?: number;
@@ -104,6 +104,11 @@ export class SeedStore {
     };
     this.comments.push(comment);
     return comment;
+  }
+
+  /** Comments on the given post (in seed order) */
+  commentsFor(post: SeedPost): SeedComment[] {
+    return this.comments.filter((comment) => comment.post === post);
   }
 
   community(
@@ -213,11 +218,6 @@ export class SeedStore {
 
   site(over: { name: string }): void {
     this.siteName = over.name;
-  }
-
-  get unreadNotificationCount(): number {
-    return this.notifications.filter((notification) => !notification.read)
-      .length;
   }
 
   #defaultCommunity(): SeedCommunity {

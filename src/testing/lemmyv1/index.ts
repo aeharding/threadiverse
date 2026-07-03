@@ -1,4 +1,4 @@
-import { FakeInstance } from "../FakeInstance";
+import { FakeInstance, Matcher, OperationApi } from "../FakeInstance";
 import {
   SeedComment,
   SeedCommunity,
@@ -13,12 +13,50 @@ import {
   LemmyV1Builders,
 } from "./builders";
 
+/**
+ * Operation → route map (threadiverse `BaseClient` endpoint names; routes
+ * verified against lemmy-js-client-v1). Powers `on`/`once`/`callsTo`.
+ */
+const LEMMY_V1_ROUTES = {
+  createComment: "POST /api/v4/comment",
+  createPost: "POST /api/v4/post",
+  createPrivateMessage: "POST /api/v4/private_message",
+  deleteComment: "DELETE /api/v4/comment",
+  deletePost: "DELETE /api/v4/post",
+  editComment: "PUT /api/v4/comment",
+  editPost: "PUT /api/v4/post",
+  followCommunity: "POST /api/v4/community/follow",
+  getComments: "GET /api/v4/comment/list",
+  getCommunity: "GET /api/v4/community",
+  getModlog: "GET /api/v4/modlog",
+  getNotifications: "GET /api/v4/account/notification/list",
+  getPersonDetails: "GET /api/v4/person",
+  getPost: "GET /api/v4/post",
+  getPosts: "GET /api/v4/post/list",
+  getRandomCommunity: "GET /api/v4/community/random",
+  getSite: "GET /api/v4/site",
+  getSiteMetadata: "GET /api/v4/post/site_metadata",
+  getUnreadCount: "GET /api/v4/account/unread_counts",
+  likeComment: "POST /api/v4/comment/like",
+  likePost: "POST /api/v4/post/like",
+  listPersonContent: "GET /api/v4/person/content",
+  login: "POST /api/v4/account/auth/login",
+  markNotificationAsRead: "POST /api/v4/account/notification/mark_as_read",
+  markPostAsRead: "POST /api/v4/post/mark_as_read/many",
+  resolveObject: "GET /api/v4/resolve_object",
+  saveComment: "PUT /api/v4/comment/save",
+  savePost: "PUT /api/v4/post/save",
+  search: "GET /api/v4/search",
+} satisfies Record<string, Matcher>;
+
 export interface FakeLemmyV1InstanceOptions {
   /** Bare hostname (no scheme) the fake instance answers for */
   host?: string;
   /** Lemmy version reported via nodeinfo and `GET /api/v4/site` */
   version?: string;
 }
+
+export type LemmyV1Operation = keyof typeof LEMMY_V1_ROUTES;
 
 /**
  * `FakeInstance` for Lemmy v1 whose default routes are derived, per
@@ -41,8 +79,20 @@ export class FakeLemmyV1Instance extends FakeInstance {
   /** Wire-format builders bound to this instance's host */
   readonly build: LemmyV1Builders;
 
+  /** Recorded requests for an operation (by name, not route) */
+  readonly callsTo: OperationApi<LemmyV1Operation>["callsTo"];
+
+  /** Override an operation's response (canonical `{ error }` supported) */
+  readonly on: OperationApi<LemmyV1Operation>["on"];
+
+  /** Override an operation's next response only, then fall back */
+  readonly once: OperationApi<LemmyV1Operation>["once"];
+
   /** Semantic content store the default routes are derived from */
   readonly seed = new SeedStore();
+
+  /** Wait until a request for an operation is recorded */
+  readonly waitForCallTo: OperationApi<LemmyV1Operation>["waitForCallTo"];
 
   constructor({
     host = "v1.test.lemmy",
@@ -53,6 +103,15 @@ export class FakeLemmyV1Instance extends FakeInstance {
     const build = createLemmyV1Builders({ host, version });
     this.build = build;
     const seed = this.seed;
+
+    const api = this.buildOperationApi(LEMMY_V1_ROUTES, (error) => ({
+      json: { error: error.code },
+      status: error.status ?? 400,
+    }));
+    this.callsTo = api.callsTo;
+    this.on = api.on;
+    this.once = api.once;
+    this.waitForCallTo = api.waitForCallTo;
 
     // seed → wire
     const person = (subject: SeedPerson) =>

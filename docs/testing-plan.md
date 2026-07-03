@@ -12,11 +12,11 @@ type-checked against the same upstream types the compat layers consume, and
 
 ## The three layers
 
-| Layer | API | Use for |
-| --- | --- | --- |
-| Content | `fake.seed.*` | What exists: people, communities, posts, comments, notifications, logged-in user. All read endpoints derive consistently from one store. |
-| Behavior | `fake.on.*` / `fake.once.*` | Per-operation overrides keyed by threadiverse endpoint name (provider-agnostic): error injection (canonical `{ code, status }`), custom wire responses (typed via `fake.build.*`), one-shot sequencing. |
-| Escape hatch | `fake.mock(matcher, responder)` | Anything else, at the HTTP route level. Discouraged in consumer specs. |
+| Layer        | API                             | Use for                                                                                                                                                                                                 |
+| ------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Content      | `fake.seed.*`                   | What exists: people, communities, posts, comments, notifications, logged-in user. All read endpoints derive consistently from one store.                                                                |
+| Behavior     | `fake.on.*` / `fake.once.*`     | Per-operation overrides keyed by threadiverse endpoint name (provider-agnostic): error injection (canonical `{ code, status }`), custom wire responses (typed via `fake.build.*`), one-shot sequencing. |
+| Escape hatch | `fake.mock(matcher, responder)` | Anything else, at the HTTP route level. Discouraged in consumer specs.                                                                                                                                  |
 
 Request assertions: `fake.callsTo("likePost")` / `fake.waitForCallTo(...)` —
 operation-keyed views over the existing recording.
@@ -31,7 +31,11 @@ fake.seed.loggedInAs(alex);
 
 // behavior
 fake.once.getSite({ error: { code: "rate_limited", status: 400 } });
-fake.on.getPosts({ json: fake.build.pagedResponse([/* custom wire */]) });
+fake.on.getPosts({
+  json: fake.build.pagedResponse([
+    /* custom wire */
+  ]),
+});
 ```
 
 ### Design decisions
