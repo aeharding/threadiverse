@@ -96,6 +96,27 @@ describe.each([
     expect(calls).toHaveLength(1);
     expect(calls[0]!.query.get("limit")).toBe("7");
   });
+
+  it("listPersonContent only returns the person's content", async () => {
+    const { alex, client, fake, post } = setup();
+
+    const bob = fake.seed.person({ name: "bob" });
+    fake.seed.post({ creator: bob, name: "Bob's post" });
+    fake.seed.comment({ content: "bob's comment", creator: bob, post });
+
+    const { data } = await client.listPersonContent({ person_id: alex.id });
+
+    const names = data.map((item) =>
+      "post" in item && !("comment" in item)
+        ? item.post.name
+        : "comment" in item
+          ? item.comment.content
+          : "?",
+    );
+    expect(names).toContain("Hello **world**");
+    expect(names).not.toContain("Bob's post");
+    expect(names).not.toContain("bob's comment");
+  });
 });
 
 describe("seeded notifications (lemmyv1)", () => {
@@ -128,5 +149,10 @@ describe("seeded notifications (lemmyv1)", () => {
       "reply",
       "private_message",
     ]);
+
+    const { data: unreadOnly } = await client.getNotifications({
+      unread_only: true,
+    });
+    expect(unreadOnly.map((view) => view.notification.kind)).toEqual(["reply"]);
   });
 });

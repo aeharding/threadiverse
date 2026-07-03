@@ -243,7 +243,7 @@ export class FakeLemmyV1Instance extends FakeInstance {
 
     this.mock("GET /api/v4/account/notification/list", (call) => {
       const type = call.query.get("type_");
-      const notifications =
+      let notifications =
         type && type !== "all"
           ? seed.notifications.filter((notification) =>
               type === "private_message"
@@ -251,6 +251,10 @@ export class FakeLemmyV1Instance extends FakeInstance {
                 : notification.kind === type,
             )
           : seed.notifications;
+      if (call.query.get("unread_only") === "true")
+        notifications = notifications.filter(
+          (notification) => !notification.read,
+        );
       return {
         json: build.pagedResponse(notifications.map(notificationView)),
       };

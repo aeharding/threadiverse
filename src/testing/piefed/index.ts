@@ -153,15 +153,25 @@ export class FakePiefedInstance extends FakeInstance {
         published: subject.published,
       });
 
-    const notFound = { json: { error: "not_found" }, status: 404 } as const;
+    // Seed misses render through PieFed's real error wire shape (unlike the
+    // deliberate loud 404 for entirely unmocked routes)
+    const notFound = {
+      json: { code: 404, message: "not_found", status: "Not Found" },
+      status: 404,
+    } as const;
 
     this.mock("GET /api/alpha/site", () => ({
       json: build.getSiteResponse({ name: seed.siteName }),
     }));
 
-    this.mock("GET /api/alpha/post/list", () => ({
-      json: build.postListResponse(seed.posts.map(postView)),
-    }));
+    this.mock("GET /api/alpha/post/list", (call) => {
+      // The piefed adapter implements listPersonContent via person_id here
+      const personId = call.query.get("person_id");
+      const posts = personId
+        ? seed.posts.filter((post) => post.creator.id === Number(personId))
+        : seed.posts;
+      return { json: build.postListResponse(posts.map(postView)) };
+    });
 
     this.mock("GET /api/alpha/post", (call) => {
       const post = seed.posts.find(
@@ -172,9 +182,17 @@ export class FakePiefedInstance extends FakeInstance {
 
     this.mock("GET /api/alpha/comment/list", (call) => {
       const postId = call.query.get("post_id");
-      const comments = postId
-        ? seed.comments.filter((comment) => comment.post.id === Number(postId))
-        : seed.comments;
+      // The piefed adapter implements listPersonContent via person_id here
+      const personId = call.query.get("person_id");
+      let comments = seed.comments;
+      if (postId)
+        comments = comments.filter(
+          (comment) => comment.post.id === Number(postId),
+        );
+      if (personId)
+        comments = comments.filter(
+          (comment) => comment.creator.id === Number(personId),
+        );
       return { json: build.commentListResponse(comments.map(commentView)) };
     });
 
@@ -187,6 +205,23 @@ export class FakePiefedInstance extends FakeInstance {
         ? { json: build.communityResponse({ community: community(found) }) }
         : notFound;
     });
+
+    this.mock("GET /api/alpha/user/unread_count", () => ({
+      json: {
+        mentions: seed.notifications.filter(
+          (notification) =>
+            notification.kind === "mention" && !notification.read,
+        ).length,
+        other: 0,
+        private_messages: seed.notifications.filter(
+          (notification) =>
+            notification.kind === "private_message" && !notification.read,
+        ).length,
+        replies: seed.notifications.filter(
+          (notification) => notification.kind === "reply" && !notification.read,
+        ).length,
+      },
+    }));
 
     this.mock("GET /api/alpha/user", (call) => {
       const username = call.query.get("username")?.split("@")[0];
