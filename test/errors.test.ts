@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   createResponseError,
+  Incorrect2faError,
   IncorrectLoginError,
   isErrorCode,
+  Missing2faError,
   NotFoundError,
   RateLimitedError,
   ResponseError,
@@ -23,6 +25,15 @@ describe("createResponseError", () => {
     expect(error.message).toBe("incorrect_login");
     expect(error.software).toBe("lemmy");
     expect(error.status).toBe(401);
+  });
+
+  it("distinguishes missing vs incorrect 2fa", () => {
+    expect(createResponseError("missing_totp_token")).toBeInstanceOf(
+      Missing2faError,
+    );
+    expect(createResponseError("incorrect_totp_token")).toBeInstanceOf(
+      Incorrect2faError,
+    );
   });
 
   it("maps equivalent codes across versions to one condition", () => {

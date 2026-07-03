@@ -105,7 +105,7 @@ export class EmailNotVerifiedError extends ResponseError {
   }
 }
 
-/** Wrong or missing TOTP second factor */
+/** Wrong TOTP second factor */
 export class Incorrect2faError extends ResponseError {
   constructor(code: string, options?: ResponseErrorOptions) {
     super(code, options);
@@ -133,6 +133,17 @@ export class InvalidPayloadError extends FediverseError {
   constructor(message: string) {
     super(message);
     this.name = "InvalidPayloadError";
+  }
+}
+
+/**
+ * A TOTP second factor is required but wasn't provided (e.g. show the 2FA
+ * input on the login form)
+ */
+export class Missing2faError extends ResponseError {
+  constructor(code: string, options?: ResponseErrorOptions) {
+    super(code, options);
+    this.name = "Missing2faError";
   }
 }
 
@@ -193,6 +204,7 @@ const CONDITION_BY_CODE: Record<string, ResponseErrorConstructor> = {
   incorrect_login: IncorrectLoginError,
   incorrect_totp_token: Incorrect2faError,
   invalid_bot_action: InvalidBotActionError,
+  missing_totp_token: Missing2faError,
   "No row was found when one was required": NotFoundError,
   not_found: NotFoundError,
   rate_limit_error: RateLimitedError,
