@@ -137,16 +137,6 @@ class ThreadiverseClient {
     return { mode: this.mode, software: this.software };
   }
 
-  /** @deprecated Use `connect()` (or the sync `mode` getter once connected) */
-  async getMode(): Promise<ThreadiverseMode> {
-    return (await this.connect()).mode;
-  }
-
-  /** @deprecated Use `connect()` (or the sync `software` getter once connected) */
-  async getSoftware(): Promise<ProviderInfo> {
-    return (await this.connect()).software;
-  }
-
   private async ensureClient(): Promise<BaseClient> {
     if (this.delegateClient) {
       return this.delegateClient;

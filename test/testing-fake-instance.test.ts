@@ -44,10 +44,9 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
   it("discovers software via nodeinfo", async () => {
     const { client } = setup();
 
-    expect(await client.getMode()).toBe("lemmyv1");
-    expect(await client.getSoftware()).toEqual({
-      name: "lemmy",
-      version: "1.0.0-beta.1",
+    expect(await client.connect()).toEqual({
+      mode: "lemmyv1",
+      software: { name: "lemmy", version: "1.0.0-beta.1" },
     });
   });
 
@@ -202,8 +201,8 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
       second.clientOptions(),
     );
 
-    expect((await firstClient.getSoftware()).version).toBe("1.0.0-beta.1");
-    expect((await secondClient.getSoftware()).version).toBe("1.2.0");
+    expect((await firstClient.connect()).software.version).toBe("1.0.0-beta.1");
+    expect((await secondClient.connect()).software.version).toBe("1.2.0");
   });
 
   it("serves null-body statuses through the fetch adapter", async () => {
