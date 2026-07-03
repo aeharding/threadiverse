@@ -81,6 +81,16 @@ export class SeedStore {
   // High start so explicit ids in tests never collide with generated ones
   #nextId = 1000;
 
+  /** Wipe all seeded content (e.g. to replace a fixture's default feed) */
+  clear(): void {
+    this.comments = [];
+    this.communities = [];
+    this.loggedInPerson = undefined;
+    this.notifications = [];
+    this.people = [];
+    this.posts = [];
+  }
+
   comment(over: {
     childCount?: number;
     content: string;
@@ -115,7 +125,9 @@ export class SeedStore {
     over: { id?: number; name?: string; title?: string } = {},
   ): SeedCommunity {
     const community: SeedCommunity = {
-      id: over.id ?? this.#nextId++,
+      // First community defaults to 111 so seeds agree with the wire-level
+      // builders' default community out of the box
+      id: over.id ?? (this.communities.length === 0 ? 111 : this.#nextId++),
       name: over.name ?? "test_comm",
       title: over.title ?? "Test Community",
     };
@@ -181,6 +193,8 @@ export class SeedStore {
     content: string;
     creator: SeedPerson;
     id?: number;
+    /** Pin the inbox notification's id (for mark-as-read assertions) */
+    notificationId?: number;
     read?: boolean;
     recipient?: SeedPerson;
   }): SeedPrivateMessage {
@@ -199,7 +213,7 @@ export class SeedStore {
     };
 
     this.notifications.push({
-      id: this.#nextId++,
+      id: over.notificationId ?? this.#nextId++,
       kind: "private_message",
       message,
       read: over.read ?? false,

@@ -102,8 +102,9 @@ const SCENARIOS = [
     operation: "getPosts",
   },
   {
-    expected: { limit: 5, post_id: 42 },
-    invoke: (c: ThreadiverseClient) => c.getComments({ limit: 5, post_id: 42 }),
+    expected: { limit: 5, parent_id: 7, post_id: 42 },
+    invoke: (c: ThreadiverseClient) =>
+      c.getComments({ limit: 5, parent_id: 7, post_id: 42 }),
     operation: "getComments",
   },
   {
@@ -136,6 +137,12 @@ const SCENARIOS = [
 ] as const;
 
 const V1_ONLY_SCENARIOS = [
+  {
+    expected: { page_cursor: "abc123", sort: "hot" },
+    invoke: (c: ThreadiverseClient) =>
+      c.getPosts({ mode: "lemmyv1", page_cursor: "abc123", sort: "hot" }),
+    operation: "getPosts",
+  },
   {
     expected: { notification_id: 3, read: true },
     invoke: (c: ThreadiverseClient) =>

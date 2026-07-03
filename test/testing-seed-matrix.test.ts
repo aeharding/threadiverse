@@ -109,6 +109,39 @@ describe.each([
     );
   });
 
+  it("filters comment subtrees by parent_id", async () => {
+    const { client, fake, post } = setup();
+
+    // A small tree on the seeded post: parent with one child, plus an
+    // unrelated top-level comment
+    const parent = fake.seed.comment({ content: "parent", id: 20, post });
+    fake.seed.comment({
+      content: "child",
+      id: 21,
+      path: `0.${parent.id}.21`,
+      post,
+    });
+    fake.seed.comment({ content: "unrelated", id: 22, post });
+
+    const { data } = await client.getComments({
+      parent_id: parent.id,
+      post_id: post.id,
+    });
+    expect(data.map((view) => view.comment.content).sort()).toEqual([
+      "child",
+      "parent",
+    ]);
+  });
+
+  it("seed.clear() empties the derived feed", async () => {
+    const { client, fake } = setup();
+
+    fake.seed.clear();
+
+    const { data } = await client.getPosts({});
+    expect(data).toHaveLength(0);
+  });
+
   it("listPersonContent only returns the person's content", async () => {
     const { alex, client, fake, post } = setup();
 
@@ -166,5 +199,42 @@ describe("seeded notifications (lemmyv1)", () => {
       unread_only: true,
     });
     expect(unreadOnly.map((view) => view.notification.kind)).toEqual(["reply"]);
+  });
+
+  it("mark-as-read writes mutate derived seed state", async () => {
+    const fake = new FakeLemmyV1Instance();
+    const seed = fake.seed;
+
+    const alex = seed.person({ name: "alex" });
+    const other = seed.person({ name: "other" });
+    seed.loggedInAs(alex);
+
+    const reply = seed.reply({
+      comment: seed.comment({ content: "hi", creator: other }),
+      id: 301,
+    });
+    seed.privateMessage({
+      content: "psst",
+      creator: other,
+      notificationId: 302,
+    });
+
+    const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
+
+    expect((await client.getUnreadCount()).replies).toBe(2);
+
+    await client.markNotificationAsRead({
+      kind: "reply",
+      notification_id: reply.id,
+      read: true,
+    });
+    expect((await client.getUnreadCount()).replies).toBe(1);
+    expect(fake.callsTo("markNotificationAsRead")[0]).toEqual({
+      notification_id: 301,
+      read: true,
+    });
+
+    await client.markAllAsRead();
+    expect((await client.getUnreadCount()).replies).toBe(0);
   });
 });
