@@ -17,6 +17,12 @@ import type { ThreadiverseClientOptions } from "../ThreadiverseClient";
 
 import { DiscoveryCache, Nodeinfo21Payload, NodeinfoLink } from "../wellknown";
 
+/**
+ * Canonical error injection: rendered into the provider's error wire shape
+ * (verified against real instances by the live error-fidelity suite).
+ */
+export type ErrorInjection = { code: string; status?: number };
+
 export interface FakeInstanceOptions {
   /** Bare hostname (no scheme), e.g. `"v1.test.lemmy"` */
   host: string;
@@ -41,6 +47,27 @@ export type FakeResponse =
 
 /** `"METHOD /path"` — matched against pathname only (query ignored) */
 export type Matcher = `${"DELETE" | "GET" | "POST" | "PUT"} /${string}`;
+
+export interface OperationApi<Operation extends string> {
+  /** Recorded requests for an operation (by name, not route) */
+  callsTo(operation: Operation): RecordedCall[];
+  /** Override an operation's response. Last call wins. */
+  on: Record<Operation, (responder: OperationResponder) => void>;
+  /** Override an operation's next response only, then fall back. */
+  once: Record<Operation, (responder: OperationResponder) => void>;
+  /** Wait until a request for an operation is recorded. */
+  waitForCallTo(
+    operation: Operation,
+    predicate?: (call: RecordedCall) => boolean,
+    options?: { timeoutMs?: number },
+  ): Promise<RecordedCall>;
+}
+
+export type OperationResponder =
+  | ((call: RecordedCall) => OperationResponse | Promise<OperationResponse>)
+  | OperationResponse;
+
+export type OperationResponse = FakeResponse | { error: ErrorInjection };
 
 export type RecordedCall = {
   body: unknown;
@@ -102,6 +129,8 @@ export class FakeInstance {
   #discoveryCache: DiscoveryCache = new Map();
 
   #handlers = new Map<Matcher, Responder>();
+
+  #onceQueues = new Map<Matcher, Responder[]>();
 
   #waiters: Waiter[] = [];
 
@@ -207,9 +236,12 @@ export class FakeInstance {
     this.#calls.push(call);
     this.#notifyWaiters(call);
 
-    const responder = this.#handlers.get(
-      `${request.method} ${url.pathname}` as Matcher,
-    );
+    const matcher = `${request.method} ${url.pathname}` as Matcher;
+
+    const onceQueue = this.#onceQueues.get(matcher);
+    const responder = onceQueue?.length
+      ? onceQueue.shift()
+      : this.#handlers.get(matcher);
 
     if (!responder) {
       // Surface missing mocks loudly instead of letting requests escape to
@@ -258,6 +290,13 @@ export class FakeInstance {
     this.#handlers.set(matcher, responder);
   }
 
+  /** Respond once for an endpoint, then fall back to the standing mock. */
+  mockOnce(matcher: Matcher, responder: Responder): void {
+    const queue = this.#onceQueues.get(matcher) ?? [];
+    queue.push(responder);
+    this.#onceQueues.set(matcher, queue);
+  }
+
   /**
    * Wait until a matching request is recorded, then return the latest.
    * Resolution is push-based (no polling), so pending waiters settle the
@@ -292,6 +331,42 @@ export class FakeInstance {
 
       this.#waiters.push(waiter);
     });
+  }
+
+  /**
+   * Build the operation-level API (`on`/`once`/`callsTo`/`waitForCallTo`)
+   * from a provider's operation → route map plus its error wire renderer.
+   */
+  protected buildOperationApi<Operation extends string>(
+    routes: Record<Operation, Matcher>,
+    renderError: (error: ErrorInjection) => FakeResponse,
+  ): OperationApi<Operation> {
+    const toResponder = (responder: OperationResponder): Responder => {
+      const render = (response: OperationResponse): FakeResponse =>
+        "error" in response ? renderError(response.error) : response;
+
+      return typeof responder === "function"
+        ? async (call) => render(await responder(call))
+        : render(responder);
+    };
+
+    const on = {} as OperationApi<Operation>["on"];
+    const once = {} as OperationApi<Operation>["once"];
+
+    for (const operation of Object.keys(routes) as Operation[]) {
+      on[operation] = (responder) =>
+        this.mock(routes[operation], toResponder(responder));
+      once[operation] = (responder) =>
+        this.mockOnce(routes[operation], toResponder(responder));
+    }
+
+    return {
+      callsTo: (operation) => this.calls(routes[operation]),
+      on,
+      once,
+      waitForCallTo: (operation, predicate, options) =>
+        this.waitForCall(routes[operation], predicate, options),
+    };
   }
 
   #notifyWaiters(call: RecordedCall): void {

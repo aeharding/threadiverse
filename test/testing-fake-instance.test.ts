@@ -11,6 +11,7 @@ import ThreadiverseClient from "../src/ThreadiverseClient";
 
 function setup() {
   const instance = new FakeLemmyV1Instance({ host: "v1.fake.test" });
+  instance.seed.site({ name: "Test v1 site" });
 
   const alex = instance.build.person({ id: 100, name: "alex" });
   const posts = [
@@ -168,7 +169,7 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
   it("answers unmocked endpoints with a 404 error", async () => {
     const { client } = setup();
 
-    await expect(client.getUnreadCount()).rejects.toThrow();
+    await expect(client.search({ search_term: "x" })).rejects.toThrow();
   });
 
   it("simulates aborts as network failures", async () => {

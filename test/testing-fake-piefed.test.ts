@@ -11,6 +11,7 @@ import ThreadiverseClient from "../src/ThreadiverseClient";
 
 function setup() {
   const instance = new FakePiefedInstance({ host: "piefed.fake.test" });
+  instance.seed.site({ name: "Test piefed site" });
 
   const alex = instance.build.person({ id: 100, user_name: "alex" });
   const posts = [

@@ -1,9 +1,56 @@
-import { FakeInstance } from "../FakeInstance";
+import { FakeInstance, Matcher, OperationApi } from "../FakeInstance";
+import {
+  SeedComment,
+  SeedCommunity,
+  SeedPerson,
+  SeedPost,
+  SeedStore,
+} from "../seed";
 import {
   createPiefedBuilders,
   DEFAULT_PIEFED_VERSION,
   PiefedBuilders,
 } from "./builders";
+
+/**
+ * Operation → route map (threadiverse `BaseClient` endpoint names; routes
+ * from the piefed adapter). Powers `on`/`once`/`callsTo`.
+ */
+const PIEFED_ROUTES = {
+  createComment: "POST /api/alpha/comment",
+  createPost: "POST /api/alpha/post",
+  createPrivateMessage: "POST /api/alpha/private_message",
+  deleteComment: "POST /api/alpha/comment/delete",
+  deletePost: "POST /api/alpha/post/delete",
+  editComment: "PUT /api/alpha/comment",
+  editPost: "PUT /api/alpha/post",
+  followCommunity: "POST /api/alpha/community/follow",
+  getComments: "GET /api/alpha/comment/list",
+  getCommunity: "GET /api/alpha/community",
+  getPersonDetails: "GET /api/alpha/user",
+  getPost: "GET /api/alpha/post",
+  getPosts: "GET /api/alpha/post/list",
+  getSite: "GET /api/alpha/site",
+  getUnreadCount: "GET /api/alpha/user/unread_count",
+  likeComment: "POST /api/alpha/comment/like",
+  likePost: "POST /api/alpha/post/like",
+  login: "POST /api/alpha/user/login",
+  markPostAsRead: "POST /api/alpha/post/mark_as_read",
+  resolveObject: "GET /api/alpha/resolve_object",
+  saveComment: "PUT /api/alpha/comment/save",
+  savePost: "PUT /api/alpha/post/save",
+  search: "GET /api/alpha/search",
+} satisfies Record<string, Matcher>;
+
+export type PiefedOperation = keyof typeof PIEFED_ROUTES;
+
+const STATUS_TEXT: Record<number, string> = {
+  400: "Bad Request",
+  401: "Unauthorized",
+  403: "Forbidden",
+  404: "Not Found",
+  429: "Too Many Requests",
+};
 
 export interface FakePiefedInstanceOptions {
   /** Bare hostname (no scheme) the fake instance answers for */
@@ -13,23 +60,39 @@ export interface FakePiefedInstanceOptions {
 }
 
 /**
- * `FakeInstance` pre-seeded with the PieFed routes an app touches at
- * startup, each serving an empty default. Seed data with `mock()` and the
- * typed builders on `build`:
+ * `FakeInstance` for PieFed whose default routes are derived, per request,
+ * from the semantic `seed` store — tests describe what exists, not which
+ * endpoint returns it:
  *
  * ```ts
- * fake.mock("GET /api/alpha/post/list", {
- *   json: fake.build.postListResponse([fake.build.postView({ ... })]),
- * });
+ * const alex = fake.seed.person({ name: "alex" });
+ * fake.seed.post({ name: "Hello **world**", creator: alex });
  * ```
  *
- * Not yet default-mocked (no typed builders yet — unmocked requests 404
- * loudly): the notification fan-out (`GET /api/alpha/user/replies`,
- * `GET /api/alpha/user/mentions`, `GET /api/alpha/private_message/list`).
+ * Derived: site, post list/detail, comment list, community, person. Use
+ * `mock()` for error injection or endpoints outside this set (notably the
+ * notification fan-out — `GET /api/alpha/user/replies`, `/user/mentions`,
+ * `/private_message/list` — which has no typed builders yet and 404s
+ * loudly when unmocked). Wire-level builders stay available on `build`.
  */
 export class FakePiefedInstance extends FakeInstance {
   /** Wire-format builders bound to this instance's host */
   readonly build: PiefedBuilders;
+
+  /** Recorded requests for an operation (by name, not route) */
+  readonly callsTo: OperationApi<PiefedOperation>["callsTo"];
+
+  /** Override an operation's response (canonical `{ error }` supported) */
+  readonly on: OperationApi<PiefedOperation>["on"];
+
+  /** Override an operation's next response only, then fall back */
+  readonly once: OperationApi<PiefedOperation>["once"];
+
+  /** Semantic content store the default routes are derived from */
+  readonly seed = new SeedStore();
+
+  /** Wait until a request for an operation is recorded */
+  readonly waitForCallTo: OperationApi<PiefedOperation>["waitForCallTo"];
 
   constructor({
     host = "piefed.test",
@@ -39,19 +102,134 @@ export class FakePiefedInstance extends FakeInstance {
 
     const build = createPiefedBuilders({ host, version });
     this.build = build;
+    const seed = this.seed;
 
-    // Everything the piefed path touches at app startup. Function responders
-    // so each request gets a fresh object (no shared mutable state) and
-    // nothing is built unless actually requested.
+    const api = this.buildOperationApi(PIEFED_ROUTES, (error) => {
+      const status = error.status ?? 400;
+      return {
+        json: {
+          code: status,
+          message: error.code,
+          status: STATUS_TEXT[status] ?? "Error",
+        },
+        status,
+      };
+    });
+    this.callsTo = api.callsTo;
+    this.on = api.on;
+    this.once = api.once;
+    this.waitForCallTo = api.waitForCallTo;
+
+    // seed → wire
+    const person = (subject: SeedPerson) =>
+      build.person({
+        id: subject.id,
+        title: subject.displayName,
+        user_name: subject.name,
+      });
+    const community = (subject: SeedCommunity) =>
+      build.community({
+        id: subject.id,
+        name: subject.name,
+        title: subject.title,
+      });
+    const postView = (subject: SeedPost) =>
+      build.postView({
+        body: subject.body,
+        community: community(subject.community),
+        creator: person(subject.creator),
+        id: subject.id,
+        title: subject.name,
+        url: subject.url,
+      });
+    const commentView = (subject: SeedComment) =>
+      build.commentView({
+        body: subject.content,
+        child_count: subject.childCount,
+        creator: person(subject.creator),
+        id: subject.id,
+        path: subject.path,
+        post: postView(subject.post),
+        published: subject.published,
+      });
+
+    // Seed misses render through PieFed's real error wire shape (unlike the
+    // deliberate loud 404 for entirely unmocked routes)
+    const notFound = {
+      json: { code: 404, message: "not_found", status: "Not Found" },
+      status: 404,
+    } as const;
+
     this.mock("GET /api/alpha/site", () => ({
-      json: build.getSiteResponse(),
+      json: build.getSiteResponse({ name: seed.siteName }),
     }));
-    this.mock("GET /api/alpha/post/list", () => ({
-      json: build.postListResponse([]),
+
+    this.mock("GET /api/alpha/post/list", (call) => {
+      // The piefed adapter implements listPersonContent via person_id here
+      const personId = call.query.get("person_id");
+      const posts = personId
+        ? seed.posts.filter((post) => post.creator.id === Number(personId))
+        : seed.posts;
+      return { json: build.postListResponse(posts.map(postView)) };
+    });
+
+    this.mock("GET /api/alpha/post", (call) => {
+      const post = seed.posts.find(
+        (candidate) => candidate.id === Number(call.query.get("id")),
+      );
+      return post ? { json: { post_view: postView(post) } } : notFound;
+    });
+
+    this.mock("GET /api/alpha/comment/list", (call) => {
+      const postId = call.query.get("post_id");
+      // The piefed adapter implements listPersonContent via person_id here
+      const personId = call.query.get("person_id");
+      let comments = seed.comments;
+      if (postId)
+        comments = comments.filter(
+          (comment) => comment.post.id === Number(postId),
+        );
+      if (personId)
+        comments = comments.filter(
+          (comment) => comment.creator.id === Number(personId),
+        );
+      return { json: build.commentListResponse(comments.map(commentView)) };
+    });
+
+    this.mock("GET /api/alpha/community", (call) => {
+      const name = call.query.get("name")?.split("@")[0];
+      const found = seed.communities.find(
+        (candidate) => candidate.name === name,
+      );
+      return found
+        ? { json: build.communityResponse({ community: community(found) }) }
+        : notFound;
+    });
+
+    this.mock("GET /api/alpha/user/unread_count", () => ({
+      json: {
+        mentions: seed.notifications.filter(
+          (notification) =>
+            notification.kind === "mention" && !notification.read,
+        ).length,
+        other: 0,
+        private_messages: seed.notifications.filter(
+          (notification) =>
+            notification.kind === "private_message" && !notification.read,
+        ).length,
+        replies: seed.notifications.filter(
+          (notification) => notification.kind === "reply" && !notification.read,
+        ).length,
+      },
     }));
-    this.mock("GET /api/alpha/comment/list", () => ({
-      json: build.commentListResponse([]),
-    }));
+
+    this.mock("GET /api/alpha/user", (call) => {
+      const username = call.query.get("username")?.split("@")[0];
+      const found = seed.people.find(
+        (candidate) => candidate.name === username,
+      );
+      return found ? { json: build.userResponse(person(found)) } : notFound;
+    });
   }
 }
 

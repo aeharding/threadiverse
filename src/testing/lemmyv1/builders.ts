@@ -375,17 +375,34 @@ export function createLemmyV1Builders({
   }
 
   /** `GET /api/v4/community` (getCommunity) */
+  function communityView(
+    over: { community?: Wire<LemmyV1.Community> } = {},
+  ): Wire<LemmyV1.CommunityView> {
+    return {
+      can_mod: false,
+      community: over.community ?? community(),
+      tags: [],
+    };
+  }
+
   function communityResponse(
     over: { community?: Wire<LemmyV1.Community> } = {},
   ): Wire<LemmyV1.GetCommunityResponse> {
     return {
-      community_view: {
-        can_mod: false,
-        community: over.community ?? community(),
-        tags: [],
-      },
+      community_view: communityView(over),
       discussion_languages: [],
       moderators: [],
+    };
+  }
+
+  /** `GET /api/v4/post` (getPost) */
+  function postResponse(
+    view: Wire<LemmyV1.PostView>,
+  ): Wire<LemmyV1.GetPostResponse> {
+    return {
+      community_view: communityView({ community: view.community }),
+      cross_posts: [],
+      post_view: view,
     };
   }
 
@@ -497,6 +514,7 @@ export function createLemmyV1Builders({
     commentView,
     community,
     communityResponse,
+    communityView,
     getSiteResponse,
     localUser,
     modlogView,
@@ -505,6 +523,7 @@ export function createLemmyV1Builders({
     person,
     personResponse,
     post,
+    postResponse,
     postView,
     privateMessageNotification,
     privateMessageView,
