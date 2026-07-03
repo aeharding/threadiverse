@@ -91,14 +91,14 @@ describe.each([
     expect(data).toHaveLength(1);
   });
 
-  it("records calls by operation name", async () => {
+  it("records canonical payloads by operation name", async () => {
     const { client, fake } = setup();
 
     await client.getPosts({ limit: 7 });
 
-    const calls = fake.callsTo("getPosts");
-    expect(calls).toHaveLength(1);
-    expect(calls[0]!.query.get("limit")).toBe("7");
+    const payloads = fake.callsTo("getPosts");
+    expect(payloads).toHaveLength(1);
+    expect(payloads[0]).toMatchObject({ limit: 7 });
   });
 
   it("rejects account endpoints when nobody is logged in", async () => {

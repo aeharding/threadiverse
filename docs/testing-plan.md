@@ -21,7 +21,7 @@ type-checked against the same upstream types the compat layers consume, and
 | Behavior     | `fake.on.*` / `fake.once.*`     | Per-operation overrides keyed by threadiverse endpoint name (provider-agnostic): error injection (canonical `{ code, status }`), custom wire responses (typed via `fake.build.*`), one-shot sequencing. |
 | Escape hatch | `fake.mock(matcher, responder)` | Anything else, at the HTTP route level. Discouraged in consumer specs.                                                                                                                                  |
 
-Request assertions: `fake.callsTo("likePost")` / `fake.waitForCallTo(...)` —
+Request assertions: `fake.callsTo("likePost")` / `fake.waitForPayload(...)` —
 operation-keyed views over the existing recording.
 
 ```ts

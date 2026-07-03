@@ -1,4 +1,11 @@
-import { FakeInstance, Matcher, OperationApi } from "../FakeInstance";
+import type { BaseClient } from "../../BaseClient";
+
+import {
+  FakeInstance,
+  OperationApi,
+  OperationDef,
+  RecordedCall,
+} from "../FakeInstance";
 import {
   SeedComment,
   SeedCommunity,
@@ -12,37 +19,191 @@ import {
   PiefedBuilders,
 } from "./builders";
 
-/**
- * Operation → route map (threadiverse `BaseClient` endpoint names; routes
- * from the piefed adapter). Powers `on`/`once`/`callsTo`.
- */
-const PIEFED_ROUTES = {
-  createComment: "POST /api/alpha/comment",
-  createPost: "POST /api/alpha/post",
-  createPrivateMessage: "POST /api/alpha/private_message",
-  deleteComment: "POST /api/alpha/comment/delete",
-  deletePost: "POST /api/alpha/post/delete",
-  editComment: "PUT /api/alpha/comment",
-  editPost: "PUT /api/alpha/post",
-  followCommunity: "POST /api/alpha/community/follow",
-  getComments: "GET /api/alpha/comment/list",
-  getCommunity: "GET /api/alpha/community",
-  getPersonDetails: "GET /api/alpha/user",
-  getPost: "GET /api/alpha/post",
-  getPosts: "GET /api/alpha/post/list",
-  getSite: "GET /api/alpha/site",
-  getUnreadCount: "GET /api/alpha/user/unread_count",
-  likeComment: "POST /api/alpha/comment/like",
-  likePost: "POST /api/alpha/post/like",
-  login: "POST /api/alpha/user/login",
-  markPostAsRead: "POST /api/alpha/post/mark_as_read",
-  resolveObject: "GET /api/alpha/resolve_object",
-  saveComment: "PUT /api/alpha/comment/save",
-  savePost: "PUT /api/alpha/post/save",
-  search: "GET /api/alpha/search",
-} satisfies Record<string, Matcher>;
+/** Canonical payload shape for a threadiverse endpoint (partial) */
+type Payload<K extends keyof BaseClient> = Partial<
+  Parameters<BaseClient[K]>[0]
+>;
 
-export type PiefedOperation = keyof typeof PIEFED_ROUTES;
+/** piefed request bodies that are canonical passthrough */
+const body =
+  <K extends keyof BaseClient>() =>
+  (call: RecordedCall) =>
+    call.body as Payload<K>;
+
+// Inverse of compat's fromListingType
+const LISTING_TYPE_FROM_WIRE: Record<string, Payload<"getPosts">["type_"]> = {
+  All: "all",
+  Local: "local",
+  ModeratorView: "moderator_view",
+  Subscribed: "subscribed",
+};
+
+function fromScore(score: number | undefined): boolean | undefined {
+  if (score === 1) return true;
+  if (score === -1) return false;
+  return undefined;
+}
+
+function numberish(value: string | undefined): number | undefined {
+  return value === undefined ? undefined : Number(value);
+}
+
+function query(call: RecordedCall): Record<string, string> {
+  return Object.fromEntries(call.query);
+}
+
+/**
+ * Operation definitions (threadiverse `BaseClient` endpoint names; routes
+ * from the piefed adapter; decoders reconstruct canonical payloads from the
+ * wire, round-trip tested in test/testing-request-decoders.test.ts). Powers
+ * `on`/`once`/`callsTo`/`waitForPayload`.
+ */
+const PIEFED_OPERATIONS = {
+  createComment: {
+    decode: (call: RecordedCall): Payload<"createComment"> => {
+      // wire = canonical (spread) with content also duplicated as `body`
+      const { body, ...payload } = call.body as { body: string };
+      return { ...payload, content: body };
+    },
+    route: "POST /api/alpha/comment",
+  },
+  createPost: {
+    decode: (call: RecordedCall): Payload<"createPost"> => {
+      // wire = canonical + duplicated `title` field
+      const payload = { ...(call.body as Record<string, unknown>) };
+      delete payload.title;
+      return payload as Payload<"createPost">;
+    },
+    route: "POST /api/alpha/post",
+  },
+  createPrivateMessage: {
+    decode: body<"createPrivateMessage">(),
+    route: "POST /api/alpha/private_message",
+  },
+  deleteComment: {
+    decode: body<"deleteComment">(),
+    route: "POST /api/alpha/comment/delete",
+  },
+  deletePost: {
+    decode: body<"deletePost">(),
+    route: "POST /api/alpha/post/delete",
+  },
+  editComment: {
+    decode: (call: RecordedCall): Payload<"editComment"> => {
+      // wire = canonical (spread) with content also duplicated as `body`
+      const { body, ...payload } = call.body as { body: string };
+      return { ...payload, content: body };
+    },
+    route: "PUT /api/alpha/comment",
+  },
+  editPost: {
+    decode: (call: RecordedCall): Payload<"editPost"> => {
+      // wire = canonical + duplicated `title` field
+      const payload = { ...(call.body as Record<string, unknown>) };
+      delete payload.title;
+      return payload as Payload<"editPost">;
+    },
+    route: "PUT /api/alpha/post",
+  },
+  followCommunity: {
+    decode: body<"followCommunity">(),
+    route: "POST /api/alpha/community/follow",
+  },
+  getComments: {
+    decode: (call: RecordedCall): Payload<"getComments"> => {
+      const q = query(call);
+      return {
+        limit: numberish(q.limit),
+        max_depth: numberish(q.max_depth),
+        post_id: numberish(q.post_id),
+      };
+    },
+    route: "GET /api/alpha/comment/list",
+  },
+  getCommunity: {
+    decode: (call: RecordedCall): Payload<"getCommunity"> => ({
+      name: query(call).name,
+    }),
+    route: "GET /api/alpha/community",
+  },
+  getPersonDetails: {
+    decode: (call: RecordedCall): Payload<"getPersonDetails"> => ({
+      username: query(call).username,
+    }),
+    route: "GET /api/alpha/user",
+  },
+  getPost: {
+    decode: (call: RecordedCall): Payload<"getPost"> => ({
+      id: numberish(query(call).id),
+    }),
+    route: "GET /api/alpha/post",
+  },
+  getPosts: {
+    decode: (call: RecordedCall): Payload<"getPosts"> => {
+      const q = query(call);
+      return {
+        community_name: q.community_name,
+        limit: numberish(q.limit),
+        type_:
+          q.type_ === undefined ? undefined : LISTING_TYPE_FROM_WIRE[q.type_],
+      };
+    },
+    route: "GET /api/alpha/post/list",
+  },
+  getSite: { route: "GET /api/alpha/site" },
+  getUnreadCount: { route: "GET /api/alpha/user/unread_count" },
+  likeComment: {
+    decode: (call: RecordedCall): Payload<"likeComment"> => {
+      const wire = call.body as { comment_id: number; score?: number };
+      return { comment_id: wire.comment_id, is_upvote: fromScore(wire.score) };
+    },
+    route: "POST /api/alpha/comment/like",
+  },
+  likePost: {
+    decode: (call: RecordedCall): Payload<"likePost"> => {
+      const wire = call.body as { post_id: number; score?: number };
+      return { is_upvote: fromScore(wire.score), post_id: wire.post_id };
+    },
+    route: "POST /api/alpha/post/like",
+  },
+  login: {
+    decode: (call: RecordedCall): Payload<"login"> => {
+      const wire = call.body as { password: string; username: string };
+      return { password: wire.password, username_or_email: wire.username };
+    },
+    route: "POST /api/alpha/user/login",
+  },
+  markPostAsRead: {
+    decode: body<"markPostAsRead">(),
+    route: "POST /api/alpha/post/mark_as_read",
+  },
+  resolveObject: {
+    decode: (call: RecordedCall): Payload<"resolveObject"> => ({
+      q: query(call).q,
+    }),
+    route: "GET /api/alpha/resolve_object",
+  },
+  saveComment: {
+    decode: body<"saveComment">(),
+    route: "PUT /api/alpha/comment/save",
+  },
+  savePost: { decode: body<"savePost">(), route: "PUT /api/alpha/post/save" },
+  search: {
+    decode: (call: RecordedCall): Payload<"search"> => {
+      const q = query(call);
+      return {
+        limit: numberish(q.limit),
+        search_term: q.q,
+        type_: q.type_?.toLowerCase() as Payload<"search">["type_"],
+      };
+    },
+    route: "GET /api/alpha/search",
+  },
+} satisfies {
+  [K in keyof BaseClient]?: OperationDef<Partial<Parameters<BaseClient[K]>[0]>>;
+};
+
+export type PiefedOperation = keyof typeof PIEFED_OPERATIONS;
 
 const STATUS_TEXT: Record<number, string> = {
   400: "Bad Request",
@@ -79,20 +240,22 @@ export class FakePiefedInstance extends FakeInstance {
   /** Wire-format builders bound to this instance's host */
   readonly build: PiefedBuilders;
 
-  /** Recorded requests for an operation (by name, not route) */
-  readonly callsTo: OperationApi<PiefedOperation>["callsTo"];
+  /** Canonical payloads of the requests an operation received */
+  readonly callsTo: OperationApi<typeof PIEFED_OPERATIONS>["callsTo"];
 
   /** Override an operation's response (canonical `{ error }` supported) */
-  readonly on: OperationApi<PiefedOperation>["on"];
+  readonly on: OperationApi<typeof PIEFED_OPERATIONS>["on"];
 
   /** Override an operation's next response only, then fall back */
-  readonly once: OperationApi<PiefedOperation>["once"];
+  readonly once: OperationApi<typeof PIEFED_OPERATIONS>["once"];
 
   /** Semantic content store the default routes are derived from */
   readonly seed = new SeedStore();
 
-  /** Wait until a request for an operation is recorded */
-  readonly waitForCallTo: OperationApi<PiefedOperation>["waitForCallTo"];
+  /** Wait for an operation's next request; resolves its canonical payload */
+  readonly waitForPayload: OperationApi<
+    typeof PIEFED_OPERATIONS
+  >["waitForPayload"];
 
   constructor({
     host = "piefed.test",
@@ -104,7 +267,7 @@ export class FakePiefedInstance extends FakeInstance {
     this.build = build;
     const seed = this.seed;
 
-    const api = this.buildOperationApi(PIEFED_ROUTES, (error) => {
+    const api = this.buildOperationApi(PIEFED_OPERATIONS, (error) => {
       const status = error.status ?? 400;
       return {
         json: {
@@ -118,7 +281,7 @@ export class FakePiefedInstance extends FakeInstance {
     this.callsTo = api.callsTo;
     this.on = api.on;
     this.once = api.once;
-    this.waitForCallTo = api.waitForCallTo;
+    this.waitForPayload = api.waitForPayload;
 
     // seed → wire
     const person = (subject: SeedPerson) =>

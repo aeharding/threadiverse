@@ -1,4 +1,11 @@
-import { FakeInstance, Matcher, OperationApi } from "../FakeInstance";
+import type { BaseClient } from "../../BaseClient";
+
+import {
+  FakeInstance,
+  OperationApi,
+  OperationDef,
+  RecordedCall,
+} from "../FakeInstance";
 import {
   SeedComment,
   SeedCommunity,
@@ -14,40 +21,164 @@ import {
 } from "./builders";
 
 /**
- * Operation → route map (threadiverse `BaseClient` endpoint names; routes
- * verified against lemmy-js-client-v1). Powers `on`/`once`/`callsTo`.
+ * Canonical payload shape for a threadiverse endpoint (partial: some wire
+ * requests are lossy, e.g. v1 drops `kind` from markNotificationAsRead).
  */
-const LEMMY_V1_ROUTES = {
-  createComment: "POST /api/v4/comment",
-  createPost: "POST /api/v4/post",
-  createPrivateMessage: "POST /api/v4/private_message",
-  deleteComment: "DELETE /api/v4/comment",
-  deletePost: "DELETE /api/v4/post",
-  editComment: "PUT /api/v4/comment",
-  editPost: "PUT /api/v4/post",
-  followCommunity: "POST /api/v4/community/follow",
-  getComments: "GET /api/v4/comment/list",
-  getCommunity: "GET /api/v4/community",
-  getModlog: "GET /api/v4/modlog",
-  getNotifications: "GET /api/v4/account/notification/list",
-  getPersonDetails: "GET /api/v4/person",
-  getPost: "GET /api/v4/post",
-  getPosts: "GET /api/v4/post/list",
-  getRandomCommunity: "GET /api/v4/community/random",
-  getSite: "GET /api/v4/site",
-  getSiteMetadata: "GET /api/v4/post/site_metadata",
-  getUnreadCount: "GET /api/v4/account/unread_counts",
-  likeComment: "POST /api/v4/comment/like",
-  likePost: "POST /api/v4/post/like",
-  listPersonContent: "GET /api/v4/person/content",
-  login: "POST /api/v4/account/auth/login",
-  markNotificationAsRead: "POST /api/v4/account/notification/mark_as_read",
-  markPostAsRead: "POST /api/v4/post/mark_as_read/many",
-  resolveObject: "GET /api/v4/resolve_object",
-  saveComment: "PUT /api/v4/comment/save",
-  savePost: "PUT /api/v4/post/save",
-  search: "GET /api/v4/search",
-} satisfies Record<string, Matcher>;
+type Payload<K extends keyof BaseClient> = Partial<
+  Parameters<BaseClient[K]>[0]
+>;
+
+/** v1 request bodies are canonical passthrough for most write endpoints */
+const body =
+  <K extends keyof BaseClient>() =>
+  (call: RecordedCall) =>
+    call.body as Payload<K>;
+
+function numberish(value: string | undefined): number | undefined {
+  return value === undefined ? undefined : Number(value);
+}
+
+function query(call: RecordedCall): Record<string, string> {
+  return Object.fromEntries(call.query);
+}
+
+/**
+ * Operation definitions (threadiverse `BaseClient` endpoint names; routes
+ * verified against lemmy-js-client-v1; decoders reconstruct canonical
+ * payloads from the wire, round-trip tested in
+ * test/testing-request-decoders.test.ts). Powers `on`/`once`/`callsTo`/
+ * `waitForPayload`.
+ */
+const LEMMY_V1_OPERATIONS = {
+  createComment: {
+    decode: body<"createComment">(),
+    route: "POST /api/v4/comment",
+  },
+  createPost: { decode: body<"createPost">(), route: "POST /api/v4/post" },
+  createPrivateMessage: {
+    decode: body<"createPrivateMessage">(),
+    route: "POST /api/v4/private_message",
+  },
+  deleteComment: {
+    decode: body<"deleteComment">(),
+    route: "DELETE /api/v4/comment",
+  },
+  deletePost: { decode: body<"deletePost">(), route: "DELETE /api/v4/post" },
+  editComment: { decode: body<"editComment">(), route: "PUT /api/v4/comment" },
+  editPost: { decode: body<"editPost">(), route: "PUT /api/v4/post" },
+  followCommunity: {
+    decode: body<"followCommunity">(),
+    route: "POST /api/v4/community/follow",
+  },
+  getComments: {
+    decode: (call: RecordedCall): Payload<"getComments"> => {
+      const q = query(call);
+      return {
+        limit: numberish(q.limit),
+        max_depth: numberish(q.max_depth),
+        post_id: numberish(q.post_id),
+      };
+    },
+    route: "GET /api/v4/comment/list",
+  },
+  getCommunity: {
+    decode: (call: RecordedCall): Payload<"getCommunity"> => ({
+      name: query(call).name,
+    }),
+    route: "GET /api/v4/community",
+  },
+  getModlog: { route: "GET /api/v4/modlog" },
+  getNotifications: {
+    decode: (call: RecordedCall): Payload<"getNotifications"> => {
+      const q = query(call);
+      return {
+        limit: numberish(q.limit),
+        unread_only:
+          q.unread_only === undefined ? undefined : q.unread_only === "true",
+      };
+    },
+    route: "GET /api/v4/account/notification/list",
+  },
+  getPersonDetails: {
+    decode: (call: RecordedCall): Payload<"getPersonDetails"> => ({
+      username: query(call).username,
+    }),
+    route: "GET /api/v4/person",
+  },
+  getPost: {
+    decode: (call: RecordedCall): Payload<"getPost"> => ({
+      id: numberish(query(call).id),
+    }),
+    route: "GET /api/v4/post",
+  },
+  getPosts: {
+    decode: (call: RecordedCall): Payload<"getPosts"> => {
+      const q = query(call);
+      return {
+        community_name: q.community_name,
+        limit: numberish(q.limit),
+        // v1 wire listing types are already canonical lowercase
+        type_: q.type_ as Payload<"getPosts">["type_"],
+      };
+    },
+    route: "GET /api/v4/post/list",
+  },
+  getRandomCommunity: { route: "GET /api/v4/community/random" },
+  getSite: { route: "GET /api/v4/site" },
+  getSiteMetadata: {
+    decode: (call: RecordedCall): Payload<"getSiteMetadata"> => ({
+      url: query(call).url,
+    }),
+    route: "GET /api/v4/post/site_metadata",
+  },
+  getUnreadCount: { route: "GET /api/v4/account/unread_counts" },
+  likeComment: {
+    decode: body<"likeComment">(),
+    route: "POST /api/v4/comment/like",
+  },
+  likePost: { decode: body<"likePost">(), route: "POST /api/v4/post/like" },
+  listPersonContent: {
+    decode: (call: RecordedCall): Payload<"listPersonContent"> => ({
+      person_id: numberish(query(call).person_id),
+    }),
+    route: "GET /api/v4/person/content",
+  },
+  login: { decode: body<"login">(), route: "POST /api/v4/account/auth/login" },
+  markNotificationAsRead: {
+    // v1 drops `kind` on the wire — payload is partial
+    decode: body<"markNotificationAsRead">(),
+    route: "POST /api/v4/account/notification/mark_as_read",
+  },
+  markPostAsRead: {
+    decode: body<"markPostAsRead">(),
+    route: "POST /api/v4/post/mark_as_read/many",
+  },
+  resolveObject: {
+    decode: (call: RecordedCall): Payload<"resolveObject"> => ({
+      q: query(call).q,
+    }),
+    route: "GET /api/v4/resolve_object",
+  },
+  saveComment: {
+    decode: body<"saveComment">(),
+    route: "PUT /api/v4/comment/save",
+  },
+  savePost: { decode: body<"savePost">(), route: "PUT /api/v4/post/save" },
+  search: {
+    decode: (call: RecordedCall): Payload<"search"> => {
+      const q = query(call);
+      return {
+        limit: numberish(q.limit),
+        search_term: q.search_term,
+        // v1 wire search types are already canonical lowercase
+        type_: q.type_ as Payload<"search">["type_"],
+      };
+    },
+    route: "GET /api/v4/search",
+  },
+} satisfies {
+  [K in keyof BaseClient]?: OperationDef<Partial<Parameters<BaseClient[K]>[0]>>;
+};
 
 export interface FakeLemmyV1InstanceOptions {
   /** Bare hostname (no scheme) the fake instance answers for */
@@ -56,7 +187,7 @@ export interface FakeLemmyV1InstanceOptions {
   version?: string;
 }
 
-export type LemmyV1Operation = keyof typeof LEMMY_V1_ROUTES;
+export type LemmyV1Operation = keyof typeof LEMMY_V1_OPERATIONS;
 
 /**
  * `FakeInstance` for Lemmy v1 whose default routes are derived, per
@@ -79,20 +210,22 @@ export class FakeLemmyV1Instance extends FakeInstance {
   /** Wire-format builders bound to this instance's host */
   readonly build: LemmyV1Builders;
 
-  /** Recorded requests for an operation (by name, not route) */
-  readonly callsTo: OperationApi<LemmyV1Operation>["callsTo"];
+  /** Canonical payloads of the requests an operation received */
+  readonly callsTo: OperationApi<typeof LEMMY_V1_OPERATIONS>["callsTo"];
 
   /** Override an operation's response (canonical `{ error }` supported) */
-  readonly on: OperationApi<LemmyV1Operation>["on"];
+  readonly on: OperationApi<typeof LEMMY_V1_OPERATIONS>["on"];
 
   /** Override an operation's next response only, then fall back */
-  readonly once: OperationApi<LemmyV1Operation>["once"];
+  readonly once: OperationApi<typeof LEMMY_V1_OPERATIONS>["once"];
 
   /** Semantic content store the default routes are derived from */
   readonly seed = new SeedStore();
 
-  /** Wait until a request for an operation is recorded */
-  readonly waitForCallTo: OperationApi<LemmyV1Operation>["waitForCallTo"];
+  /** Wait for an operation's next request; resolves its canonical payload */
+  readonly waitForPayload: OperationApi<
+    typeof LEMMY_V1_OPERATIONS
+  >["waitForPayload"];
 
   constructor({
     host = "v1.test.lemmy",
@@ -104,14 +237,14 @@ export class FakeLemmyV1Instance extends FakeInstance {
     this.build = build;
     const seed = this.seed;
 
-    const api = this.buildOperationApi(LEMMY_V1_ROUTES, (error) => ({
+    const api = this.buildOperationApi(LEMMY_V1_OPERATIONS, (error) => ({
       json: { error: error.code },
       status: error.status ?? 400,
     }));
     this.callsTo = api.callsTo;
     this.on = api.on;
     this.once = api.once;
-    this.waitForCallTo = api.waitForCallTo;
+    this.waitForPayload = api.waitForPayload;
 
     // seed → wire
     const person = (subject: SeedPerson) =>
