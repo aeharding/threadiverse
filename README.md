@@ -40,36 +40,39 @@ const posts = await client.getPosts();
 
 ## Testing your app
 
-`threadiverse/testing` provides a fake instance for consumer test suites, so
-you don't have to hand-maintain wire-format fixtures or discovery mocks. Wire
-shapes are type-checked against the same upstream API types the compat layer
-uses, so fixtures can't silently drift.
+`threadiverse/testing` provides fake instances for consumer test suites, so
+your tests describe _what exists and what happens_ — never provider routes
+or wire shapes. The same test text works against every provider.
 
 ```ts
 import { FakeLemmyV1Instance } from "threadiverse/testing";
+// ...or FakePiefedInstance — the API below is identical
 
-const instance = new FakeLemmyV1Instance({ host: "fake.lemmy.test" });
+const fake = new FakeLemmyV1Instance();
 
-instance.mock("GET /api/v4/post/list", {
-  json: instance.build.pagedResponse([
-    instance.build.postView({
-      id: 1,
-      name: "Hello world",
-      creator: instance.build.person({ id: 100, name: "alex" }),
-    }),
-  ]),
-});
+// Content: seed it; every read endpoint (feeds, post detail, comments,
+// site counts, profiles, notifications) derives from the store
+const alex = fake.seed.person({ name: "alex" });
+fake.seed.post({ name: "Hello **world**", creator: alex });
+fake.seed.loggedInAs(alex);
+
+// Behavior: override by threadiverse endpoint name; errors are canonical
+fake.once.getPosts({ error: { code: "rate_limit_error", status: 429 } });
 
 // Unit tests: clientOptions() routes fetch through the fake and keeps
 // software discovery isolated from other tests
-const client = new ThreadiverseClient(
-  instance.origin,
-  instance.clientOptions(),
-);
+const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
 
 // Playwright: route all traffic for the fake host
-await instance.install(page);
+await fake.install(page);
 
-// Assert on outgoing requests
-const call = await instance.waitForCall("GET /api/v4/post/list");
+// Assert on outgoing requests as canonical payloads — what your app
+// *meant*, decoded from the wire and round-trip tested per provider
+const payload = await fake.waitForPayload("likePost");
+// { post_id: 1, is_upvote: true }
 ```
+
+Fidelity is enforced, not assumed: wire shapes are type-checked against the
+same upstream API types the compat layers use, and a scheduled suite
+verifies the fakes' responses — especially error responses — against live
+Lemmy and PieFed instances.
