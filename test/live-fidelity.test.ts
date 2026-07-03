@@ -43,7 +43,15 @@ const SCENARIOS = [
 ] as const;
 
 const INSTANCES: { makeFake: () => FakeInstance; realUrl: string }[] = [
+  // Cross-version: v0 instance vs the v1 fake — condition classes are the
+  // invariant that must hold across version vocabularies
   { makeFake: () => new FakeLemmyV1Instance(), realUrl: "https://lemmy.world" },
+  // Same-version: Lemmy 1.0 nightly dev instance (error responses don't
+  // depend on instance content, so a sparse dev instance is fine here)
+  {
+    makeFake: () => new FakeLemmyV1Instance(),
+    realUrl: "https://ds9.lemmy.ml",
+  },
   {
     makeFake: () => new FakePiefedInstance(),
     realUrl: "https://piefed.social",

@@ -189,7 +189,6 @@ const CONDITION_BY_CODE: Record<string, ResponseErrorConstructor> = {
   cant_block_admin: CantBlockAdminError,
   deleted: AccountDeletedError,
   email_not_verified: EmailNotVerifiedError,
-
   "error - unknown community. Please wait a sec and try again.": NotFoundError,
   incorrect_login: IncorrectLoginError,
   incorrect_totp_token: Incorrect2faError,
