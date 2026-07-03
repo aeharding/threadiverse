@@ -115,8 +115,12 @@ const PIEFED_OPERATIONS = {
       return {
         limit: numberish(q.limit),
         max_depth: numberish(q.max_depth),
+        // piefed pages with numbers; canonical page_cursor is the string
+        page_cursor: q.page,
+        parent_id: numberish(q.parent_id),
         post_id: numberish(q.post_id),
-      };
+        sort: q.sort,
+      } as Payload<"getComments">;
     },
     route: "GET /api/alpha/comment/list",
   },
@@ -144,9 +148,12 @@ const PIEFED_OPERATIONS = {
       return {
         community_name: q.community_name,
         limit: numberish(q.limit),
+        // piefed pages with numbers; canonical page_cursor is the string
+        page_cursor: q.page,
+        sort: q.sort,
         type_:
           q.type_ === undefined ? undefined : LISTING_TYPE_FROM_WIRE[q.type_],
-      };
+      } as Payload<"getPosts">;
     },
     route: "GET /api/alpha/post/list",
   },
@@ -193,9 +200,11 @@ const PIEFED_OPERATIONS = {
       const q = query(call);
       return {
         limit: numberish(q.limit),
+        page_cursor: q.page,
         search_term: q.q,
-        type_: q.type_?.toLowerCase() as Payload<"search">["type_"],
-      };
+        sort: q.sort,
+        type_: q.type_?.toLowerCase(),
+      } as Payload<"search">;
     },
     route: "GET /api/alpha/search",
   },
@@ -368,6 +377,7 @@ export class FakePiefedInstance extends FakeInstance {
       const postId = call.query.get("post_id");
       // The piefed adapter implements listPersonContent via person_id here
       const personId = call.query.get("person_id");
+      const parentId = call.query.get("parent_id");
       let comments = seed.comments;
       if (postId)
         comments = comments.filter(
@@ -376,6 +386,11 @@ export class FakePiefedInstance extends FakeInstance {
       if (personId)
         comments = comments.filter(
           (comment) => comment.creator.id === Number(personId),
+        );
+      // parent_id = the comment's subtree (path segments include it)
+      if (parentId)
+        comments = comments.filter((comment) =>
+          comment.path.split(".").includes(parentId),
         );
       return { json: build.commentListResponse(comments.map(commentView)) };
     });

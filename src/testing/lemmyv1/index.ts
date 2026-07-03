@@ -76,8 +76,11 @@ const LEMMY_V1_OPERATIONS = {
       return {
         limit: numberish(q.limit),
         max_depth: numberish(q.max_depth),
+        page_cursor: q.page_cursor,
+        parent_id: numberish(q.parent_id),
         post_id: numberish(q.post_id),
-      };
+        sort: q.sort,
+      } as Payload<"getComments">;
     },
     route: "GET /api/v4/comment/list",
   },
@@ -117,9 +120,11 @@ const LEMMY_V1_OPERATIONS = {
       return {
         community_name: q.community_name,
         limit: numberish(q.limit),
+        page_cursor: q.page_cursor,
+        sort: q.sort,
         // v1 wire listing types are already canonical lowercase
-        type_: q.type_ as Payload<"getPosts">["type_"],
-      };
+        type_: q.type_,
+      } as Payload<"getPosts">;
     },
     route: "GET /api/v4/post/list",
   },
@@ -144,6 +149,9 @@ const LEMMY_V1_OPERATIONS = {
     route: "GET /api/v4/person/content",
   },
   login: { decode: body<"login">(), route: "POST /api/v4/account/auth/login" },
+  markAllAsRead: {
+    route: "POST /api/v4/account/notification/mark_as_read/all",
+  },
   markNotificationAsRead: {
     // v1 drops `kind` on the wire — payload is partial
     decode: body<"markNotificationAsRead">(),
@@ -169,10 +177,12 @@ const LEMMY_V1_OPERATIONS = {
       const q = query(call);
       return {
         limit: numberish(q.limit),
+        page_cursor: q.page_cursor,
         search_term: q.search_term,
+        sort: q.sort,
         // v1 wire search types are already canonical lowercase
-        type_: q.type_ as Payload<"search">["type_"],
-      };
+        type_: q.type_,
+      } as Payload<"search">;
     },
     route: "GET /api/v4/search",
   },
@@ -320,9 +330,15 @@ export class FakeLemmyV1Instance extends FakeInstance {
 
     this.mock("GET /api/v4/comment/list", (call) => {
       const postId = call.query.get("post_id");
-      const comments = postId
+      const parentId = call.query.get("parent_id");
+      let comments = postId
         ? seed.comments.filter((comment) => comment.post.id === Number(postId))
         : seed.comments;
+      // parent_id = the comment's subtree (path segments include it)
+      if (parentId)
+        comments = comments.filter((comment) =>
+          comment.path.split(".").includes(parentId),
+        );
       return { json: build.pagedResponse(comments.map(commentView)) };
     });
 
@@ -406,6 +422,27 @@ export class FakeLemmyV1Instance extends FakeInstance {
     // Fire-and-forget side effect of many logged-in interactions
     this.mock("POST /api/v4/post/mark_as_read/many", {
       json: { success: true },
+    });
+
+    // Write routes mutate the seed store, so derived unread counts and
+    // notification lists reflect the change on subsequent reads
+    this.mock("POST /api/v4/account/notification/mark_as_read", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { notification_id, read } = call.body as {
+        notification_id: number;
+        read: boolean;
+      };
+      const notification = seed.notifications.find(
+        (candidate) => candidate.id === notification_id,
+      );
+      if (notification) notification.read = read;
+      return { json: { success: true } };
+    });
+
+    this.mock("POST /api/v4/account/notification/mark_as_read/all", () => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      for (const notification of seed.notifications) notification.read = true;
+      return { json: { success: true } };
     });
   }
 }
