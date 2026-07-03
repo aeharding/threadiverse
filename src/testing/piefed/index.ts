@@ -153,11 +153,32 @@ export class FakePiefedInstance extends FakeInstance {
         published: subject.published,
       });
 
-    // Seed misses render through PieFed's real error wire shape (unlike the
-    // deliberate loud 404 for entirely unmocked routes)
+    // Seed misses render PieFed's real error responses as observed live
+    // (piefed.social 2026-07-02): 400s whose message is prose, mapped to
+    // NotFoundError in the condition table. Verified by the fidelity suite.
     const notFound = {
-      json: { code: 404, message: "not_found", status: "Not Found" },
-      status: 404,
+      json: {
+        code: 400,
+        message: "No row was found when one was required",
+        status: "Not found",
+      },
+      status: 400,
+    } as const;
+
+    const communityNotFound = {
+      json: {
+        code: 400,
+        message: "error - unknown community. Please wait a sec and try again.",
+        status: "Bad Request",
+      },
+      status: 400,
+    } as const;
+
+    // Observed live: piefed answers unauthenticated account endpoints with
+    // 400 incorrect_login
+    const unauthenticated = {
+      json: { code: 400, message: "incorrect_login", status: "Bad Request" },
+      status: 400,
     } as const;
 
     this.mock("GET /api/alpha/site", () => ({
@@ -203,25 +224,29 @@ export class FakePiefedInstance extends FakeInstance {
       );
       return found
         ? { json: build.communityResponse({ community: community(found) }) }
-        : notFound;
+        : communityNotFound;
     });
 
-    this.mock("GET /api/alpha/user/unread_count", () => ({
-      json: {
-        mentions: seed.notifications.filter(
-          (notification) =>
-            notification.kind === "mention" && !notification.read,
-        ).length,
-        other: 0,
-        private_messages: seed.notifications.filter(
-          (notification) =>
-            notification.kind === "private_message" && !notification.read,
-        ).length,
-        replies: seed.notifications.filter(
-          (notification) => notification.kind === "reply" && !notification.read,
-        ).length,
-      },
-    }));
+    this.mock("GET /api/alpha/user/unread_count", () => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      return {
+        json: {
+          mentions: seed.notifications.filter(
+            (notification) =>
+              notification.kind === "mention" && !notification.read,
+          ).length,
+          other: 0,
+          private_messages: seed.notifications.filter(
+            (notification) =>
+              notification.kind === "private_message" && !notification.read,
+          ).length,
+          replies: seed.notifications.filter(
+            (notification) =>
+              notification.kind === "reply" && !notification.read,
+          ).length,
+        },
+      };
+    });
 
     this.mock("GET /api/alpha/user", (call) => {
       const username = call.query.get("username")?.split("@")[0];

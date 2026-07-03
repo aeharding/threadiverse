@@ -6,7 +6,11 @@
 
 import { describe, expect, it } from "vitest";
 
-import { NotFoundError, RateLimitedError } from "../src/errors";
+import {
+  IncorrectLoginError,
+  NotFoundError,
+  RateLimitedError,
+} from "../src/errors";
 import {
   FakeLemmyV1Instance,
   FakePiefedInstance,
@@ -95,6 +99,14 @@ describe.each([
     const calls = fake.callsTo("getPosts");
     expect(calls).toHaveLength(1);
     expect(calls[0]!.query.get("limit")).toBe("7");
+  });
+
+  it("rejects account endpoints when nobody is logged in", async () => {
+    const { client } = setup();
+
+    await expect(client.getUnreadCount()).rejects.toBeInstanceOf(
+      IncorrectLoginError,
+    );
   });
 
   it("listPersonContent only returns the person's content", async () => {

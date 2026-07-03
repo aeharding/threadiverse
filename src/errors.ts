@@ -181,15 +181,20 @@ export class UnsupportedSoftwareError extends UnsupportedError {
   }
 }
 
-// Lemmy codes (v0 + v1). PieFed's native codes are mapped as the live
-// error-fidelity suite discovers them.
+// Lemmy codes (v0 + v1) plus PieFed's native codes as observed by the live
+// error-fidelity suite (PieFed puts human-ish prose in its message field;
+// the exact strings below were captured from piefed.social 2026-07-02 —
+// the scheduled fidelity run detects when they change).
 const CONDITION_BY_CODE: Record<string, ResponseErrorConstructor> = {
   cant_block_admin: CantBlockAdminError,
   deleted: AccountDeletedError,
   email_not_verified: EmailNotVerifiedError,
+
+  "error - unknown community. Please wait a sec and try again.": NotFoundError,
   incorrect_login: IncorrectLoginError,
   incorrect_totp_token: Incorrect2faError,
   invalid_bot_action: InvalidBotActionError,
+  "No row was found when one was required": NotFoundError,
   not_found: NotFoundError,
   rate_limit_error: RateLimitedError,
   registration_application_is_pending: RegistrationApplicationPendingError,

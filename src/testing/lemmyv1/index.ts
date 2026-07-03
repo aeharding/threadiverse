@@ -231,17 +231,27 @@ export class FakeLemmyV1Instance extends FakeInstance {
       json: build.pagedResponse([]),
     }));
 
+    // Observed live: lemmy answers unauthenticated account endpoints with
+    // 401 incorrect_login
+    const unauthenticated = {
+      json: { error: "incorrect_login" },
+      status: 401,
+    } as const;
+
     this.mock("GET /api/v4/account", () =>
       seed.loggedInPerson
         ? { json: build.myUserInfo({ person: person(seed.loggedInPerson) }) }
-        : { json: { error: "not_logged_in" }, status: 401 },
+        : unauthenticated,
     );
 
-    this.mock("GET /api/v4/account/unread_counts", () => ({
-      json: { notification_count: seed.unreadNotificationCount },
-    }));
+    this.mock("GET /api/v4/account/unread_counts", () =>
+      seed.loggedInPerson
+        ? { json: { notification_count: seed.unreadNotificationCount } }
+        : unauthenticated,
+    );
 
     this.mock("GET /api/v4/account/notification/list", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
       const type = call.query.get("type_");
       let notifications =
         type && type !== "all"

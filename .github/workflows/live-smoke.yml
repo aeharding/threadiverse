@@ -19,6 +19,6 @@ jobs:
           node-version: 22
           cache: "pnpm"
       - run: pnpm install
-      - run: pnpm vitest run test/live-smoke.test.ts
+      - run: pnpm vitest run test/live-smoke.test.ts test/live-fidelity.test.ts
         env:
           LIVE_SMOKE: "1"
