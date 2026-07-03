@@ -48,19 +48,38 @@ export type FakeResponse =
 /** `"METHOD /path"` — matched against pathname only (query ignored) */
 export type Matcher = `${"DELETE" | "GET" | "POST" | "PUT"} /${string}`;
 
-export interface OperationApi<Operation extends string> {
-  /** Recorded requests for an operation (by name, not route) */
-  callsTo(operation: Operation): RecordedCall[];
-  /** Override an operation's response. Last call wins. */
-  on: Record<Operation, (responder: OperationResponder) => void>;
-  /** Override an operation's next response only, then fall back. */
-  once: Record<Operation, (responder: OperationResponder) => void>;
-  /** Wait until a request for an operation is recorded. */
-  waitForCallTo(
+export interface OperationApi<Ops extends Record<string, OperationDef>> {
+  /**
+   * Canonical payloads of the requests an operation received (in order).
+   * Only operations with a decoder; use `calls()` for wire-level access.
+   */
+  callsTo<Operation extends DecodableOperation<Ops>>(
     operation: Operation,
-    predicate?: (call: RecordedCall) => boolean,
+  ): PayloadOf<Ops[Operation]>[];
+  /** Override an operation's response. Last call wins. */
+  on: { [Operation in keyof Ops]: (responder: OperationResponder) => void };
+  /** Override an operation's next response only, then fall back. */
+  once: { [Operation in keyof Ops]: (responder: OperationResponder) => void };
+  /**
+   * Wait until an operation receives a request, then return its canonical
+   * payload.
+   */
+  waitForPayload<Operation extends DecodableOperation<Ops>>(
+    operation: Operation,
+    predicate?: (payload: PayloadOf<Ops[Operation]>) => boolean,
     options?: { timeoutMs?: number },
-  ): Promise<RecordedCall>;
+  ): Promise<PayloadOf<Ops[Operation]>>;
+}
+
+export interface OperationDef<Payload = unknown> {
+  /**
+   * Reconstruct the canonical threadiverse payload from the wire request,
+   * so consumer tests assert on what their app *meant* — never on routes,
+   * query params, or wire body shapes. Partial where the wire is lossy.
+   * Round-trip tested against the real client in threadiverse.
+   */
+  decode?: (call: RecordedCall) => Payload;
+  route: Matcher;
 }
 
 export type OperationResponder =
@@ -80,6 +99,15 @@ export type RecordedCall = {
 export type Responder =
   | ((call: RecordedCall) => FakeResponse | Promise<FakeResponse>)
   | FakeResponse;
+
+type DecodableOperation<Ops extends Record<string, OperationDef>> = {
+  [K in keyof Ops]: Ops[K]["decode"] extends (call: RecordedCall) => unknown
+    ? K
+    : never;
+}[keyof Ops];
+
+type PayloadOf<Def extends OperationDef> =
+  Def extends OperationDef<infer Payload> ? Payload : never;
 
 /** Response statuses that must not carry a body (fetch `Response` throws) */
 const NULL_BODY_STATUSES = [204, 205, 304];
@@ -334,13 +362,13 @@ export class FakeInstance {
   }
 
   /**
-   * Build the operation-level API (`on`/`once`/`callsTo`/`waitForCallTo`)
-   * from a provider's operation → route map plus its error wire renderer.
+   * Build the operation-level API (`on`/`once`/`callsTo`/`waitForPayload`)
+   * from a provider's operation definitions plus its error wire renderer.
    */
-  protected buildOperationApi<Operation extends string>(
-    routes: Record<Operation, Matcher>,
+  protected buildOperationApi<Ops extends Record<string, OperationDef>>(
+    operations: Ops,
     renderError: (error: ErrorInjection) => FakeResponse,
-  ): OperationApi<Operation> {
+  ): OperationApi<Ops> {
     const toResponder = (responder: OperationResponder): Responder => {
       const render = (response: OperationResponse): FakeResponse =>
         "error" in response ? renderError(response.error) : response;
@@ -350,22 +378,43 @@ export class FakeInstance {
         : render(responder);
     };
 
-    const on = {} as OperationApi<Operation>["on"];
-    const once = {} as OperationApi<Operation>["once"];
+    const on = {} as OperationApi<Ops>["on"];
+    const once = {} as OperationApi<Ops>["once"];
 
-    for (const operation of Object.keys(routes) as Operation[]) {
+    for (const operation of Object.keys(operations) as (keyof Ops)[]) {
       on[operation] = (responder) =>
-        this.mock(routes[operation], toResponder(responder));
+        this.mock(operations[operation]!.route, toResponder(responder));
       once[operation] = (responder) =>
-        this.mockOnce(routes[operation], toResponder(responder));
+        this.mockOnce(operations[operation]!.route, toResponder(responder));
     }
 
+    const decoderFor = (operation: keyof Ops) => {
+      const decode = operations[operation]!.decode;
+      if (!decode)
+        throw new Error(
+          `${String(operation)} has no payload decoder — use calls() for wire-level access`,
+        );
+      return decode;
+    };
+
     return {
-      callsTo: (operation) => this.calls(routes[operation]),
+      callsTo: (operation) => {
+        const decode = decoderFor(operation);
+        return this.calls(operations[operation]!.route).map(
+          (call) => decode(call) as never,
+        );
+      },
       on,
       once,
-      waitForCallTo: (operation, predicate, options) =>
-        this.waitForCall(routes[operation], predicate, options),
+      waitForPayload: async (operation, predicate, options) => {
+        const decode = decoderFor(operation);
+        const call = await this.waitForCall(
+          operations[operation]!.route,
+          predicate ? (call) => predicate(decode(call) as never) : undefined,
+          options,
+        );
+        return decode(call) as never;
+      },
     };
   }
 
