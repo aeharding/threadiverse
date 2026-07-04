@@ -2,6 +2,11 @@ dist
 coverage
 node_modules
 
+# generated docs
+docs/api
+docs/.vitepress/dist
+docs/.vitepress/cache
+
 .nuxt
 .output
 tsconfig.tsbuildinfo

@@ -1,2 +1,5 @@
 src/providers/piefed/schema.ts
 pnpm-lock.yaml
+docs/api
+docs/.vitepress/dist
+docs/.vitepress/cache

@@ -1,0 +1,67 @@
+/**
+ * Brand theme derived from the threadiverse logo: a spectral tall ship on a
+ * near-black cosmic sea. Teal (the dominant sail color) is the primary
+ * accent; the hero picks up the full sail-to-hull spectrum (orange → gold →
+ * teal → blue → purple).
+ */
+
+:root {
+  --tv-teal-1: #12a594;
+  --tv-teal-2: #0d8578;
+  --tv-teal-3: #0b6e63;
+  --tv-teal-soft: rgba(18, 165, 148, 0.14);
+
+  --vp-c-brand-1: var(--tv-teal-1);
+  --vp-c-brand-2: var(--tv-teal-2);
+  --vp-c-brand-3: var(--tv-teal-3);
+  --vp-c-brand-soft: var(--tv-teal-soft);
+
+  /* hero name: full logo spectrum */
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(
+    100deg,
+    #e0762e 0%,
+    #d9b13c 24%,
+    #2dd4bf 52%,
+    #4c8fe0 76%,
+    #9a6fe0 100%
+  );
+
+  /* logo glow behind the hero image */
+  --vp-home-hero-image-background-image: radial-gradient(
+    closest-side,
+    rgba(45, 212, 191, 0.35),
+    rgba(76, 143, 224, 0.18) 55%,
+    transparent 100%
+  );
+  --vp-home-hero-image-filter: blur(56px);
+}
+
+.dark {
+  --tv-teal-1: #2dd4bf;
+  --tv-teal-2: #3ce0cb;
+  --tv-teal-3: #58e8d5;
+  --tv-teal-soft: rgba(45, 212, 191, 0.16);
+
+  /* cosmic near-black backdrop, matching the logo field */
+  --vp-c-bg: #0b0b13;
+  --vp-c-bg-alt: #07070d;
+  --vp-c-bg-elv: #12121c;
+  --vp-c-bg-soft: #14141f;
+  --vp-c-divider: #23233200;
+  --vp-c-gutter: #07070d;
+}
+
+/* round the ship logo in the nav so the square jpg reads as a mark */
+.VPNavBarTitle .logo,
+.VPHero .VPImage {
+  border-radius: 50%;
+}
+
+/* feature cards pick up a faint spectral top border on hover */
+.VPFeature {
+  transition: border-color 0.25s;
+}
+.VPFeature:hover {
+  border-color: var(--vp-c-brand-1);
+}
