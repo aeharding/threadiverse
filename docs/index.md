@@ -4,7 +4,7 @@ layout: home
 hero:
   name: threadiverse
   text: Unified typescript client for threadiverse instances
-  tagline: One API for Lemmy and PieFed, with runtime-validated responses and fake instances for consumer test suites.
+  tagline: One API for Lemmy and PieFed, with runtime-validated responses and fakes for consumer test suites.
   image:
     src: /logo.jpg
     alt: threadiverse
