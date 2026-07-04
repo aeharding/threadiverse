@@ -8,6 +8,12 @@
 Unified typescript client for threadiverse APIs (Lemmy, Piefed, Mbin etc)
 </p>
 
+<p align="center">
+<a href="https://aeharding.github.io/threadiverse/">Documentation</a> ·
+<a href="https://aeharding.github.io/threadiverse/guide/testing">Testing Your App</a> ·
+<a href="https://aeharding.github.io/threadiverse/api/">API Reference</a>
+</p>
+
 > [!WARNING]
 > **Early Development Stage**: This project is under active development and may undergo significant API changes between versions. While v0, this project's design decisions will be guided by [Voyager](https://github.com/aeharding/voyager)'s usage.
 
@@ -37,6 +43,9 @@ const client = new ThreadiverseClient("https://lemmy.world");
 
 const posts = await client.getPosts();
 ```
+
+See the [documentation](https://aeharding.github.io/threadiverse/) for
+authentication, software discovery, pagination, and error handling.
 
 ## Testing your app
 
@@ -76,3 +85,7 @@ Fidelity is enforced, not assumed: wire shapes are type-checked against the
 same upstream API types the compat layers use, and a scheduled suite
 verifies the fakes' responses — especially error responses — against live
 Lemmy and PieFed instances.
+
+See the [testing guide](https://aeharding.github.io/threadiverse/guide/testing)
+for the full API: the seed store, `on`/`once` overrides, request
+assertions, and Playwright/vitest wiring.
