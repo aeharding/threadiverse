@@ -8,6 +8,12 @@
 Unified typescript client for threadiverse APIs (Lemmy, Piefed, Mbin etc)
 </p>
 
+<p align="center">
+<a href="https://aeharding.github.io/threadiverse/">Documentation</a> ·
+<a href="https://aeharding.github.io/threadiverse/guide/testing">Testing Your App</a> ·
+<a href="https://aeharding.github.io/threadiverse/api/">API Reference</a>
+</p>
+
 > [!WARNING]
 > **Early Development Stage**: This project is under active development and may undergo significant API changes between versions. While v0, this project's design decisions will be guided by [Voyager](https://github.com/aeharding/voyager)'s usage.
 
@@ -38,41 +44,12 @@ const client = new ThreadiverseClient("https://lemmy.world");
 const posts = await client.getPosts();
 ```
 
+See the [documentation](https://aeharding.github.io/threadiverse/) for
+authentication, software discovery, pagination, and error handling.
+
 ## Testing your app
 
-`threadiverse/testing` provides fake instances for consumer test suites, so
-your tests describe _what exists and what happens_ — never provider routes
-or wire shapes. The same test text works against every provider.
-
-```ts
-import { FakeLemmyV1Instance } from "threadiverse/testing";
-// ...or FakePiefedInstance — the API below is identical
-
-const fake = new FakeLemmyV1Instance();
-
-// Content: seed it; every read endpoint (feeds, post detail, comments,
-// site counts, profiles, notifications) derives from the store
-const alex = fake.seed.person({ name: "alex" });
-fake.seed.post({ name: "Hello **world**", creator: alex });
-fake.seed.loggedInAs(alex);
-
-// Behavior: override by threadiverse endpoint name; errors are canonical
-fake.once.getPosts({ error: { code: "rate_limit_error", status: 429 } });
-
-// Unit tests: clientOptions() routes fetch through the fake and keeps
-// software discovery isolated from other tests
-const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
-
-// Playwright: route all traffic for the fake host
-await fake.install(page);
-
-// Assert on outgoing requests as canonical payloads — what your app
-// *meant*, decoded from the wire and round-trip tested per provider
-const payload = await fake.waitForPayload("likePost");
-// { post_id: 1, is_upvote: true }
-```
-
-Fidelity is enforced, not assumed: wire shapes are type-checked against the
-same upstream API types the compat layers use, and a scheduled suite
-verifies the fakes' responses — especially error responses — against live
-Lemmy and PieFed instances.
+`threadiverse/testing` provides fakes for consumer test suites — seed
+content, inject errors, assert request payloads — with one API across
+providers. See the
+[testing guide](https://aeharding.github.io/threadiverse/guide/testing).

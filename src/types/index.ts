@@ -2,100 +2,134 @@ import type { z } from "zod/v4-mini";
 
 import * as schemas from "../schemas";
 
-export type Comment = z.infer<typeof schemas.Comment>;
-export type CommentReport = z.infer<typeof schemas.CommentReport>;
-export type CommentReportView = z.infer<typeof schemas.CommentReportView>;
-export type CommentView = z.infer<typeof schemas.CommentView>;
-export type Community = z.infer<typeof schemas.Community>;
-export type CommunityFollowerView = z.infer<
+export interface Comment extends z.infer<typeof schemas.Comment> {}
+export interface CommentReport extends z.infer<typeof schemas.CommentReport> {}
+export interface CommentReportView extends z.infer<
+  typeof schemas.CommentReportView
+> {}
+export interface CommentView extends z.infer<typeof schemas.CommentView> {}
+export interface Community extends z.infer<typeof schemas.Community> {}
+export interface CommunityFollowerView extends z.infer<
   typeof schemas.CommunityFollowerView
->;
-export type CommunityModeratorView = z.infer<
+> {}
+export interface CommunityModeratorView extends z.infer<
   typeof schemas.CommunityModeratorView
->;
+> {}
 export type CommunityNotificationsMode = z.infer<
   typeof schemas.CommunityNotificationsMode
 >;
-export type CommunityView = z.infer<typeof schemas.CommunityView>;
+export interface CommunityView extends z.infer<typeof schemas.CommunityView> {}
 export type CommunityVisibility = z.infer<typeof schemas.CommunityVisibility>;
-export type FederatedInstances = z.infer<typeof schemas.FederatedInstances>;
-export type GetCaptchaResponse = z.infer<typeof schemas.GetCaptchaResponse>;
-export type GetCommunityResponse = z.infer<typeof schemas.GetCommunityResponse>;
-export type GetPersonDetailsResponse = z.infer<
+export interface FederatedInstances extends z.infer<
+  typeof schemas.FederatedInstances
+> {}
+export interface GetCaptchaResponse extends z.infer<
+  typeof schemas.GetCaptchaResponse
+> {}
+export interface GetCommunityResponse extends z.infer<
+  typeof schemas.GetCommunityResponse
+> {}
+export interface GetPersonDetailsResponse extends z.infer<
   typeof schemas.GetPersonDetailsResponse
->;
-export type GetSiteMetadataResponse = z.infer<
+> {}
+export interface GetSiteMetadataResponse extends z.infer<
   typeof schemas.GetSiteMetadataResponse
->;
+> {}
 // Zod schema inferred types
-export type GetSiteResponse = z.infer<typeof schemas.GetSiteResponse>;
-export type GetUnreadCountResponse = z.infer<
+export interface GetSiteResponse extends z.infer<
+  typeof schemas.GetSiteResponse
+> {}
+export interface GetUnreadCountResponse extends z.infer<
   typeof schemas.GetUnreadCountResponse
->;
-export type Instance = z.infer<typeof schemas.Instance>;
-export type InstanceWithFederationState = z.infer<
+> {}
+export interface Instance extends z.infer<typeof schemas.Instance> {}
+export interface InstanceWithFederationState extends z.infer<
   typeof schemas.InstanceWithFederationState
->;
-export type LinkMetadata = z.infer<typeof schemas.LinkMetadata>;
-export type ListCommentReportsResponse = z.infer<
+> {}
+export interface LinkMetadata extends z.infer<typeof schemas.LinkMetadata> {}
+export interface ListCommentReportsResponse extends z.infer<
   typeof schemas.ListCommentReportsResponse
->;
-export type ListCommentsResponse = z.infer<typeof schemas.ListCommentsResponse>;
-export type ListCommunitiesResponse = z.infer<
+> {}
+export interface ListCommentsResponse extends z.infer<
+  typeof schemas.ListCommentsResponse
+> {}
+export interface ListCommunitiesResponse extends z.infer<
   typeof schemas.ListCommunitiesResponse
->;
+> {}
 export type ListingType = z.infer<typeof schemas.ListingType>;
-export type ListModlogResponse = z.infer<typeof schemas.ListModlogResponse>;
-export type ListNotificationsResponse = z.infer<
+export interface ListModlogResponse extends z.infer<
+  typeof schemas.ListModlogResponse
+> {}
+export interface ListNotificationsResponse extends z.infer<
   typeof schemas.ListNotificationsResponse
->;
-export type ListPersonContentResponse = z.infer<
+> {}
+export interface ListPersonContentResponse extends z.infer<
   typeof schemas.ListPersonContentResponse
->;
-export type ListPersonLikedResponse = z.infer<
+> {}
+export interface ListPersonLikedResponse extends z.infer<
   typeof schemas.ListPersonLikedResponse
->;
-export type ListPostReportsResponse = z.infer<
+> {}
+export interface ListPostReportsResponse extends z.infer<
   typeof schemas.ListPostReportsResponse
->;
-export type ListPostsResponse = z.infer<typeof schemas.ListPostsResponse>;
-export type ListReportsResponse = z.infer<typeof schemas.ListReportsResponse>;
-export type ListSearchResponse = z.infer<typeof schemas.ListSearchResponse>;
-export type LocalSite = z.infer<typeof schemas.LocalSite>;
-export type LoginResponse = z.infer<typeof schemas.LoginResponse>;
-export type Modlog = z.infer<typeof schemas.Modlog>;
-export type ModlogItem = z.infer<typeof schemas.ModlogItem>;
+> {}
+export interface ListPostsResponse extends z.infer<
+  typeof schemas.ListPostsResponse
+> {}
+export interface ListReportsResponse extends z.infer<
+  typeof schemas.ListReportsResponse
+> {}
+export interface ListSearchResponse extends z.infer<
+  typeof schemas.ListSearchResponse
+> {}
+export interface LocalSite extends z.infer<typeof schemas.LocalSite> {}
+export interface LoginResponse extends z.infer<typeof schemas.LoginResponse> {}
+export interface Modlog extends z.infer<typeof schemas.Modlog> {}
+export interface ModlogItem extends z.infer<typeof schemas.ModlogItem> {}
 export type ModlogKind = z.infer<typeof schemas.ModlogKind>;
-export type MyUserInfo = z.infer<typeof schemas.MyUserInfo>;
-export type Notification = z.infer<typeof schemas.Notification>;
+export interface MyUserInfo extends z.infer<typeof schemas.MyUserInfo> {}
+export interface Notification extends z.infer<typeof schemas.Notification> {}
 export type NotificationDataType = z.infer<typeof schemas.NotificationDataType>;
-export type NotificationView = z.infer<typeof schemas.NotificationView>;
-export type PagableResponse = z.infer<typeof schemas.PagableResponse>;
+export interface NotificationView extends z.infer<
+  typeof schemas.NotificationView
+> {}
+export interface PagableResponse extends z.infer<
+  typeof schemas.PagableResponse
+> {}
 export type PageCursor = z.infer<typeof schemas.PageCursor>;
-export type Person = z.infer<typeof schemas.Person>;
+export interface Person extends z.infer<typeof schemas.Person> {}
 export type PersonContentItem = z.infer<typeof schemas.PersonContentItem>;
-export type PersonMention = z.infer<typeof schemas.PersonMention>;
-export type PersonView = z.infer<typeof schemas.PersonView>;
-export type PiefedErrorResponse = z.infer<typeof schemas.PiefedErrorResponse>;
-export type Post = z.infer<typeof schemas.Post>;
+export interface PersonMention extends z.infer<typeof schemas.PersonMention> {}
+export interface PersonView extends z.infer<typeof schemas.PersonView> {}
+export interface PiefedErrorResponse extends z.infer<
+  typeof schemas.PiefedErrorResponse
+> {}
+export interface Post extends z.infer<typeof schemas.Post> {}
 export type PostNotificationsMode = z.infer<
   typeof schemas.PostNotificationsMode
 >;
-export type PostReport = z.infer<typeof schemas.PostReport>;
-export type PostReportView = z.infer<typeof schemas.PostReportView>;
-export type PostTag = z.infer<typeof schemas.PostTag>;
-export type PostView = z.infer<typeof schemas.PostView>;
-export type PrivateMessage = z.infer<typeof schemas.PrivateMessage>;
-export type PrivateMessageView = z.infer<typeof schemas.PrivateMessageView>;
+export interface PostReport extends z.infer<typeof schemas.PostReport> {}
+export interface PostReportView extends z.infer<
+  typeof schemas.PostReportView
+> {}
+export interface PostTag extends z.infer<typeof schemas.PostTag> {}
+export interface PostView extends z.infer<typeof schemas.PostView> {}
+export interface PrivateMessage extends z.infer<
+  typeof schemas.PrivateMessage
+> {}
+export interface PrivateMessageView extends z.infer<
+  typeof schemas.PrivateMessageView
+> {}
 export type RegistrationMode = z.infer<typeof schemas.RegistrationMode>;
-export type ResolveObjectResponse = z.infer<
+export interface ResolveObjectResponse extends z.infer<
   typeof schemas.ResolveObjectResponse
->;
+> {}
 export type SearchItem = z.infer<typeof schemas.SearchItem>;
-export type Site = z.infer<typeof schemas.Site>;
-export type SiteView = z.infer<typeof schemas.SiteView>;
+export interface Site extends z.infer<typeof schemas.Site> {}
+export interface SiteView extends z.infer<typeof schemas.SiteView> {}
 export type SubscribedType = z.infer<typeof schemas.SubscribedType>;
-export type UploadImageResponse = z.infer<typeof schemas.UploadImageResponse>;
+export interface UploadImageResponse extends z.infer<
+  typeof schemas.UploadImageResponse
+> {}
 
 // Re-export existing TypeScript types and interfaces
 export type * from "../schemas/GetCommunityResponse";
