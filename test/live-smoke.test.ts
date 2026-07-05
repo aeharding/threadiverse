@@ -7,6 +7,7 @@
 
 import { describe, expect, it } from "vitest";
 
+import { detectBotChallenge } from "../src/errors";
 import ThreadiverseClient from "../src/ThreadiverseClient";
 
 const INSTANCES = [
@@ -66,5 +67,22 @@ describe.runIf(process.env.LIVE_SMOKE)("live smoke", () => {
 
       expect(data.length).toBeGreaterThan(0);
     });
+  });
+});
+
+// Bot-challenge detection markers are empirical (Anubis documents no
+// contract and has renamed its cookies before) — verify they still match a
+// real deployment. Requests a page with a browser-ish User-Agent, which
+// Anubis challenges by default.
+describe.runIf(process.env.LIVE_SMOKE)("anubis challenge detection", () => {
+  it("recognizes a live anubis challenge", OPTIONS, async () => {
+    const response = await fetch("https://xeiaso.net/", {
+      headers: {
+        // Node lets fetch override User-Agent (unlike browsers)
+        ["User-Agent"]: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+      },
+    });
+
+    expect(detectBotChallenge(response, await response.text())).toBe("anubis");
   });
 });

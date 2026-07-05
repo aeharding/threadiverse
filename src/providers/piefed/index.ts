@@ -6,10 +6,13 @@ import {
   RequestOptions,
 } from "../../BaseClient";
 import {
+  BotChallengeError,
   createResponseError,
+  detectBotChallenge,
   InvalidPayloadError,
   UnsupportedError,
 } from "../../errors";
+import { pickHeaders, USER_AGENT_HEADERS } from "../../helpers";
 import buildSafeClient from "../../SafeClient";
 import { PiefedErrorResponse } from "../../schemas";
 import * as types from "../../types";
@@ -23,33 +26,48 @@ import * as compat from "./compat";
 import { components, paths } from "./schema";
 
 async function validateResponse(response: Response) {
-  if (!response.ok) {
-    let code = response.statusText;
-    let payload: types.PiefedErrorResponse | undefined;
-    try {
-      const data: unknown = await response.json();
-      const parsed = PiefedErrorResponse.safeParse(data);
-      if (parsed.success) {
-        payload = parsed.data;
-        code = parsed.data.message;
-      } else if (
-        data &&
-        typeof data === "object" &&
-        "error" in data &&
-        typeof data.error === "string"
-      ) {
-        code = data.error;
-      }
-    } catch {
-      // Non-JSON body (e.g., HTML error page from an upstream proxy).
-      // Fall back to statusText already set above.
+  if (response.ok) {
+    // Bot challenges (e.g. Anubis) can interject HTML with a 2xx status.
+    // Clone so the caller can still consume the body.
+    if (response.headers.get("content-type")?.includes("text/html")) {
+      const body = await response.clone().text();
+      const vendor = detectBotChallenge(response, body);
+      if (vendor) throw new BotChallengeError(vendor);
     }
-    throw createResponseError(code, {
-      response: payload,
-      software: "piefed",
-      status: response.status,
-    });
+    return;
   }
+
+  const headerVendor = detectBotChallenge(response);
+  if (headerVendor) throw new BotChallengeError(headerVendor);
+
+  let code = response.statusText;
+  let payload: types.PiefedErrorResponse | undefined;
+  const body = await response.text();
+  try {
+    const data: unknown = JSON.parse(body);
+    const parsed = PiefedErrorResponse.safeParse(data);
+    if (parsed.success) {
+      payload = parsed.data;
+      code = parsed.data.message;
+    } else if (
+      data &&
+      typeof data === "object" &&
+      "error" in data &&
+      typeof data.error === "string"
+    ) {
+      code = data.error;
+    }
+  } catch {
+    // Non-JSON body (e.g., HTML error page from an upstream proxy).
+    // Fall back to statusText already set above.
+    const vendor = detectBotChallenge(response, body);
+    if (vendor) throw new BotChallengeError(vendor);
+  }
+  throw createResponseError(code, {
+    response: payload,
+    software: "piefed",
+    status: response.status,
+  });
 }
 
 const piefedMiddleware: Middleware = {
@@ -76,18 +94,19 @@ export class UnsafePiefedClient implements BaseClient {
     this.#customFetch = options.fetchFunction ?? globalThis.fetch;
     this.#url = url;
 
-    const headers = options.headers?.Authorization
-      ? {
-          Authorization: options.headers?.Authorization,
-        }
-      : undefined;
+    // Piefed's CORS policy only allows `Content-Type, Authorization, Accept,
+    // User-Agent` — forwarding anything else (e.g. `Cache-Control`) fails
+    // preflight in browsers.
+    const headers = pickHeaders(options.headers, [
+      "Authorization",
+      ...USER_AGENT_HEADERS,
+    ]);
 
     this.#headers = headers;
 
     this.#client = createClient({
       baseUrl: url,
       fetch: options.fetchFunction,
-      // TODO: piefed doesn't allow CORS headers other than Authorization
       headers,
     });
 

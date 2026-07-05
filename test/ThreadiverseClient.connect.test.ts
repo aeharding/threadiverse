@@ -34,6 +34,28 @@ describe("connect() and sync introspection", () => {
     expect(fake.calls("GET /.well-known/nodeinfo")).toHaveLength(1);
   });
 
+  it("forwards User-Agent (and not credentials) to discovery requests", async () => {
+    const fake = new FakeLemmyV1Instance();
+    const client = new ThreadiverseClient(fake.origin, {
+      ...fake.clientOptions(),
+      headers: {
+        Authorization: "Bearer abc",
+        "User-Agent": "VoyagerApp/1.0",
+      },
+    });
+
+    await client.connect();
+
+    for (const matcher of [
+      "GET /.well-known/nodeinfo",
+      "GET /nodeinfo/2.1",
+    ] as const) {
+      const [call] = fake.calls(matcher);
+      expect(call?.headers).toMatchObject({ "user-agent": "VoyagerApp/1.0" });
+      expect(call?.headers).not.toHaveProperty("authorization");
+    }
+  });
+
   it("any API call connects implicitly", async () => {
     const fake = new FakeLemmyV1Instance();
     const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
