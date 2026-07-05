@@ -101,6 +101,36 @@ describe.each([
     expect(payloads[0]).toMatchObject({ limit: 7 });
   });
 
+  it("derives vote/save state from write mutations", async () => {
+    const { client, fake, post } = setup();
+    fake.seed.loggedInAs(fake.seed.person({ name: "me" }));
+
+    // Seeded post starts unvoted at base score 1
+    const before = await client.getPost({ id: post.id });
+    expect(before.post_view.my_vote ?? 0).toBe(0);
+    expect(before.post_view.post.score).toBe(1);
+
+    // Upvote → returned view and subsequent reads reflect it
+    const liked = await client.likePost({ is_upvote: true, post_id: post.id });
+    expect(liked.post_view.my_vote).toBe(1);
+    expect(liked.post_view.post.score).toBe(2);
+
+    const { data: feed } = await client.getPosts({});
+    expect(feed[0]!.my_vote).toBe(1);
+    expect(feed[0]!.post.score).toBe(2);
+
+    // Unvote returns to base
+    await client.likePost({ post_id: post.id });
+    expect((await client.getPost({ id: post.id })).post_view.post.score).toBe(
+      1,
+    );
+
+    // Save
+    const saved = await client.savePost({ post_id: post.id, save: true });
+    expect(saved.post_view.saved).toBe(true);
+    expect((await client.getPost({ id: post.id })).post_view.saved).toBe(true);
+  });
+
   it("rejects account endpoints when nobody is logged in", async () => {
     const { client } = setup();
 

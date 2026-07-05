@@ -275,7 +275,10 @@ export class FakeLemmyV1Instance extends FakeInstance {
         community: community(subject.community),
         creator: person(subject.creator),
         id: subject.id,
+        myVote: subject.myVote,
         name: subject.name,
+        saved: subject.saved,
+        score: subject.score,
         url: subject.url,
       });
     const commentView = (subject: SeedComment) =>
@@ -284,9 +287,12 @@ export class FakeLemmyV1Instance extends FakeInstance {
         content: subject.content,
         creator: person(subject.creator),
         id: subject.id,
+        myVote: subject.myVote,
         path: subject.path,
         post: postView(subject.post),
         published_at: subject.published,
+        saved: subject.saved,
+        score: subject.score,
       });
     const notificationView = (subject: SeedNotification) =>
       subject.kind === "private_message"
@@ -422,6 +428,64 @@ export class FakeLemmyV1Instance extends FakeInstance {
     // Fire-and-forget side effect of many logged-in interactions
     this.mock("POST /api/v4/post/mark_as_read/many", {
       json: { success: true },
+    });
+
+    // Vote/save writes mutate the seed store, so the returned view — and
+    // every subsequent read — reflects the new state.
+    const toVote = (isUpvote: boolean | undefined): -1 | 0 | 1 =>
+      isUpvote === true ? 1 : isUpvote === false ? -1 : 0;
+
+    const findPost = (id: number) =>
+      seed.posts.find((candidate) => candidate.id === id);
+    const findComment = (id: number) =>
+      seed.comments.find((candidate) => candidate.id === id);
+
+    this.mock("POST /api/v4/post/like", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { is_upvote, post_id } = call.body as {
+        is_upvote?: boolean;
+        post_id: number;
+      };
+      const post = findPost(post_id);
+      if (!post) return notFound;
+      post.myVote = toVote(is_upvote);
+      return { json: { post_view: postView(post) } };
+    });
+
+    this.mock("POST /api/v4/comment/like", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { comment_id, is_upvote } = call.body as {
+        comment_id: number;
+        is_upvote?: boolean;
+      };
+      const comment = findComment(comment_id);
+      if (!comment) return notFound;
+      comment.myVote = toVote(is_upvote);
+      return { json: { comment_view: commentView(comment) } };
+    });
+
+    this.mock("PUT /api/v4/post/save", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { post_id, save } = call.body as {
+        post_id: number;
+        save: boolean;
+      };
+      const post = findPost(post_id);
+      if (!post) return notFound;
+      post.saved = save;
+      return { json: { post_view: postView(post) } };
+    });
+
+    this.mock("PUT /api/v4/comment/save", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { comment_id, save } = call.body as {
+        comment_id: number;
+        save: boolean;
+      };
+      const comment = findComment(comment_id);
+      if (!comment) return notFound;
+      comment.saved = save;
+      return { json: { comment_view: commentView(comment) } };
     });
 
     // Write routes mutate the seed store, so derived unread counts and

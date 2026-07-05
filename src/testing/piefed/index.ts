@@ -315,6 +315,9 @@ export class FakePiefedInstance extends FakeInstance {
         community: community(subject.community),
         creator: person(subject.creator),
         id: subject.id,
+        myVote: subject.myVote,
+        saved: subject.saved,
+        score: subject.score,
         title: subject.name,
         url: subject.url,
       });
@@ -324,9 +327,12 @@ export class FakePiefedInstance extends FakeInstance {
         child_count: subject.childCount,
         creator: person(subject.creator),
         id: subject.id,
+        myVote: subject.myVote,
         path: subject.path,
         post: postView(subject.post),
         published: subject.published,
+        saved: subject.saved,
+        score: subject.score,
       });
 
     // Seed misses render PieFed's real error responses as observed live
@@ -497,6 +503,65 @@ export class FakePiefedInstance extends FakeInstance {
           }
         : unauthenticated,
     );
+
+    // Vote/save writes mutate the seed store, so the returned view — and
+    // every subsequent read — reflects the new state. PieFed's like body
+    // carries a signed `score` (the adapter's is_upvote → 1/-1/0).
+    const toVote = (score: number | undefined): -1 | 0 | 1 =>
+      score === 1 ? 1 : score === -1 ? -1 : 0;
+
+    const findPost = (id: number) =>
+      seed.posts.find((candidate) => candidate.id === id);
+    const findComment = (id: number) =>
+      seed.comments.find((candidate) => candidate.id === id);
+
+    this.mock("POST /api/alpha/post/like", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { post_id, score } = call.body as {
+        post_id: number;
+        score?: number;
+      };
+      const post = findPost(post_id);
+      if (!post) return notFound;
+      post.myVote = toVote(score);
+      return { json: { post_view: postView(post) } };
+    });
+
+    this.mock("POST /api/alpha/comment/like", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { comment_id, score } = call.body as {
+        comment_id: number;
+        score?: number;
+      };
+      const comment = findComment(comment_id);
+      if (!comment) return notFound;
+      comment.myVote = toVote(score);
+      return { json: { comment_view: commentView(comment) } };
+    });
+
+    this.mock("PUT /api/alpha/post/save", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { post_id, save } = call.body as {
+        post_id: number;
+        save: boolean;
+      };
+      const post = findPost(post_id);
+      if (!post) return notFound;
+      post.saved = save;
+      return { json: { post_view: postView(post) } };
+    });
+
+    this.mock("PUT /api/alpha/comment/save", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { comment_id, save } = call.body as {
+        comment_id: number;
+        save: boolean;
+      };
+      const comment = findComment(comment_id);
+      if (!comment) return notFound;
+      comment.saved = save;
+      return { json: { comment_view: commentView(comment) } };
+    });
 
     // Mark-as-read writes mutate the seed store, so derived unread counts
     // and lists reflect them. The piefed adapter maps canonical
