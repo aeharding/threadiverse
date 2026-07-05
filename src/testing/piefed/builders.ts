@@ -248,12 +248,59 @@ export function createPiefedBuilders({
     };
   }
 
+  function localUser(): Wire<Schemas["LocalUser"]> {
+    return {
+      accept_private_messages: "All",
+      ai_visibility: "Show",
+      bot_visibility: "Show",
+      default_comment_sort_type: "Hot",
+      default_listing_type: "All",
+      email_unread: false,
+      federate_votes: true,
+      feed_auto_follow: false,
+      feed_auto_leave: false,
+      hide_low_quality: false,
+      indexable: true,
+      newsletter: false,
+      nsfl_visibility: "Hide",
+      nsfw_visibility: "Blur",
+      reply_collapse_threshold: 0,
+      reply_hide_threshold: 0,
+      searchable: true,
+      show_bot_accounts: true,
+      show_nsfl: false,
+      show_nsfw: false,
+      show_read_posts: true,
+      show_scores: true,
+    };
+  }
+
+  /** The authenticated user's info, embedded in `GET /api/alpha/site` */
+  function myUserInfo(
+    subject: Wire<Schemas["Person"]>,
+  ): Wire<Schemas["MyUserInfo"]> {
+    return {
+      community_blocks: [],
+      discussion_languages: [],
+      follows: [],
+      instance_blocks: [],
+      local_user_view: {
+        counts: { comment_count: 0, person_id: subject.id, post_count: 0 },
+        local_user: localUser(),
+        person: subject,
+      },
+      moderates: [],
+      person_blocks: [],
+    };
+  }
+
   /** `GET /api/alpha/site` (getSite) */
   function getSiteResponse(
-    over: { name?: string } = {},
+    over: { myUser?: Wire<Schemas["Person"]>; name?: string } = {},
   ): Wire<Schemas["GetSiteResponse"]> {
     return {
       admins: [],
+      my_user: over.myUser ? myUserInfo(over.myUser) : undefined,
       site: {
         actor_id: `https://${host}/`,
         name: over.name ?? "Test piefed site",
@@ -361,6 +408,8 @@ export function createPiefedBuilders({
     communityResponse,
     communityView,
     getSiteResponse,
+    localUser,
+    myUserInfo,
     person,
     personView,
     post,

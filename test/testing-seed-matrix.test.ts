@@ -188,6 +188,30 @@ describe.each([
     expect(afterRead.map((view) => view.notification.kind)).toEqual([
       "private_message",
     ]);
+
+    // markAllAsRead clears the rest on every provider
+    await client.markAllAsRead();
+    const { data: afterAll } = await client.getNotifications({
+      unread_only: true,
+    });
+    expect(afterAll).toHaveLength(0);
+  });
+
+  it("includes the logged-in user in getSite", async () => {
+    const { fake } = setup();
+
+    const me = fake.seed.person({ name: "me" });
+    fake.seed.loggedInAs(me);
+
+    // A logged-in client carries auth; lemmyv1 only fetches my_user when
+    // authed, piefed always reads it from the site response
+    const client = new ThreadiverseClient(fake.origin, {
+      ...fake.clientOptions(),
+      headers: { Authorization: "Bearer test" },
+    });
+
+    const site = await client.getSite();
+    expect(site.my_user?.local_user_view.person.name).toBe("me");
   });
 
   it("listPersonContent only returns the person's content", async () => {

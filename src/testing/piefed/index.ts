@@ -181,6 +181,9 @@ const PIEFED_OPERATIONS = {
     },
     route: "POST /api/alpha/user/login",
   },
+  markAllAsRead: {
+    route: "POST /api/alpha/user/mark_all_as_read",
+  },
   markPostAsRead: {
     decode: body<"markPostAsRead">(),
     route: "POST /api/alpha/post/mark_as_read",
@@ -381,7 +384,10 @@ export class FakePiefedInstance extends FakeInstance {
     } as const;
 
     this.mock("GET /api/alpha/site", () => ({
-      json: build.getSiteResponse({ name: seed.siteName }),
+      json: build.getSiteResponse({
+        myUser: seed.loggedInPerson ? person(seed.loggedInPerson) : undefined,
+        name: seed.siteName,
+      }),
     }));
 
     this.mock("GET /api/alpha/post/list", (call) => {
@@ -522,6 +528,12 @@ export class FakePiefedInstance extends FakeInstance {
           candidate.message.id === private_message_id,
       );
       if (notification) notification.read = read;
+      return { json: { success: true } };
+    });
+
+    this.mock("POST /api/alpha/user/mark_all_as_read", () => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      for (const notification of seed.notifications) notification.read = true;
       return { json: { success: true } };
     });
 
