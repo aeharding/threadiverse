@@ -45,7 +45,6 @@ export interface ThreadiverseClientOptions extends BaseClientOptions {
  * (`./endpoints.ts`) in the class's static block; this merged interface
  * declares their types. */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface ThreadiverseClient extends BaseClient {}
 
 class ThreadiverseClient {

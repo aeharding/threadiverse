@@ -125,15 +125,27 @@ export function createPiefedBuilders({
     };
   }
 
+  // Vote counts from a base score (all base votes are upvotes) plus the
+  // logged-in user's vote layered on top.
+  function votes(baseScore: number, myVote: -1 | 0 | 1) {
+    const upvotes = baseScore + (myVote === 1 ? 1 : 0);
+    const downvotes = myVote === -1 ? 1 : 0;
+    return { downvotes, score: upvotes - downvotes, upvotes };
+  }
+
   function postView(over: {
     body?: string;
     community?: Wire<Schemas["Community"]>;
     creator: Wire<Schemas["Person"]>;
     id: number;
+    myVote?: -1 | 0 | 1;
+    saved?: boolean;
+    score?: number;
     title: string;
     url?: string;
   }): Wire<Schemas["PostView"]> {
     const resolvedCommunity = over.community ?? community();
+    const myVote = over.myVote ?? 0;
 
     return {
       banned_from_community: false,
@@ -141,21 +153,20 @@ export function createPiefedBuilders({
       counts: {
         comments: 0,
         cross_posts: 0,
-        downvotes: 0,
         newest_comment_time: now,
         post_id: over.id,
         published: now,
-        score: 1,
-        upvotes: 1,
+        ...votes(over.score ?? 1, myVote),
       },
       creator: over.creator,
       creator_banned_from_community: false,
       creator_is_admin: false,
       creator_is_moderator: false,
       hidden: false,
+      my_vote: myVote,
       post: post({ ...over, community: resolvedCommunity }),
       read: false,
-      saved: false,
+      saved: over.saved ?? false,
       subscribed: "NotSubscribed",
       unread_comments: 0,
     };
@@ -166,12 +177,16 @@ export function createPiefedBuilders({
     child_count?: number;
     creator?: Wire<Schemas["Person"]>;
     id: number;
+    myVote?: -1 | 0 | 1;
     path?: string;
     post: Pick<Wire<Schemas["PostView"]>, "community" | "creator" | "post">;
     published?: string;
+    saved?: boolean;
+    score?: number;
   }): Wire<Schemas["CommentView"]> {
     const creator = over.creator ?? over.post.creator;
     const published = over.published ?? now;
+    const myVote = over.myVote ?? 0;
 
     return {
       activity_alert: false,
@@ -194,18 +209,17 @@ export function createPiefedBuilders({
       counts: {
         child_count: over.child_count ?? 0,
         comment_id: over.id,
-        downvotes: 0,
         published,
-        score: 1,
-        upvotes: 1,
+        ...votes(over.score ?? 1, myVote),
       },
       creator,
       creator_banned_from_community: false,
       creator_blocked: false,
       creator_is_admin: false,
       creator_is_moderator: false,
+      my_vote: myVote,
       post: over.post.post,
-      saved: false,
+      saved: over.saved ?? false,
       subscribed: "NotSubscribed",
     };
   }

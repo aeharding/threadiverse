@@ -84,12 +84,32 @@ export function createLemmyV1Builders({
     };
   }
 
+  // Vote counts derived from a base score (all base votes are upvotes) plus
+  // the logged-in user's vote layered on top.
+  function votes(baseScore: number, myVote: -1 | 0 | 1) {
+    const upvotes = baseScore + (myVote === 1 ? 1 : 0);
+    const downvotes = myVote === -1 ? 1 : 0;
+    return { downvotes, score: upvotes - downvotes, upvotes };
+  }
+
+  // v1 conveys the logged-in user's vote/save via *_actions; absent (`{}`)
+  // when there's no interaction.
+  function actions(myVote: -1 | 0 | 1, saved: boolean) {
+    return {
+      saved_at: saved ? now : undefined,
+      vote_is_upvote: myVote === 0 ? undefined : myVote === 1,
+      voted_at: myVote === 0 ? undefined : now,
+    };
+  }
+
   function post(over: {
     body?: string;
     community?: Wire<LemmyV1.Community>;
     creator: Wire<LemmyV1.Person>;
     id: number;
+    myVote?: -1 | 0 | 1;
     name: string;
+    score?: number;
     url?: string;
   }): Wire<LemmyV1.Post> {
     return {
@@ -99,7 +119,6 @@ export function createLemmyV1Builders({
       community_id: over.community?.id ?? DEFAULT_COMMUNITY_ID,
       creator_id: over.creator.id,
       deleted: false,
-      downvotes: 0,
       featured_community: false,
       featured_local: false,
       federation_pending: false,
@@ -113,10 +132,9 @@ export function createLemmyV1Builders({
       published_at: now,
       removed: false,
       report_count: 0,
-      score: 1,
       unresolved_report_count: 0,
-      upvotes: 1,
       url: over.url,
+      ...votes(over.score ?? 1, over.myVote ?? 0),
     };
   }
 
@@ -125,7 +143,10 @@ export function createLemmyV1Builders({
     community?: Wire<LemmyV1.Community>;
     creator: Wire<LemmyV1.Person>;
     id: number;
+    myVote?: -1 | 0 | 1;
     name: string;
+    saved?: boolean;
+    score?: number;
     url?: string;
   }): Wire<LemmyV1.PostView> {
     const resolvedCommunity = over.community ?? community();
@@ -139,6 +160,7 @@ export function createLemmyV1Builders({
       creator_is_admin: false,
       creator_is_moderator: false,
       post: post({ ...over, community: resolvedCommunity }),
+      post_actions: actions(over.myVote ?? 0, over.saved ?? false),
       tags: [],
     };
   }
@@ -148,9 +170,12 @@ export function createLemmyV1Builders({
     content: string;
     creator?: Wire<LemmyV1.Person>;
     id: number;
+    myVote?: -1 | 0 | 1;
     path?: string;
     post: Pick<Wire<LemmyV1.PostView>, "community" | "creator" | "post">;
     published_at?: string;
+    saved?: boolean;
+    score?: number;
   }): Wire<LemmyV1.CommentView> {
     const creator = over.creator ?? over.post.creator;
 
@@ -163,7 +188,6 @@ export function createLemmyV1Builders({
         creator_id: creator.id,
         deleted: false,
         distinguished: false,
-        downvotes: 0,
         federation_pending: false,
         id: over.id,
         language_id: 0,
@@ -174,10 +198,10 @@ export function createLemmyV1Builders({
         published_at: over.published_at ?? now,
         removed: false,
         report_count: 0,
-        score: 1,
         unresolved_report_count: 0,
-        upvotes: 1,
+        ...votes(over.score ?? 1, over.myVote ?? 0),
       },
+      comment_actions: actions(over.myVote ?? 0, over.saved ?? false),
       community: over.post.community,
       creator,
       creator_banned: false,

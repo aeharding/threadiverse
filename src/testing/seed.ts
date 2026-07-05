@@ -16,10 +16,16 @@ export interface SeedComment {
   content: string;
   creator: SeedPerson;
   id: number;
+  /** The logged-in user's vote (mutated by like writes) */
+  myVote: -1 | 0 | 1;
   path: string;
   post: SeedPost;
   /** ISO 8601; defaults to the fake's fixed "now" */
   published?: string;
+  /** Saved by the logged-in user (mutated by save writes) */
+  saved: boolean;
+  /** Base score at `myVote` 0; the logged-in user's vote is added on top */
+  score: number;
 }
 
 export interface SeedCommunity {
@@ -53,7 +59,13 @@ export interface SeedPost {
   community: SeedCommunity;
   creator: SeedPerson;
   id: number;
+  /** The logged-in user's vote (mutated by like writes) */
+  myVote: -1 | 0 | 1;
   name: string;
+  /** Saved by the logged-in user (mutated by save writes) */
+  saved: boolean;
+  /** Base score at `myVote` 0; the logged-in user's vote is added on top */
+  score: number;
   url?: string;
 }
 
@@ -96,9 +108,12 @@ export class SeedStore {
     content: string;
     creator?: SeedPerson;
     id?: number;
+    myVote?: -1 | 0 | 1;
     path?: string;
     post?: SeedPost;
     published?: string;
+    saved?: boolean;
+    score?: number;
   }): SeedComment {
     const post = over.post ?? this.posts[0] ?? this.post({ name: "Seed post" });
     const id = over.id ?? this.#nextId++;
@@ -108,9 +123,12 @@ export class SeedStore {
       content: over.content,
       creator: over.creator ?? post.creator,
       id,
+      myVote: over.myVote ?? 0,
       path: over.path ?? `0.${id}`,
       post,
       published: over.published,
+      saved: over.saved ?? false,
+      score: over.score ?? 1,
     };
     this.comments.push(comment);
     return comment;
@@ -170,7 +188,10 @@ export class SeedStore {
     community?: SeedCommunity;
     creator?: SeedPerson;
     id?: number;
+    myVote?: -1 | 0 | 1;
     name: string;
+    saved?: boolean;
+    score?: number;
     url?: string;
   }): SeedPost {
     const post: SeedPost = {
@@ -178,7 +199,10 @@ export class SeedStore {
       community: over.community ?? this.#defaultCommunity(),
       creator: over.creator ?? this.#defaultPerson(),
       id: over.id ?? this.#nextId++,
+      myVote: over.myVote ?? 0,
       name: over.name,
+      saved: over.saved ?? false,
+      score: over.score ?? 1,
       url: over.url,
     };
     this.posts.push(post);
