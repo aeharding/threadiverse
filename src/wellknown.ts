@@ -1,7 +1,12 @@
 import { z } from "zod/v4-mini";
 
 import { BaseClientOptions } from "./BaseClient";
-import { UnexpectedResponseError } from "./errors";
+import {
+  BotChallengeError,
+  detectBotChallenge,
+  UnexpectedResponseError,
+} from "./errors";
+import { pickHeaders, USER_AGENT_HEADERS } from "./helpers";
 
 export const NodeinfoLink = z.object({
   href: z.string(),
@@ -38,10 +43,14 @@ export async function resolveSoftware(
 ): Promise<Nodeinfo21Payload["software"]> {
   const fetch = options?.fetchFunction ?? globalThis.fetch;
 
+  // Discovery hits arbitrary instances, so only forward headers that are
+  // universally CORS-safe (see USER_AGENT_HEADERS for why the user agent
+  // must be forwarded). Notably not Authorization — no reason to send
+  // credentials to nodeinfo endpoints.
   const fetchOptions: RequestInit = {
     headers: {
-      // ...options?.headers, // TODO: Piefed doesn't allow many headers for CORS
       Accept: "application/json",
+      ...pickHeaders(options?.headers, USER_AGENT_HEADERS),
     },
   };
 
@@ -49,7 +58,7 @@ export async function resolveSoftware(
 
   const data = parseDiscoveryPayload(
     NodeinfoLinksPayload,
-    await response.json(),
+    await parseDiscoveryJson(response, "nodeinfo links"),
     "nodeinfo links",
   );
 
@@ -62,11 +71,38 @@ export async function resolveSoftware(
 
   const nodeinfoData = parseDiscoveryPayload(
     Nodeinfo21Payload,
-    await nodeinfoResponse.json(),
+    await parseDiscoveryJson(nodeinfoResponse, "nodeinfo"),
     "nodeinfo",
   );
 
   return nodeinfoData.software;
+}
+
+/**
+ * Non-JSON discovery responses get a diagnosis instead of a raw
+ * `SyntaxError`: a bot-protection interstitial (e.g. Cloudflare's
+ * "Just a moment..." HTML page) throws `BotChallengeError` so consumers can
+ * explain what actually blocked the connection.
+ */
+async function parseDiscoveryJson(
+  response: Response,
+  what: string,
+): Promise<unknown> {
+  const headerVendor = detectBotChallenge(response);
+  if (headerVendor) throw new BotChallengeError(headerVendor);
+
+  const body = await response.text();
+
+  try {
+    return JSON.parse(body);
+  } catch (error) {
+    const vendor = detectBotChallenge(response, body);
+    if (vendor) throw new BotChallengeError(vendor);
+
+    throw new UnexpectedResponseError(`Non-JSON ${what} response`, {
+      cause: error,
+    });
+  }
 }
 
 /**

@@ -2,6 +2,8 @@ import type { LemmyErrorType } from "lemmy-js-client-v0";
 
 import { PiefedErrorResponse } from "./types";
 
+export type BotChallengeVendor = "anubis" | "cloudflare";
+
 /**
  * Machine-readable error codes a fediverse server may return (e.g.
  * "incorrect_login", "too_many_requests"), exposed on `ResponseError.code`.
@@ -67,12 +69,6 @@ export class ResponseError extends FediverseError {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Condition subclasses. Add a class (and its code mapping in
-// CONDITION_BY_CODE) when a consumer needs to branch on a condition — the
-// live error-fidelity suite verifies mappings against real instances.
-// ---------------------------------------------------------------------------
-
 /** The account has been deleted */
 export class AccountDeletedError extends ResponseError {
   constructor(code: string, options?: ResponseErrorOptions) {
@@ -81,11 +77,37 @@ export class AccountDeletedError extends ResponseError {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Condition subclasses. Add a class (and its code mapping in
+// CONDITION_BY_CODE) when a consumer needs to branch on a condition — the
+// live error-fidelity suite verifies mappings against real instances.
+// ---------------------------------------------------------------------------
+
 /** The account is banned from the instance */
 export class BannedError extends ResponseError {
   constructor(code: string, options?: ResponseErrorOptions) {
     super(code, options);
     this.name = "BannedError";
+  }
+}
+
+/**
+ * The request was intercepted by the instance's bot protection (e.g. a
+ * Cloudflare "Just a moment..." challenge) and never reached the fediverse
+ * software. Typically means the request's fingerprint looked automated —
+ * e.g. a native app sending a browser User-Agent over a non-browser TLS
+ * stack. Which protection intercepted it is on `.vendor`.
+ */
+export class BotChallengeError extends FediverseError {
+  vendor: BotChallengeVendor;
+
+  constructor(vendor: BotChallengeVendor, errorOptions?: ErrorOptions) {
+    super(
+      `Blocked by the instance's bot protection challenge (${vendor})`,
+      errorOptions,
+    );
+    this.name = "BotChallengeError";
+    this.vendor = vendor;
   }
 }
 
@@ -190,6 +212,28 @@ export class UnsupportedSoftwareError extends UnsupportedError {
     super(message);
     this.name = "UnsupportedSoftwareError";
   }
+}
+
+/**
+ * Which bot protection's challenge interstitial `response` is, or
+ * `undefined` if it doesn't look like one and presumably came from the
+ * fediverse software itself.
+ *
+ * Cloudflare documents `cf-mitigated: challenge`. Anubis has no documented
+ * detection contract, so markers are empirical (verified against live
+ * v1.25/v1.26 deployments; the live-smoke suite detects drift): its
+ * `*anubis*` cookies (readable on native and server runtimes; browsers hide
+ * Set-Cookie, but real browsers pass challenges anyway) and its
+ * `/.within.website/` vendor asset namespace in the challenge HTML (`body` —
+ * already-consumed text).
+ */
+export function detectBotChallenge(
+  response: Response,
+  body?: string,
+): BotChallengeVendor | undefined {
+  if (response.headers.get("cf-mitigated") === "challenge") return "cloudflare";
+  if (response.headers.get("set-cookie")?.includes("anubis")) return "anubis";
+  if (body?.includes("/.within.website/")) return "anubis";
 }
 
 // Lemmy codes (v0 + v1) plus PieFed's native codes as observed by the live
