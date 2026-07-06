@@ -99,6 +99,7 @@ export function createPiefedBuilders({
     body?: string;
     community?: Wire<Schemas["Community"]>;
     creator: Wire<Schemas["Person"]>;
+    deleted?: boolean;
     id: number;
     title: string;
     url?: string;
@@ -108,7 +109,7 @@ export function createPiefedBuilders({
       ap_id: `https://${host}/post/${over.id}`,
       body: over.body,
       community_id: over.community?.id ?? DEFAULT_COMMUNITY_ID,
-      deleted: false,
+      deleted: over.deleted ?? false,
       id: over.id,
       instance_sticky: false,
       language_id: 0,
@@ -137,6 +138,7 @@ export function createPiefedBuilders({
     body?: string;
     community?: Wire<Schemas["Community"]>;
     creator: Wire<Schemas["Person"]>;
+    deleted?: boolean;
     id: number;
     myVote?: -1 | 0 | 1;
     saved?: boolean;
@@ -176,6 +178,7 @@ export function createPiefedBuilders({
     body: string;
     child_count?: number;
     creator?: Wire<Schemas["Person"]>;
+    deleted?: boolean;
     id: number;
     myVote?: -1 | 0 | 1;
     path?: string;
@@ -194,7 +197,7 @@ export function createPiefedBuilders({
       comment: {
         ap_id: `https://${host}/comment/${over.id}`,
         body: over.body,
-        deleted: false,
+        deleted: over.deleted ?? false,
         distinguished: false,
         id: over.id,
         language_id: 0,

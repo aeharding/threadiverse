@@ -15,6 +15,8 @@ export interface SeedComment {
   childCount: number;
   content: string;
   creator: SeedPerson;
+  /** Deleted by its creator (mutated by delete writes) */
+  deleted: boolean;
   id: number;
   /** The logged-in user's vote (mutated by like writes) */
   myVote: -1 | 0 | 1;
@@ -58,6 +60,8 @@ export interface SeedPost {
   body?: string;
   community: SeedCommunity;
   creator: SeedPerson;
+  /** Deleted by its creator (mutated by delete writes) */
+  deleted: boolean;
   id: number;
   /** The logged-in user's vote (mutated by like writes) */
   myVote: -1 | 0 | 1;
@@ -107,6 +111,7 @@ export class SeedStore {
     childCount?: number;
     content: string;
     creator?: SeedPerson;
+    deleted?: boolean;
     id?: number;
     myVote?: -1 | 0 | 1;
     path?: string;
@@ -122,6 +127,7 @@ export class SeedStore {
       childCount: over.childCount ?? 0,
       content: over.content,
       creator: over.creator ?? post.creator,
+      deleted: over.deleted ?? false,
       id,
       myVote: over.myVote ?? 0,
       path: over.path ?? `0.${id}`,
@@ -187,6 +193,7 @@ export class SeedStore {
     body?: string;
     community?: SeedCommunity;
     creator?: SeedPerson;
+    deleted?: boolean;
     id?: number;
     myVote?: -1 | 0 | 1;
     name: string;
@@ -198,6 +205,7 @@ export class SeedStore {
       body: over.body,
       community: over.community ?? this.#defaultCommunity(),
       creator: over.creator ?? this.#defaultPerson(),
+      deleted: over.deleted ?? false,
       id: over.id ?? this.#nextId++,
       myVote: over.myVote ?? 0,
       name: over.name,

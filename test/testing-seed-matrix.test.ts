@@ -101,6 +101,59 @@ describe.each([
     expect(payloads[0]).toMatchObject({ limit: 7 });
   });
 
+  it("derives create/edit/delete write responses", async () => {
+    const { cats, client, fake, post } = setup();
+    fake.seed.loggedInAs(fake.seed.person({ id: 100, name: "me" }));
+
+    // Create a post → returned view + subsequent feed reflect it
+    const created = await client.createPost({
+      body: "fresh body",
+      community_id: cats.id,
+      name: "Fresh post",
+    });
+    expect(created.post_view.post.name).toBe("Fresh post");
+    expect(created.post_view.creator.name).toBe("me");
+    const { data: feed } = await client.getPosts({});
+    expect(feed.map((view) => view.post.name)).toContain("Fresh post");
+
+    // Edit the created post
+    const edited = await client.editPost({
+      name: "Edited post",
+      post_id: created.post_view.post.id,
+    });
+    expect(edited.post_view.post.name).toBe("Edited post");
+
+    // Delete it
+    const removed = await client.deletePost({
+      deleted: true,
+      post_id: created.post_view.post.id,
+    });
+    expect(removed.post_view.post.deleted).toBe(true);
+
+    // Create a comment → appears under the post
+    const comment = await client.createComment({
+      content: "a new reply",
+      post_id: post.id,
+    });
+    expect(comment.comment_view.comment.content).toBe("a new reply");
+    const { data: comments } = await client.getComments({ post_id: post.id });
+    expect(comments.map((view) => view.comment.content)).toContain(
+      "a new reply",
+    );
+
+    // Edit + delete the comment
+    const editedComment = await client.editComment({
+      comment_id: comment.comment_view.comment.id,
+      content: "edited reply",
+    });
+    expect(editedComment.comment_view.comment.content).toBe("edited reply");
+    const deletedComment = await client.deleteComment({
+      comment_id: comment.comment_view.comment.id,
+      deleted: true,
+    });
+    expect(deletedComment.comment_view.comment.deleted).toBe(true);
+  });
+
   it("derives vote/save state from write mutations", async () => {
     const { client, fake, post } = setup();
     fake.seed.loggedInAs(fake.seed.person({ name: "me" }));
@@ -129,6 +182,25 @@ describe.each([
     const saved = await client.savePost({ post_id: post.id, save: true });
     expect(saved.post_view.saved).toBe(true);
     expect((await client.getPost({ id: post.id })).post_view.saved).toBe(true);
+
+    // Comments mutate the same way
+    const comment = fake.seed.comment({ content: "hi", post });
+    const cLiked = await client.likeComment({
+      comment_id: comment.id,
+      is_upvote: true,
+    });
+    expect(cLiked.comment_view.my_vote).toBe(1);
+    expect(cLiked.comment_view.comment.score).toBe(2);
+
+    const cSaved = await client.saveComment({
+      comment_id: comment.id,
+      save: true,
+    });
+    expect(cSaved.comment_view.saved).toBe(true);
+    const { data: comments } = await client.getComments({ post_id: post.id });
+    const reread = comments.find((view) => view.comment.id === comment.id);
+    expect(reread?.saved).toBe(true);
+    expect(reread?.my_vote).toBe(1);
   });
 
   it("rejects account endpoints when nobody is logged in", async () => {
