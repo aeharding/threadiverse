@@ -314,6 +314,7 @@ export class FakePiefedInstance extends FakeInstance {
         body: subject.body,
         community: community(subject.community),
         creator: person(subject.creator),
+        deleted: subject.deleted,
         id: subject.id,
         myVote: subject.myVote,
         saved: subject.saved,
@@ -326,6 +327,7 @@ export class FakePiefedInstance extends FakeInstance {
         body: subject.content,
         child_count: subject.childCount,
         creator: person(subject.creator),
+        deleted: subject.deleted,
         id: subject.id,
         myVote: subject.myVote,
         path: subject.path,
@@ -560,6 +562,101 @@ export class FakePiefedInstance extends FakeInstance {
       const comment = findComment(comment_id);
       if (!comment) return notFound;
       comment.saved = save;
+      return { json: { comment_view: commentView(comment) } };
+    });
+
+    // Create/edit/delete writes mutate the seed store; the returned view and
+    // subsequent reads reflect the change. PieFed carries content as `body`
+    // and duplicates `name` as `title`.
+    this.mock("POST /api/alpha/post", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const wire = call.body as {
+        body?: string;
+        community_id: number;
+        name: string;
+        url?: string;
+      };
+      const community = seed.communities.find(
+        (candidate) => candidate.id === wire.community_id,
+      );
+      const post = seed.post({
+        body: wire.body,
+        community,
+        creator: seed.loggedInPerson,
+        name: wire.name,
+        url: wire.url,
+      });
+      return { json: { post_view: postView(post) } };
+    });
+
+    this.mock("PUT /api/alpha/post", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const wire = call.body as {
+        body?: string;
+        name?: string;
+        post_id: number;
+        url?: string;
+      };
+      const post = findPost(wire.post_id);
+      if (!post) return notFound;
+      if (wire.name !== undefined) post.name = wire.name;
+      if (wire.body !== undefined) post.body = wire.body;
+      if (wire.url !== undefined) post.url = wire.url;
+      return { json: { post_view: postView(post) } };
+    });
+
+    this.mock("POST /api/alpha/post/delete", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { deleted, post_id } = call.body as {
+        deleted: boolean;
+        post_id: number;
+      };
+      const post = findPost(post_id);
+      if (!post) return notFound;
+      post.deleted = deleted;
+      return { json: { post_view: postView(post) } };
+    });
+
+    this.mock("POST /api/alpha/comment", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const wire = call.body as {
+        body: string;
+        parent_id?: number;
+        post_id: number;
+      };
+      const post = findPost(wire.post_id);
+      if (!post) return notFound;
+      const parent = wire.parent_id ? findComment(wire.parent_id) : undefined;
+      const comment = seed.comment({
+        content: wire.body,
+        creator: seed.loggedInPerson,
+        post,
+      });
+      if (parent) comment.path = `${parent.path}.${comment.id}`;
+      return { json: { comment_view: commentView(comment) } };
+    });
+
+    this.mock("PUT /api/alpha/comment", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { body, comment_id } = call.body as {
+        body: string;
+        comment_id: number;
+      };
+      const comment = findComment(comment_id);
+      if (!comment) return notFound;
+      comment.content = body;
+      return { json: { comment_view: commentView(comment) } };
+    });
+
+    this.mock("POST /api/alpha/comment/delete", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { comment_id, deleted } = call.body as {
+        comment_id: number;
+        deleted: boolean;
+      };
+      const comment = findComment(comment_id);
+      if (!comment) return notFound;
+      comment.deleted = deleted;
       return { json: { comment_view: commentView(comment) } };
     });
 

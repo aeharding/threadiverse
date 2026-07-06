@@ -106,6 +106,7 @@ export function createLemmyV1Builders({
     body?: string;
     community?: Wire<LemmyV1.Community>;
     creator: Wire<LemmyV1.Person>;
+    deleted?: boolean;
     id: number;
     myVote?: -1 | 0 | 1;
     name: string;
@@ -118,7 +119,7 @@ export function createLemmyV1Builders({
       comments: 0,
       community_id: over.community?.id ?? DEFAULT_COMMUNITY_ID,
       creator_id: over.creator.id,
-      deleted: false,
+      deleted: over.deleted ?? false,
       featured_community: false,
       featured_local: false,
       federation_pending: false,
@@ -142,6 +143,7 @@ export function createLemmyV1Builders({
     body?: string;
     community?: Wire<LemmyV1.Community>;
     creator: Wire<LemmyV1.Person>;
+    deleted?: boolean;
     id: number;
     myVote?: -1 | 0 | 1;
     name: string;
@@ -169,6 +171,7 @@ export function createLemmyV1Builders({
     child_count?: number;
     content: string;
     creator?: Wire<LemmyV1.Person>;
+    deleted?: boolean;
     id: number;
     myVote?: -1 | 0 | 1;
     path?: string;
@@ -186,7 +189,7 @@ export function createLemmyV1Builders({
         child_count: over.child_count ?? 0,
         content: over.content,
         creator_id: creator.id,
-        deleted: false,
+        deleted: over.deleted ?? false,
         distinguished: false,
         federation_pending: false,
         id: over.id,
