@@ -728,21 +728,23 @@ export class UnsafePiefedClient implements BaseClient {
     switch (payload.type) {
       case "all":
       case undefined: {
-        const response = await Promise.all([
+        const [posts, comments] = await Promise.all([
           this.#listPersonPosts(payload, options),
-
           this.#listPersonComments(payload, options),
-        ]).then(([posts, comments]) =>
-          [...posts.data, ...comments.data].sort(
-            (a, b) =>
-              getPostCommentItemCreatedDate(b) -
-              getPostCommentItemCreatedDate(a),
-          ),
+        ]);
+
+        const data = [...posts.data, ...comments.data].sort(
+          (a, b) =>
+            getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a),
         );
 
+        // Both halves already resolved the server's own cursor; either one
+        // having more means this merged feed does too. More reliable than
+        // inferring from the merged length, since piefed silently clamps
+        // large limits.
         return {
-          ...compat.toPageResponse(payload, { items: response.length }),
-          data: response,
+          data,
+          next_page: posts.next_page ?? comments.next_page,
         };
       }
 
