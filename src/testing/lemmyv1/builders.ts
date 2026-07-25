@@ -386,6 +386,31 @@ export function createLemmyV1Builders({
     };
   }
 
+  function personView(subject: Wire<LemmyV1.Person>): Wire<LemmyV1.PersonView> {
+    return { banned: false, is_admin: false, person: subject };
+  }
+
+  /** `GET /api/v4/search` (search) */
+  function searchResponse(
+    over: {
+      comments?: Wire<LemmyV1.CommentView>[];
+      communities?: Wire<LemmyV1.CommunityView>[];
+      nextPage?: null | string;
+      persons?: Wire<LemmyV1.PersonView>[];
+      posts?: Wire<LemmyV1.PostView>[];
+    } = {},
+  ): Wire<LemmyV1.SearchResponse> {
+    return {
+      comments: over.comments ?? [],
+      communities: over.communities ?? [],
+      multi_communities: [],
+      next_page: over.nextPage ?? null,
+      persons: over.persons ?? [],
+      posts: over.posts ?? [],
+      prev_page: null,
+    };
+  }
+
   /** `GET /api/v4/person` (getPersonDetails) */
   function personResponse(
     subject: Wire<LemmyV1.Person>,
@@ -549,10 +574,12 @@ export function createLemmyV1Builders({
     pagedResponse,
     person,
     personResponse,
+    personView,
     post,
     postResponse,
     postView,
     privateMessageNotification,
     privateMessageView,
+    searchResponse,
   };
 }

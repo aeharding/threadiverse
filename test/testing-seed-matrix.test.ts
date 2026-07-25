@@ -235,6 +235,114 @@ describe.each([
     ]);
   });
 
+  it("paginates derived feeds with the provider's own cursor model", async () => {
+    const { client, fake } = setup();
+
+    fake.seed.clear();
+    const alex = fake.seed.person({ name: "alex" });
+    fake.seed.loggedInAs(alex);
+    for (const index of [1, 2, 3, 4, 5])
+      fake.seed.post({ creator: alex, id: index, name: `Post ${index}` });
+
+    const first = await client.getPosts({ limit: 2 });
+    expect(first.data.map((view) => view.post.name)).toEqual([
+      "Post 1",
+      "Post 2",
+    ]);
+    expect(first.next_page).toBeDefined();
+
+    // Feed the cursor back exactly as the app would
+    const second = await client.getPosts({
+      limit: 2,
+      page_cursor: first.next_page,
+    } as Parameters<typeof client.getPosts>[0]);
+    expect(second.data.map((view) => view.post.name)).toEqual([
+      "Post 3",
+      "Post 4",
+    ]);
+
+    const third = await client.getPosts({
+      limit: 2,
+      page_cursor: second.next_page,
+    } as Parameters<typeof client.getPosts>[0]);
+    expect(third.data.map((view) => view.post.name)).toEqual(["Post 5"]);
+  });
+
+  it("honors max_depth relative to the requested parent", async () => {
+    const { client, fake, post } = setup();
+
+    // parent → child → grandchild, all on the seeded post
+    const parent = fake.seed.comment({ content: "parent", id: 20, post });
+    fake.seed.comment({
+      content: "child",
+      id: 21,
+      path: `0.${parent.id}.21`,
+      post,
+    });
+    fake.seed.comment({
+      content: "grandchild",
+      id: 22,
+      path: `0.${parent.id}.21.22`,
+      post,
+    });
+
+    // Depth 1 from the post = top-level comments only
+    const shallow = await client.getComments({
+      max_depth: 1,
+      post_id: post.id,
+    });
+    expect(shallow.data.map((view) => view.comment.content)).toEqual([
+      "First!",
+      "parent",
+    ]);
+
+    // Depth 1 from the parent = the parent plus its direct children
+    const subtree = await client.getComments({
+      max_depth: 1,
+      parent_id: parent.id,
+      post_id: post.id,
+    });
+    expect(subtree.data.map((view) => view.comment.content)).toEqual([
+      "parent",
+      "child",
+    ]);
+  });
+
+  it("derives search results from seeded content", async () => {
+    const { client, fake } = setup();
+
+    fake.seed.community({ name: "cats_only", title: "Cats Only" });
+    fake.seed.person({ name: "catlover" });
+
+    const posts = await client.search({
+      search_term: "hello",
+      type_: "posts",
+    });
+    expect(
+      posts.data.map((item) => ("post" in item ? item.post.name : "?")),
+    ).toEqual(["Hello **world**"]);
+
+    // Type filtering keeps other buckets out
+    const communities = await client.search({
+      search_term: "cats",
+      type_: "communities",
+    });
+    expect(
+      communities.data.map((item) =>
+        "community" in item && !("post" in item) ? item.community.name : "?",
+      ),
+    ).toEqual(["cats", "cats_only"]);
+
+    const users = await client.search({ search_term: "cat", type_: "users" });
+    expect(
+      users.data.map((item) => ("person" in item ? item.person.name : "?")),
+    ).toEqual(["catlover"]);
+
+    // A term nothing matches yields an empty result set, not an error
+    const none = await client.search({ search_term: "zzzz", type_: "posts" });
+    expect(none.data).toHaveLength(0);
+  });
+
   it("seed.clear() empties the derived feed", async () => {
     const { client, fake } = setup();
 

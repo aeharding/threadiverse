@@ -6,6 +6,8 @@ import {
   OperationDef,
   RecordedCall,
 } from "../FakeInstance";
+import { depthOf, paginateByCursor } from "../pagination";
+import { searchSeed, SeedSearchType } from "../search";
 import {
   SeedComment,
   SeedCommunity,
@@ -210,8 +212,11 @@ export type LemmyV1Operation = keyof typeof LEMMY_V1_OPERATIONS;
  * fake.seed.loggedInAs(alex);
  * ```
  *
- * Derived: site, post list/detail, comment list, community, person (+
- * person content), account, unread counts, notifications, modlog. Use
+ * Derived: site, post list/detail, comment list (honoring `parent_id` and
+ * `max_depth`), search, community, person (+ person content), account,
+ * unread counts, notifications, modlog, and the vote/save/create/edit/
+ * delete/mark-read writes (which mutate the store). Lists paginate with
+ * opaque `page_cursor` strings, like the real server. Use
  * `mock()` for error injection or endpoints outside this set, and
  * `calls()` / `waitForCall()` to assert on outgoing requests. Wire-level
  * builders stay available on `build`.
@@ -316,6 +321,23 @@ export class FakeLemmyV1Instance extends FakeInstance {
             recipient_id: seed.loggedInPerson?.id ?? 0,
           });
 
+    // v1 pages with opaque cursors the server round-trips
+    const pageOf = <T>(items: T[], call: RecordedCall) => {
+      const limit = call.query.get("limit");
+      return paginateByCursor(items, {
+        cursor: call.query.get("page_cursor") ?? undefined,
+        limit: limit === null ? undefined : Number(limit),
+      });
+    };
+    const pagedFrom = <T, W>(
+      items: T[],
+      call: RecordedCall,
+      toWire: (item: T) => W,
+    ) => {
+      const { items: page, nextPage } = pageOf(items, call);
+      return build.pagedResponse(page.map(toWire), nextPage ?? null);
+    };
+
     const notFound = { json: { error: "not_found" }, status: 404 } as const;
 
     this.mock("GET /api/v4/site", () => ({
@@ -325,8 +347,8 @@ export class FakeLemmyV1Instance extends FakeInstance {
       }),
     }));
 
-    this.mock("GET /api/v4/post/list", () => ({
-      json: build.pagedResponse(seed.posts.map(postView)),
+    this.mock("GET /api/v4/post/list", (call) => ({
+      json: pagedFrom(seed.posts, call, postView),
     }));
 
     this.mock("GET /api/v4/post", (call) => {
@@ -339,15 +361,31 @@ export class FakeLemmyV1Instance extends FakeInstance {
     this.mock("GET /api/v4/comment/list", (call) => {
       const postId = call.query.get("post_id");
       const parentId = call.query.get("parent_id");
+      const maxDepth = call.query.get("max_depth");
+
       let comments = postId
         ? seed.comments.filter((comment) => comment.post.id === Number(postId))
         : seed.comments;
+
       // parent_id = the comment's subtree (path segments include it)
       if (parentId)
         comments = comments.filter((comment) =>
           comment.path.split(".").includes(parentId),
         );
-      return { json: build.pagedResponse(comments.map(commentView)) };
+
+      // max_depth is relative to the requested parent, so fetching a
+      // subtree returns that comment plus max_depth levels beneath it
+      if (maxDepth) {
+        const parent = parentId
+          ? seed.comments.find((comment) => comment.id === Number(parentId))
+          : undefined;
+        const baseDepth = parent ? depthOf(parent.path) : 0;
+        comments = comments.filter(
+          (comment) => depthOf(comment.path) - baseDepth <= Number(maxDepth),
+        );
+      }
+
+      return { json: pagedFrom(comments, call, commentView) };
     });
 
     this.mock("GET /api/v4/community", (call) => {
@@ -381,7 +419,52 @@ export class FakeLemmyV1Instance extends FakeInstance {
             ...commentView(comment),
           })),
       ];
-      return { json: build.pagedResponse(items) };
+      const { items: page, nextPage } = pageOf(items, call);
+      return { json: build.pagedResponse(page, nextPage ?? null) };
+    });
+
+    this.mock("GET /api/v4/search", (call) => {
+      // v1 sends canonical (lowercase) search types on the wire
+      const results = searchSeed(seed, {
+        term: call.query.get("search_term") ?? undefined,
+        type: (call.query.get("type_") ?? undefined) as
+          | SeedSearchType
+          | undefined,
+      });
+
+      // One cursor across the concatenated result set, matching how the
+      // adapter flattens the buckets into a single canonical list
+      const { items, nextPage } = pageOf(
+        [
+          ...results.comments.map((comment) => ["comment", comment] as const),
+          ...results.posts.map((post) => ["post", post] as const),
+          ...results.communities.map(
+            (community) => ["community", community] as const,
+          ),
+          ...results.people.map((person) => ["person", person] as const),
+        ],
+        call,
+      );
+
+      return {
+        json: build.searchResponse({
+          comments: items.flatMap(([kind, item]) =>
+            kind === "comment" ? [commentView(item)] : [],
+          ),
+          communities: items.flatMap(([kind, item]) =>
+            kind === "community"
+              ? [build.communityView({ community: community(item) })]
+              : [],
+          ),
+          nextPage,
+          persons: items.flatMap(([kind, item]) =>
+            kind === "person" ? [build.personView(person(item))] : [],
+          ),
+          posts: items.flatMap(([kind, item]) =>
+            kind === "post" ? [postView(item)] : [],
+          ),
+        }),
+      };
     });
 
     this.mock("GET /api/v4/modlog", () => ({
@@ -422,9 +505,7 @@ export class FakeLemmyV1Instance extends FakeInstance {
         notifications = notifications.filter(
           (notification) => !notification.read,
         );
-      return {
-        json: build.pagedResponse(notifications.map(notificationView)),
-      };
+      return { json: pagedFrom(notifications, call, notificationView) };
     });
 
     // Fire-and-forget side effect of many logged-in interactions

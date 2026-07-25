@@ -168,7 +168,10 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
   it("answers unmocked endpoints with a 404 error", async () => {
     const { client } = setup();
 
-    await expect(client.search({ search_term: "x" })).rejects.toThrow();
+    // resolveObject has no derived default — the fake 404s loudly
+    await expect(
+      client.resolveObject({ q: "https://example.com/post/1" }),
+    ).rejects.toThrow();
   });
 
   it("simulates aborts as network failures", async () => {

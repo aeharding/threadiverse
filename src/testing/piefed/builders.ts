@@ -242,6 +242,25 @@ export function createPiefedBuilders({
     };
   }
 
+  /** `GET /api/alpha/search` (search) */
+  function searchResponse(
+    over: {
+      comments?: Wire<Schemas["CommentView"]>[];
+      communities?: Wire<Schemas["CommunityView"]>[];
+      posts?: Wire<Schemas["PostView"]>[];
+      type_?: Schemas["SearchResponse"]["type_"];
+      users?: Wire<Schemas["PersonView"]>[];
+    } = {},
+  ): Wire<Schemas["SearchResponse"]> {
+    return {
+      comments: over.comments ?? [],
+      communities: over.communities ?? [],
+      posts: over.posts ?? [],
+      type_: over.type_ ?? "Posts",
+      users: over.users ?? [],
+    };
+  }
+
   /** `GET /api/alpha/user` (getPersonDetails) */
   function userResponse(
     subject: Wire<Schemas["Person"]>,
@@ -435,6 +454,7 @@ export function createPiefedBuilders({
     privateMessageListResponse,
     privateMessageView,
     repliesResponse,
+    searchResponse,
     userResponse,
   };
 }
