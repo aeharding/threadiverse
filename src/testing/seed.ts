@@ -12,7 +12,11 @@
  */
 
 export interface SeedComment {
-  childCount: number;
+  /**
+   * Overrides the count derived from seeded descendants — set it to model
+   * replies that exist server-side but were never seeded.
+   */
+  childCount?: number;
   content: string;
   creator: SeedPerson;
   /** Deleted by its creator (mutated by delete writes) */
@@ -97,6 +101,24 @@ export class SeedStore {
   // High start so explicit ids in tests never collide with generated ones
   #nextId = 1000;
 
+  /**
+   * Total replies beneath a comment — every descendant, matching Lemmy's
+   * `child_count` ("the total number of children in this comment branch").
+   * Derived from materialized paths, so seeding a deep reply automatically
+   * gives its ancestors a non-zero count and "N more replies" affordances
+   * appear when `max_depth` keeps that reply out of the response.
+   */
+  childCountOf(comment: SeedComment): number {
+    return (
+      comment.childCount ??
+      this.comments.filter(
+        (candidate) =>
+          candidate !== comment &&
+          candidate.path.split(".").includes(String(comment.id)),
+      ).length
+    );
+  }
+
   /** Wipe all seeded content (e.g. to replace a fixture's default feed) */
   clear(): void {
     this.comments = [];
@@ -124,7 +146,7 @@ export class SeedStore {
     const id = over.id ?? this.#nextId++;
 
     const comment: SeedComment = {
-      childCount: over.childCount ?? 0,
+      childCount: over.childCount,
       content: over.content,
       creator: over.creator ?? post.creator,
       deleted: over.deleted ?? false,

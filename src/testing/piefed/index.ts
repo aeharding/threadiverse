@@ -6,6 +6,8 @@ import {
   OperationDef,
   RecordedCall,
 } from "../FakeInstance";
+import { depthOf, paginateByPage } from "../pagination";
+import { searchSeed, SeedSearchType } from "../search";
 import {
   SeedComment,
   SeedCommunity,
@@ -218,6 +220,11 @@ const PIEFED_OPERATIONS = {
 
 export type PiefedOperation = keyof typeof PIEFED_OPERATIONS;
 
+/** PieFed's capitalized wire search types (`SearchResponse.type_`) */
+type PiefedSearchType = NonNullable<
+  Parameters<PiefedBuilders["searchResponse"]>[0]
+>["type_"];
+
 const STATUS_TEXT: Record<number, string> = {
   400: "Bad Request",
   401: "Unauthorized",
@@ -243,9 +250,11 @@ export interface FakePiefedInstanceOptions {
  * fake.seed.post({ name: "Hello **world**", creator: alex });
  * ```
  *
- * Derived: site, post list/detail, comment list, community, person,
- * unread counts, the notification fan-out (replies/mentions/private
- * messages), and mark-as-read writes (which mutate the seed store). Use
+ * Derived: site, post list/detail, comment list (honoring `parent_id` and
+ * `max_depth`), search, community, person, unread counts, the notification
+ * fan-out (replies/mentions/private messages), and the vote/save/create/
+ * edit/delete/mark-read writes (which mutate the store). Lists paginate by
+ * 1-based `page` number, like the real server. Use
  * `mock()` for error injection or endpoints outside this set. Wire-level
  * builders stay available on `build`.
  */
@@ -325,7 +334,7 @@ export class FakePiefedInstance extends FakeInstance {
     const commentView = (subject: SeedComment) =>
       build.commentView({
         body: subject.content,
-        child_count: subject.childCount,
+        child_count: seed.childCountOf(subject),
         creator: person(subject.creator),
         deleted: subject.deleted,
         id: subject.id,
@@ -336,6 +345,16 @@ export class FakePiefedInstance extends FakeInstance {
         saved: subject.saved,
         score: subject.score,
       });
+
+    // PieFed pages by 1-based page number
+    const pageOf = <T>(items: T[], call: RecordedCall) => {
+      const limit = call.query.get("limit");
+      const page = call.query.get("page");
+      return paginateByPage(items, {
+        limit: limit === null ? undefined : Number(limit),
+        page: page === null ? undefined : Number(page),
+      });
+    };
 
     // Seed misses render PieFed's real error responses as observed live
     // (piefed.social 2026-07-02): 400s whose message is prose, mapped to
@@ -404,7 +423,10 @@ export class FakePiefedInstance extends FakeInstance {
       const posts = personId
         ? seed.posts.filter((post) => post.creator.id === Number(personId))
         : seed.posts;
-      return { json: build.postListResponse(posts.map(postView)) };
+      const { items, nextPage } = pageOf(posts, call);
+      return {
+        json: build.postListResponse(items.map(postView), nextPage ?? null),
+      };
     });
 
     this.mock("GET /api/alpha/post", (call) => {
@@ -433,7 +455,30 @@ export class FakePiefedInstance extends FakeInstance {
         comments = comments.filter((comment) =>
           comment.path.split(".").includes(parentId),
         );
-      return { json: build.commentListResponse(comments.map(commentView)) };
+
+      // max_depth is relative to the requested parent, so fetching a
+      // subtree returns that comment plus max_depth levels beneath it.
+      // Verified live: with a parent PieFed matches Lemmy, but without one
+      // it counts levels *below* top-level (max_depth=0 → the roots),
+      // where Lemmy counts from the post (max_depth=0 → nothing).
+      const maxDepth = call.query.get("max_depth");
+      if (maxDepth) {
+        const parent = parentId
+          ? seed.comments.find((comment) => comment.id === Number(parentId))
+          : undefined;
+        const baseDepth = parent ? depthOf(parent.path) : 1;
+        comments = comments.filter(
+          (comment) => depthOf(comment.path) - baseDepth <= Number(maxDepth),
+        );
+      }
+
+      const { items, nextPage } = pageOf(comments, call);
+      return {
+        json: build.commentListResponse(
+          items.map(commentView),
+          nextPage ?? null,
+        ),
+      };
     });
 
     this.mock("GET /api/alpha/community", (call) => {
@@ -477,34 +522,82 @@ export class FakePiefedInstance extends FakeInstance {
           : [],
       );
 
+    const repliesPage = (kind: "mention" | "reply", call: RecordedCall) => {
+      const { items, nextPage } = pageOf(
+        repliesOf(kind, unreadOnly(call)),
+        call,
+      );
+      return build.repliesResponse(items, nextPage ?? null);
+    };
+
     this.mock("GET /api/alpha/user/replies", (call) =>
       seed.loggedInPerson
-        ? { json: build.repliesResponse(repliesOf("reply", unreadOnly(call))) }
+        ? { json: repliesPage("reply", call) }
         : unauthenticated,
     );
 
     this.mock("GET /api/alpha/user/mentions", (call) =>
       seed.loggedInPerson
-        ? {
-            json: build.repliesResponse(repliesOf("mention", unreadOnly(call))),
-          }
+        ? { json: repliesPage("mention", call) }
         : unauthenticated,
     );
 
-    this.mock("GET /api/alpha/private_message/list", (call) =>
-      seed.loggedInPerson
-        ? {
-            json: build.privateMessageListResponse(
-              seed.notifications.flatMap((notification) =>
-                notification.kind === "private_message" &&
-                (!unreadOnly(call) || !notification.read)
-                  ? [privateMessageView(notification)]
-                  : [],
-              ),
-            ),
-          }
-        : unauthenticated,
-    );
+    this.mock("GET /api/alpha/private_message/list", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+
+      const messages = seed.notifications.flatMap((notification) =>
+        notification.kind === "private_message" &&
+        (!unreadOnly(call) || !notification.read)
+          ? [privateMessageView(notification)]
+          : [],
+      );
+
+      return {
+        json: build.privateMessageListResponse(pageOf(messages, call).items),
+      };
+    });
+
+    this.mock("GET /api/alpha/search", (call) => {
+      // PieFed capitalizes search types on the wire
+      const wireType = call.query.get("type_");
+      const type = wireType?.toLowerCase() as SeedSearchType | undefined;
+      const results = searchSeed(seed, {
+        term: call.query.get("q") ?? undefined,
+        type,
+      });
+
+      const { items } = pageOf(
+        [
+          ...results.communities.map(
+            (community) => ["community", community] as const,
+          ),
+          ...results.posts.map((post) => ["post", post] as const),
+          ...results.people.map((person) => ["person", person] as const),
+          ...results.comments.map((comment) => ["comment", comment] as const),
+        ],
+        call,
+      );
+
+      return {
+        json: build.searchResponse({
+          comments: items.flatMap(([kind, item]) =>
+            kind === "comment" ? [commentView(item)] : [],
+          ),
+          communities: items.flatMap(([kind, item]) =>
+            kind === "community"
+              ? [build.communityView({ community: community(item) })]
+              : [],
+          ),
+          posts: items.flatMap(([kind, item]) =>
+            kind === "post" ? [postView(item)] : [],
+          ),
+          type_: (wireType ?? "Posts") as PiefedSearchType,
+          users: items.flatMap(([kind, item]) =>
+            kind === "person" ? [build.personView(person(item))] : [],
+          ),
+        }),
+      };
+    });
 
     // Vote/save writes mutate the seed store, so the returned view — and
     // every subsequent read — reflects the new state. PieFed's like body
