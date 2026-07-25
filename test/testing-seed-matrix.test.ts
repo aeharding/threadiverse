@@ -304,6 +304,17 @@ describe.each([
     expect(second.data).toHaveLength(0);
   });
 
+  it("returns no comments when asked for zero levels", async () => {
+    const { client, post } = setup();
+
+    const { data } = await client.getComments({
+      max_depth: 0,
+      post_id: post.id,
+    });
+
+    expect(data).toEqual([]);
+  });
+
   it("asks for the same comment depth regardless of provider", async () => {
     const { client, fake, post } = setup();
 

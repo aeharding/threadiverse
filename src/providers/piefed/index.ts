@@ -88,9 +88,10 @@ type SearchableType = Exclude<types.SearchType, "all">;
  * identical on both. With a `parent_id` the two agree, so it passes
  * through untouched.
  *
- * Canonical `max_depth: 0` ("no comments") has no PieFed equivalent — its
- * minimum still returns top-level — so it clamps rather than going
- * negative.
+ * Requests for zero levels never reach here (getComments answers those
+ * directly), so the adjusted value can't go negative — and wire `0`
+ * unambiguously means canonical `1`, which is what lets the fake's decoder
+ * invert this.
  */
 function toPiefedMaxDepth(
   payload: Parameters<BaseClient["getComments"]>[0],
@@ -99,7 +100,7 @@ function toPiefedMaxDepth(
 
   if (max_depth === undefined || parent_id !== undefined) return max_depth;
 
-  return Math.max(0, max_depth - 1);
+  return max_depth - 1;
 }
 
 const PIEFED_SEARCH_TYPE = {
@@ -418,6 +419,17 @@ export class UnsafePiefedClient implements BaseClient {
       throw new InvalidPayloadError(
         `Connected to piefed, ${payload.mode} is not supported`,
       );
+
+    // PieFed's shallowest response still contains top-level comments, so a
+    // canonical request for zero levels has no PieFed equivalent — answer
+    // it directly rather than asking for something else and returning more
+    // than the caller wanted.
+    if (
+      payload.max_depth !== undefined &&
+      payload.max_depth <= 0 &&
+      payload.parent_id === undefined
+    )
+      return { ...compat.toPageResponse(payload, { items: 0 }), data: [] };
 
     const { type_, ...rest } = compat.fromPageParams(payload);
     const query = {
