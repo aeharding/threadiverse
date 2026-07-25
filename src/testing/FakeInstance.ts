@@ -185,6 +185,18 @@ export class FakeInstance {
     });
   }
 
+  /**
+   * Every request this instance received, in order.
+   *
+   * For "nothing was sent" claims: asserting a specific route was never
+   * called can't fail if the client has no way to call it, whereas
+   * comparing this list before and after an action genuinely checks that
+   * the action stayed local.
+   */
+  allCalls(): RecordedCall[] {
+    return [...this.#calls];
+  }
+
   /** All recorded requests matching `"METHOD /path"` (query ignored). */
   calls(matcher: Matcher): RecordedCall[] {
     return this.#calls.filter(
