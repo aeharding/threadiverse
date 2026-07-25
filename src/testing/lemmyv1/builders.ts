@@ -92,10 +92,11 @@ export function createLemmyV1Builders({
     return { downvotes, score: upvotes - downvotes, upvotes };
   }
 
-  // v1 conveys the logged-in user's vote/save via *_actions; absent (`{}`)
-  // when there's no interaction.
-  function actions(myVote: -1 | 0 | 1, saved: boolean) {
+  // v1 conveys the logged-in user's vote/save/read via *_actions; absent
+  // (`{}`) when there's no interaction.
+  function actions(myVote: -1 | 0 | 1, saved: boolean, read = false) {
     return {
+      read_at: read ? now : undefined,
       saved_at: saved ? now : undefined,
       vote_is_upvote: myVote === 0 ? undefined : myVote === 1,
       voted_at: myVote === 0 ? undefined : now,
@@ -147,6 +148,7 @@ export function createLemmyV1Builders({
     id: number;
     myVote?: -1 | 0 | 1;
     name: string;
+    read?: boolean;
     saved?: boolean;
     score?: number;
     url?: string;
@@ -162,7 +164,11 @@ export function createLemmyV1Builders({
       creator_is_admin: false,
       creator_is_moderator: false,
       post: post({ ...over, community: resolvedCommunity }),
-      post_actions: actions(over.myVote ?? 0, over.saved ?? false),
+      post_actions: actions(
+        over.myVote ?? 0,
+        over.saved ?? false,
+        over.read ?? false,
+      ),
       tags: [],
     };
   }

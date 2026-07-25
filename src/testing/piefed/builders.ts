@@ -141,6 +141,7 @@ export function createPiefedBuilders({
     deleted?: boolean;
     id: number;
     myVote?: -1 | 0 | 1;
+    read?: boolean;
     saved?: boolean;
     score?: number;
     title: string;
@@ -167,7 +168,7 @@ export function createPiefedBuilders({
       hidden: false,
       my_vote: myVote,
       post: post({ ...over, community: resolvedCommunity }),
-      read: false,
+      read: over.read ?? false,
       saved: over.saved ?? false,
       subscribed: "NotSubscribed",
       unread_comments: 0,

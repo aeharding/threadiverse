@@ -70,6 +70,8 @@ export interface SeedPost {
   /** The logged-in user's vote (mutated by like writes) */
   myVote: -1 | 0 | 1;
   name: string;
+  /** Read by the logged-in user (mutated by mark-as-read writes) */
+  read: boolean;
   /** Saved by the logged-in user (mutated by save writes) */
   saved: boolean;
   /** Base score at `myVote` 0; the logged-in user's vote is added on top */
@@ -219,6 +221,7 @@ export class SeedStore {
     id?: number;
     myVote?: -1 | 0 | 1;
     name: string;
+    read?: boolean;
     saved?: boolean;
     score?: number;
     url?: string;
@@ -231,6 +234,7 @@ export class SeedStore {
       id: over.id ?? this.#nextId++,
       myVote: over.myVote ?? 0,
       name: over.name,
+      read: over.read ?? false,
       saved: over.saved ?? false,
       score: over.score ?? 1,
       url: over.url,

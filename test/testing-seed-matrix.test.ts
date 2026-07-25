@@ -271,6 +271,17 @@ describe.each([
     expect(third.next_page).toBeUndefined();
   });
 
+  it("marks posts read, and later reads reflect it", async () => {
+    const { client, fake, post } = setup();
+    fake.seed.loggedInAs(fake.seed.person({ name: "me" }));
+
+    expect((await client.getPost({ id: post.id })).post_view.read).toBe(false);
+
+    await client.markPostAsRead({ post_ids: [post.id], read: true });
+
+    expect((await client.getPost({ id: post.id })).post_view.read).toBe(true);
+  });
+
   it("serves a trailing empty page when the last page was full", async () => {
     const { client, fake } = setup();
 
@@ -506,6 +517,33 @@ describe.each([
     expect(names).toContain("Hello **world**");
     expect(names).not.toContain("Bob's post");
     expect(names).not.toContain("bob's comment");
+  });
+});
+
+describe("lemmyv1 cursors", () => {
+  it("hands out cursors a consumer cannot derive", async () => {
+    // Real Lemmy cursors are opaque tokens. If the fake's encoded its own
+    // offset, a consumer that ignored the server's cursor and computed one
+    // would still page correctly — and its tests would pass. (PieFed is
+    // exempt: page numbers genuinely are its API.)
+    const fake = new FakeLemmyV1Instance();
+    const alex = fake.seed.person({ name: "alex" });
+    for (const index of [1, 2, 3, 4])
+      fake.seed.post({ creator: alex, id: index, name: `Post ${index}` });
+
+    const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
+
+    const first = await client.getPosts({ limit: 2 });
+    expect(String(first.next_page)).not.toContain("2");
+
+    const second = await client.getPosts({
+      limit: 2,
+      page_cursor: first.next_page,
+    });
+    expect(second.data.map((view) => view.post.name)).toEqual([
+      "Post 3",
+      "Post 4",
+    ]);
   });
 });
 
