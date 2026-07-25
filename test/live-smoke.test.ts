@@ -58,6 +58,14 @@ describe.runIf(process.env.LIVE_SMOKE)("live smoke", () => {
       expect(data.length).toBeGreaterThan(0);
     });
 
+    it("all-type search passes canonical validation", OPTIONS, async () => {
+      // PieFed has no all-type search endpoint — the adapter fans out and
+      // merges, so an unspecified type_ must work everywhere
+      const { data } = await client.search({ limit: 3, search_term: "news" });
+
+      expect(data.length).toBeGreaterThan(0);
+    });
+
     it("search passes canonical validation", OPTIONS, async () => {
       const { data } = await client.search({
         limit: 3,

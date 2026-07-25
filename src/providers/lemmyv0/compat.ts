@@ -505,8 +505,28 @@ export function toModlogView(
   }
 }
 
+/**
+ * Canonical pagination for the page-number softwares (Lemmy v0, PieFed).
+ *
+ * `next_page` has to mean "there is more" — handing one out unconditionally
+ * makes a consumer's `while (next_page)` loop spin forever. The server's own
+ * cursor wins when the endpoint returns one; otherwise a page at least as
+ * long as the limit implies there may be another, and a shorter one is the
+ * end.
+ *
+ * "At least" matters: endpoints that merge several requests (notifications,
+ * person content, all-type search, modlog) legitimately overshoot, because
+ * these servers apply the limit per bucket. A merged page shorter than the
+ * limit means every bucket was short — genuinely exhausted.
+ */
 export function toPageResponse(
   params: types.PageParams,
+  page?: {
+    /** How many items this page returned */
+    items: number;
+    /** The server's own cursor, for endpoints that return one */
+    next_page?: null | string;
+  },
 ): types.PagableResponse {
   const page_cursor = params.page_cursor;
 
@@ -515,9 +535,25 @@ export function toPageResponse(
       "lemmyv0 does not support string page_cursor",
     );
 
-  return {
-    next_page: (page_cursor ?? 1) + 1,
-  };
+  if (page?.next_page !== undefined) {
+    const serverCursor =
+      page.next_page === null ? undefined : Number(page.next_page);
+
+    // A cursor we can't use as a page number is no cursor at all — better
+    // to report end-of-feed than to send the server garbage
+    if (serverCursor === undefined || !Number.isFinite(serverCursor))
+      return { next_page: undefined };
+
+    return { next_page: serverCursor };
+  }
+
+  const nextPage = (page_cursor ?? 1) + 1;
+
+  // Without a limit there's nothing to compare a short page against, so
+  // keep assuming there's more
+  if (!page || params.limit === undefined) return { next_page: nextPage };
+
+  return { next_page: page.items >= params.limit ? nextPage : undefined };
 }
 
 export function toPerson(

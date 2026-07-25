@@ -256,9 +256,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
       options,
     );
 
+    const data = response.comments.map(compat.toCommentView);
+
     return {
-      ...compat.toPageResponse(payload),
-      data: response.comments.map(compat.toCommentView),
+      ...compat.toPageResponse(payload, { items: data.length }),
+      data,
     };
   }
 
@@ -308,13 +310,15 @@ export class UnsafeLemmyV0Client implements BaseClient {
       options,
     );
 
+    const data = Object.values(response)
+      .flat()
+      .map(compat.toModlogView)
+      .filter((m) => !!m)
+      .sort((a, b) => Date.parse(getLogDate(b)) - Date.parse(getLogDate(a)));
+
     return {
-      ...compat.toPageResponse(payload),
-      data: Object.values(response)
-        .flat()
-        .map(compat.toModlogView)
-        .filter((m) => !!m)
-        .sort((a, b) => Date.parse(getLogDate(b)) - Date.parse(getLogDate(a))),
+      ...compat.toPageResponse(payload, { items: data.length }),
+      data,
     };
   }
 
@@ -376,7 +380,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     }
 
     return {
-      ...compat.toPageResponse(payload),
+      ...compat.toPageResponse(payload, { items: data.length }),
       data,
     };
   }
@@ -539,9 +543,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
       options,
     );
 
+    const data = response.comment_reports.map(compat.toCommentReportView);
+
     return {
-      ...compat.toPageResponse(payload),
-      data: response.comment_reports.map(compat.toCommentReportView),
+      ...compat.toPageResponse(payload, { items: data.length }),
+      data,
     };
   }
 
@@ -564,9 +570,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
       options,
     );
 
+    const data = response.communities.map(compat.toCommunityView);
+
     return {
-      ...compat.toPageResponse(payload),
-      data: response.communities.map(compat.toCommunityView),
+      ...compat.toPageResponse(payload, { items: data.length }),
+      data,
     };
   }
 
@@ -604,7 +612,7 @@ export class UnsafeLemmyV0Client implements BaseClient {
     })();
 
     return {
-      ...compat.toPageResponse(payload),
+      ...compat.toPageResponse(payload, { items: data.length }),
       data,
     };
   }
@@ -625,12 +633,14 @@ export class UnsafeLemmyV0Client implements BaseClient {
       this.#client.getComments(v0Payload, options),
     ]);
 
+    const data = [
+      ...comments.map(compat.toCommentView),
+      ...posts.map(compat.toPostView),
+    ].sort(sortPostCommentByPublished);
+
     return {
-      data: [
-        ...comments.map(compat.toCommentView),
-        ...posts.map(compat.toPostView),
-      ].sort(sortPostCommentByPublished),
-      ...compat.toPageResponse(payload),
+      ...compat.toPageResponse(payload, { items: data.length }),
+      data,
     };
   }
 
@@ -657,9 +667,11 @@ export class UnsafeLemmyV0Client implements BaseClient {
       options,
     );
 
+    const data = response.post_reports.map(compat.toPostReportView);
+
     return {
-      ...compat.toPageResponse(payload),
-      data: response.post_reports.map(compat.toPostReportView),
+      ...compat.toPageResponse(payload, { items: data.length }),
+      data,
     };
   }
 
@@ -674,15 +686,17 @@ export class UnsafeLemmyV0Client implements BaseClient {
       this.#client.listPostReports(params, options),
     ]);
 
+    const data = [
+      ...comment_reports.map(compat.toCommentReportView),
+      ...post_reports.map(compat.toPostReportView),
+    ].sort(
+      (a, b) =>
+        getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a),
+    );
+
     return {
-      ...compat.toPageResponse(payload),
-      data: [
-        ...comment_reports.map(compat.toCommentReportView),
-        ...post_reports.map(compat.toPostReportView),
-      ].sort(
-        (a, b) =>
-          getPostCommentItemCreatedDate(b) - getPostCommentItemCreatedDate(a),
-      ),
+      ...compat.toPageResponse(payload, { items: data.length }),
+      data,
     };
   }
 
@@ -856,14 +870,16 @@ export class UnsafeLemmyV0Client implements BaseClient {
       options,
     );
 
+    const data = [
+      ...response.comments.map(compat.toCommentView),
+      ...response.posts.map(compat.toPostView),
+      ...response.communities.map(compat.toCommunityView),
+      ...response.users.map(compat.toPersonView),
+    ];
+
     return {
-      ...compat.toPageResponse(payload),
-      data: [
-        ...response.comments.map(compat.toCommentView),
-        ...response.posts.map(compat.toPostView),
-        ...response.communities.map(compat.toCommunityView),
-        ...response.users.map(compat.toPersonView),
-      ],
+      ...compat.toPageResponse(payload, { items: data.length }),
+      data,
     };
   }
 
