@@ -137,6 +137,20 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
     ]);
   });
 
+  it("exposes every recorded call for 'nothing was sent' assertions", async () => {
+    const { client, instance } = setup();
+
+    await client.getPosts({});
+    const before = instance.allCalls().length;
+
+    // A local-only action must not add requests
+    expect(instance.allCalls()).toHaveLength(before);
+    expect(instance.allCalls().at(-1)?.pathname).toBe("/api/v4/post/list");
+
+    await client.getPosts({});
+    expect(instance.allCalls().length).toBe(before + 1);
+  });
+
   it("records calls with query for assertions", async () => {
     const { client, instance } = setup();
 
