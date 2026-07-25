@@ -79,6 +79,30 @@ const piefedMiddleware: Middleware = {
 /** Canonical search types PieFed can actually serve (its enum has no "All") */
 type SearchableType = Exclude<types.SearchType, "all">;
 
+/**
+ * PieFed counts `max_depth` from *below* top-level, Lemmy counts from the
+ * post, so the same request reaches a level deeper on PieFed — verified
+ * live: with `max_depth=1` and no `parent_id`, Lemmy returns top-level
+ * comments while PieFed returns those plus their children. Requesting one
+ * less keeps the canonical meaning ("levels of comments to return")
+ * identical on both. With a `parent_id` the two agree, so it passes
+ * through untouched.
+ *
+ * Requests for zero levels never reach here (getComments answers those
+ * directly), so the adjusted value can't go negative — and wire `0`
+ * unambiguously means canonical `1`, which is what lets the fake's decoder
+ * invert this.
+ */
+function toPiefedMaxDepth(
+  payload: Parameters<BaseClient["getComments"]>[0],
+): number | undefined {
+  const { max_depth, parent_id } = payload;
+
+  if (max_depth === undefined || parent_id !== undefined) return max_depth;
+
+  return max_depth - 1;
+}
+
 const PIEFED_SEARCH_TYPE = {
   comments: "Comments",
   communities: "Communities",
@@ -396,9 +420,21 @@ export class UnsafePiefedClient implements BaseClient {
         `Connected to piefed, ${payload.mode} is not supported`,
       );
 
+    // PieFed's shallowest response still contains top-level comments, so a
+    // canonical request for zero levels has no PieFed equivalent — answer
+    // it directly rather than asking for something else and returning more
+    // than the caller wanted.
+    if (
+      payload.max_depth !== undefined &&
+      payload.max_depth <= 0 &&
+      payload.parent_id === undefined
+    )
+      return { ...compat.toPageResponse(payload, { items: 0 }), data: [] };
+
     const { type_, ...rest } = compat.fromPageParams(payload);
     const query = {
       ...rest,
+      max_depth: toPiefedMaxDepth(payload),
       ...(type_ && { type_: compat.fromListingType(type_) }),
     } satisfies paths["/api/alpha/comment/list"]["get"]["parameters"]["query"];
 

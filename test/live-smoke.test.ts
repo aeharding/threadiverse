@@ -58,6 +58,32 @@ describe.runIf(process.env.LIVE_SMOKE)("live smoke", () => {
       expect(data.length).toBeGreaterThan(0);
     });
 
+    it(
+      "max_depth means the same depth on every provider",
+      OPTIONS,
+      async () => {
+        // The adapters absorb each server's own base (PieFed counts from
+        // below top-level, Lemmy from the post). If a server changes that,
+        // this catches it before consumers do.
+        const { data: posts } = await client.getPosts({
+          limit: 20,
+          type_: "local",
+        });
+        const post = posts.find((view) => view.post.comments > 0);
+        expect(post, "no post with comments to probe").toBeDefined();
+
+        const { data } = await client.getComments({
+          limit: 50,
+          max_depth: 1,
+          post_id: post!.post.id,
+        });
+
+        // Depth 1 is top-level only: paths look like `0.<id>`
+        for (const view of data)
+          expect(view.comment.path.split(".")).toHaveLength(2);
+      },
+    );
+
     it("all-type search passes canonical validation", OPTIONS, async () => {
       // PieFed has no all-type search endpoint — the adapter fans out and
       // merges, so an unspecified type_ must work everywhere

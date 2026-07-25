@@ -115,12 +115,20 @@ const PIEFED_OPERATIONS = {
   getComments: {
     decode: (call: RecordedCall): Payload<"getComments"> => {
       const q = query(call);
+      const parentId = numberish(q.parent_id);
+      const wireDepth = numberish(q.max_depth);
+
       return {
         limit: numberish(q.limit),
-        max_depth: numberish(q.max_depth),
+        // Invert the adapter's piefed depth adjustment (see
+        // toPiefedMaxDepth) so the decoded payload is canonical
+        max_depth:
+          wireDepth === undefined || parentId !== undefined
+            ? wireDepth
+            : wireDepth + 1,
         // piefed pages with numbers; canonical page_cursor is the string
         page_cursor: q.page,
-        parent_id: numberish(q.parent_id),
+        parent_id: parentId,
         post_id: numberish(q.post_id),
         sort: q.sort,
       } as Payload<"getComments">;

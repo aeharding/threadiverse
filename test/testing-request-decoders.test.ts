@@ -108,6 +108,21 @@ const SCENARIOS = [
     operation: "getComments",
   },
   {
+    // No parent: piefed's wire depth is adjusted, so the decoder has to
+    // undo it to report what the caller asked for
+    expected: { max_depth: 3, post_id: 42 },
+    invoke: (c: ThreadiverseClient) =>
+      c.getComments({ max_depth: 3, post_id: 42 }),
+    operation: "getComments",
+  },
+  {
+    // With a parent the providers agree, so depth passes through untouched
+    expected: { max_depth: 2, parent_id: 7, post_id: 42 },
+    invoke: (c: ThreadiverseClient) =>
+      c.getComments({ max_depth: 2, parent_id: 7, post_id: 42 }),
+    operation: "getComments",
+  },
+  {
     expected: { search_term: "cats", type_: "communities" },
     invoke: (c: ThreadiverseClient) =>
       c.search({ search_term: "cats", type_: "communities" }),
