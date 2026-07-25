@@ -76,6 +76,19 @@ const piefedMiddleware: Middleware = {
   },
 };
 
+/** Canonical search types PieFed can actually serve (its enum has no "All") */
+type SearchableType = Exclude<types.SearchType, "all">;
+
+const PIEFED_SEARCH_TYPE = {
+  comments: "Comments",
+  communities: "Communities",
+  posts: "Posts",
+  users: "Users",
+} as const satisfies Record<
+  SearchableType,
+  NonNullable<paths["/api/alpha/search"]["get"]["parameters"]["query"]>["type_"]
+>;
+
 export class UnsafePiefedClient implements BaseClient {
   static mode = "piefed" as const;
 
@@ -394,9 +407,14 @@ export class UnsafePiefedClient implements BaseClient {
       params: { query },
     });
 
+    const data = response.data!.comments.map(compat.toCommentView);
+
     return {
-      ...compat.toPageResponse(payload),
-      data: response.data!.comments.map(compat.toCommentView),
+      ...compat.toPageResponse(payload, {
+        items: data.length,
+        next_page: response.data!.next_page,
+      }),
+      data,
     };
   }
 
@@ -498,7 +516,7 @@ export class UnsafePiefedClient implements BaseClient {
     }
 
     return {
-      ...compat.toPageResponse(payload),
+      ...compat.toPageResponse(payload, { items: data.length }),
       data,
     };
   }
@@ -556,9 +574,14 @@ export class UnsafePiefedClient implements BaseClient {
       params: { query },
     });
 
+    const data = response.data!.posts.map(compat.toPostView);
+
     return {
-      ...compat.toPageResponse(payload),
-      data: response.data!.posts.map(compat.toPostView),
+      ...compat.toPageResponse(payload, {
+        items: data.length,
+        next_page: response.data!.next_page,
+      }),
+      data,
     };
   }
 
@@ -687,9 +710,14 @@ export class UnsafePiefedClient implements BaseClient {
       },
     });
 
+    const data = response.data!.communities.map(compat.toCommunityView);
+
     return {
-      ...compat.toPageResponse(payload),
-      data: response.data!.communities.map(compat.toCommunityView),
+      ...compat.toPageResponse(payload, {
+        items: data.length,
+        next_page: response.data!.next_page,
+      }),
+      data,
     };
   }
 
@@ -713,8 +741,7 @@ export class UnsafePiefedClient implements BaseClient {
         );
 
         return {
-          ...compat.toPageResponse(payload),
-
+          ...compat.toPageResponse(payload, { items: response.length }),
           data: response,
         };
       }
@@ -764,7 +791,7 @@ export class UnsafePiefedClient implements BaseClient {
     })();
 
     return {
-      ...compat.toPageResponse(payload),
+      ...compat.toPageResponse(payload, { items: data.length }),
       data,
     };
   }
@@ -968,27 +995,47 @@ export class UnsafePiefedClient implements BaseClient {
   ): ReturnType<BaseClient["search"]> {
     const { listing_type, search_term, type_, ...rest } =
       compat.fromPageParams(payload);
-    const response = await this.#client.GET("/api/alpha/search", {
-      ...options,
-      params: {
-        query: {
-          ...rest,
-          listing_type: compat.fromListingType(listing_type),
-          q: search_term,
-          // @ts-expect-error piefed's SearchType is narrower than ours; we pass through whatever the caller sent
-          type_: compat.fromSearchType(type_),
+
+    // PieFed requires a concrete `type_` — its enum has no "All" — so an
+    // all-type search fans out and merges, matching what the canonical
+    // `type_: "all"` (or an unspecified type) means everywhere else.
+    const searchTypes: SearchableType[] =
+      !type_ || type_ === "all"
+        ? ["communities", "posts", "users", "comments"]
+        : [type_];
+
+    const searchOne = async (searchType: SearchableType) => {
+      const response = await this.#client.GET("/api/alpha/search", {
+        ...options,
+        params: {
+          query: {
+            ...rest,
+            listing_type: compat.fromListingType(listing_type),
+            q: search_term,
+            type_: PIEFED_SEARCH_TYPE[searchType],
+          },
         },
-      },
-    });
+      });
+
+      // Each response carries every bucket, but only the requested one is
+      // populated — take just that bucket so a fan-out can't double-count
+      switch (searchType) {
+        case "comments":
+          return response.data!.comments.map(compat.toCommentView);
+        case "communities":
+          return response.data!.communities.map(compat.toCommunityView);
+        case "posts":
+          return response.data!.posts.map(compat.toPostView);
+        case "users":
+          return response.data!.users.map(compat.toPersonView);
+      }
+    };
+
+    const data = (await Promise.all(searchTypes.map(searchOne))).flat();
 
     return {
-      ...compat.toPageResponse(payload),
-      data: [
-        ...response.data!.communities.map(compat.toCommunityView),
-        ...response.data!.posts.map(compat.toPostView),
-        ...response.data!.users.map(compat.toPersonView),
-        ...response.data!.comments.map(compat.toCommentView),
-      ],
+      ...compat.toPageResponse(payload, { items: data.length }),
+      data,
     };
   }
 
@@ -1034,9 +1081,14 @@ export class UnsafePiefedClient implements BaseClient {
       params: { query: { sort: "New", ...compat.fromPageParams(payload) } },
     });
 
+    const data = response.data!.comments.map(compat.toCommentView);
+
     return {
-      ...compat.toPageResponse(payload),
-      data: response.data!.comments.map(compat.toCommentView),
+      ...compat.toPageResponse(payload, {
+        items: data.length,
+        next_page: response.data!.next_page,
+      }),
+      data,
     };
   }
 
@@ -1050,9 +1102,14 @@ export class UnsafePiefedClient implements BaseClient {
       params: { query: { sort: "New", ...compat.fromPageParams(payload) } },
     });
 
+    const data = response.data!.posts.map(compat.toPostView);
+
     return {
-      ...compat.toPageResponse(payload),
-      data: response.data!.posts.map(compat.toPostView),
+      ...compat.toPageResponse(payload, {
+        items: data.length,
+        next_page: response.data!.next_page,
+      }),
+      data,
     };
   }
 }

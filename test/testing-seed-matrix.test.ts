@@ -267,10 +267,8 @@ describe.each([
     } as Parameters<typeof client.getPosts>[0]);
     expect(third.data.map((view) => view.post.name)).toEqual(["Post 5"]);
 
-    // End-of-feed differs by provider: Lemmy stops handing out cursors,
-    // while the piefed adapter always computes the next page number — so
-    // consumers there stop on a short page instead.
-    if (mode === "lemmyv1") expect(third.next_page).toBeUndefined();
+    // End of feed means the same thing on every provider: no cursor
+    expect(third.next_page).toBeUndefined();
   });
 
   it("serves a trailing empty page when the last page was full", async () => {
@@ -377,6 +375,35 @@ describe.each([
     // A term nothing matches yields an empty result set, not an error
     const none = await client.search({ search_term: "zzzz", type_: "posts" });
     expect(none.data).toHaveLength(0);
+  });
+
+  it("searches every type at once", async () => {
+    const { client, fake } = setup();
+
+    fake.seed.community({ name: "cats_only", title: "Cats Only" });
+    fake.seed.person({ name: "catlover" });
+    fake.seed.comment({ content: "cats are great" });
+
+    // PieFed's API has no all-type search, so the adapter fans out and
+    // merges — the canonical result matches Lemmy's single request
+    const { data } = await client.search({ search_term: "cat" });
+
+    const kinds = data.map((item) => {
+      switch (true) {
+        case "comment" in item:
+          return "comment";
+        case "post" in item:
+          return "post";
+        case "community" in item:
+          return "community";
+        default:
+          return "person";
+      }
+    });
+
+    expect(new Set(kinds)).toEqual(
+      new Set(["comment", "community", "person", "post"]),
+    );
   });
 
   it("seed.clear() empties the derived feed", async () => {
