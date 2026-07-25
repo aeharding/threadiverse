@@ -7,6 +7,13 @@
  * their real pagination code paths.
  */
 
+/**
+ * Note: real servers reject a non-positive or non-numeric `limit` (Lemmy
+ * 400s with `invalid_fetch_limit`) and a corrupt cursor. These helpers
+ * degrade to an empty page / offset 0 instead — never to a cursor that
+ * fails to advance, so a consumer's paging loop can't spin forever.
+ */
+
 /** Prefix marks fake cursors as opaque: nothing should parse them */
 const CURSOR_PREFIX = "seed-offset:";
 
@@ -35,10 +42,18 @@ export function paginateByCursor<T>(
     ? Number(cursor.slice(CURSOR_PREFIX.length))
     : 0;
   const end = limit === undefined ? items.length : offset + limit;
+  const page = items.slice(offset, end);
 
   return {
-    items: items.slice(offset, end),
-    nextPage: end < items.length ? `${CURSOR_PREFIX}${end}` : undefined,
+    items: page,
+    // Real Lemmy hands out a cursor whenever it filled the page — so the
+    // last full page is followed by an empty one, and consumers that stop
+    // on "no cursor" are exercised properly. `limit > 0` keeps a
+    // degenerate limit from emitting a cursor that never advances.
+    nextPage:
+      limit !== undefined && limit > 0 && page.length === limit
+        ? `${CURSOR_PREFIX}${end}`
+        : undefined,
   };
 }
 
@@ -51,16 +66,18 @@ export function paginateByPage<T>(
   items: T[],
   { limit, page }: { limit?: number; page?: number },
 ): Page<T> {
-  const current = page ?? 1;
+  const current = Math.max(1, page ?? 1);
 
   if (limit === undefined)
     return { items: current > 1 ? [] : items, nextPage: undefined };
 
   const start = (current - 1) * limit;
   const end = start + limit;
+  const items_ = items.slice(start, end);
 
   return {
-    items: items.slice(start, end),
-    nextPage: end < items.length ? String(current + 1) : undefined,
+    items: items_,
+    nextPage:
+      limit > 0 && items_.length === limit ? String(current + 1) : undefined,
   };
 }

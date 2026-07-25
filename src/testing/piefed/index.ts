@@ -334,7 +334,7 @@ export class FakePiefedInstance extends FakeInstance {
     const commentView = (subject: SeedComment) =>
       build.commentView({
         body: subject.content,
-        child_count: subject.childCount,
+        child_count: seed.childCountOf(subject),
         creator: person(subject.creator),
         deleted: subject.deleted,
         id: subject.id,
@@ -457,13 +457,16 @@ export class FakePiefedInstance extends FakeInstance {
         );
 
       // max_depth is relative to the requested parent, so fetching a
-      // subtree returns that comment plus max_depth levels beneath it
+      // subtree returns that comment plus max_depth levels beneath it.
+      // Verified live: with a parent PieFed matches Lemmy, but without one
+      // it counts levels *below* top-level (max_depth=0 → the roots),
+      // where Lemmy counts from the post (max_depth=0 → nothing).
       const maxDepth = call.query.get("max_depth");
       if (maxDepth) {
         const parent = parentId
           ? seed.comments.find((comment) => comment.id === Number(parentId))
           : undefined;
-        const baseDepth = parent ? depthOf(parent.path) : 0;
+        const baseDepth = parent ? depthOf(parent.path) : 1;
         comments = comments.filter(
           (comment) => depthOf(comment.path) - baseDepth <= Number(maxDepth),
         );

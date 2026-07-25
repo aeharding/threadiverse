@@ -266,6 +266,33 @@ describe.each([
       page_cursor: second.next_page,
     } as Parameters<typeof client.getPosts>[0]);
     expect(third.data.map((view) => view.post.name)).toEqual(["Post 5"]);
+
+    // End-of-feed differs by provider: Lemmy stops handing out cursors,
+    // while the piefed adapter always computes the next page number — so
+    // consumers there stop on a short page instead.
+    if (mode === "lemmyv1") expect(third.next_page).toBeUndefined();
+  });
+
+  it("serves a trailing empty page when the last page was full", async () => {
+    const { client, fake } = setup();
+
+    fake.seed.clear();
+    const alex = fake.seed.person({ name: "alex" });
+    for (const index of [1, 2])
+      fake.seed.post({ creator: alex, id: index, name: `Post ${index}` });
+
+    // Exactly `limit` items: real servers still hand out a cursor, and the
+    // page behind it is empty — consumers that stop on "no cursor" must
+    // survive that extra round trip
+    const first = await client.getPosts({ limit: 2 });
+    expect(first.data).toHaveLength(2);
+    expect(first.next_page).toBeDefined();
+
+    const second = await client.getPosts({
+      limit: 2,
+      page_cursor: first.next_page,
+    } as Parameters<typeof client.getPosts>[0]);
+    expect(second.data).toHaveLength(0);
   });
 
   it("honors max_depth relative to the requested parent", async () => {
@@ -286,15 +313,24 @@ describe.each([
       post,
     });
 
-    // Depth 1 from the post = top-level comments only
+    // Shallowest depth = top-level only. The providers count differently
+    // without a parent (verified against live servers): Lemmy counts from
+    // the post, PieFed counts levels below top-level.
     const shallow = await client.getComments({
-      max_depth: 1,
+      max_depth: mode === "piefed" ? 0 : 1,
       post_id: post.id,
     });
     expect(shallow.data.map((view) => view.comment.content)).toEqual([
       "First!",
       "parent",
     ]);
+
+    // The excluded descendants still count toward child_count — which is
+    // what makes a consumer's "N more replies" affordance render
+    const shallowParent = shallow.data.find(
+      (view) => view.comment.content === "parent",
+    );
+    expect(shallowParent?.comment.child_count).toBe(2);
 
     // Depth 1 from the parent = the parent plus its direct children
     const subtree = await client.getComments({

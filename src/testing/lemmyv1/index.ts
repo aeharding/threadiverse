@@ -289,7 +289,7 @@ export class FakeLemmyV1Instance extends FakeInstance {
       });
     const commentView = (subject: SeedComment) =>
       build.commentView({
-        child_count: subject.childCount,
+        child_count: seed.childCountOf(subject),
         content: subject.content,
         creator: person(subject.creator),
         deleted: subject.deleted,
