@@ -79,6 +79,29 @@ const piefedMiddleware: Middleware = {
 /** Canonical search types PieFed can actually serve (its enum has no "All") */
 type SearchableType = Exclude<types.SearchType, "all">;
 
+/**
+ * PieFed counts `max_depth` from *below* top-level, Lemmy counts from the
+ * post, so the same request reaches a level deeper on PieFed — verified
+ * live: with `max_depth=1` and no `parent_id`, Lemmy returns top-level
+ * comments while PieFed returns those plus their children. Requesting one
+ * less keeps the canonical meaning ("levels of comments to return")
+ * identical on both. With a `parent_id` the two agree, so it passes
+ * through untouched.
+ *
+ * Canonical `max_depth: 0` ("no comments") has no PieFed equivalent — its
+ * minimum still returns top-level — so it clamps rather than going
+ * negative.
+ */
+function toPiefedMaxDepth(
+  payload: Parameters<BaseClient["getComments"]>[0],
+): number | undefined {
+  const { max_depth, parent_id } = payload;
+
+  if (max_depth === undefined || parent_id !== undefined) return max_depth;
+
+  return Math.max(0, max_depth - 1);
+}
+
 const PIEFED_SEARCH_TYPE = {
   comments: "Comments",
   communities: "Communities",
@@ -399,6 +422,7 @@ export class UnsafePiefedClient implements BaseClient {
     const { type_, ...rest } = compat.fromPageParams(payload);
     const query = {
       ...rest,
+      max_depth: toPiefedMaxDepth(payload),
       ...(type_ && { type_: compat.fromListingType(type_) }),
     } satisfies paths["/api/alpha/comment/list"]["get"]["parameters"]["query"];
 

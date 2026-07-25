@@ -304,6 +304,16 @@ describe.each([
     expect(second.data).toHaveLength(0);
   });
 
+  it("asks for the same comment depth regardless of provider", async () => {
+    const { client, fake, post } = setup();
+
+    await client.getComments({ max_depth: 3, post_id: post.id });
+
+    // Canonical payloads stay canonical even where the wire request had to
+    // be adjusted for the provider
+    expect(fake.callsTo("getComments")[0]).toMatchObject({ max_depth: 3 });
+  });
+
   it("honors max_depth relative to the requested parent", async () => {
     const { client, fake, post } = setup();
 
@@ -322,11 +332,10 @@ describe.each([
       post,
     });
 
-    // Shallowest depth = top-level only. The providers count differently
-    // without a parent (verified against live servers): Lemmy counts from
-    // the post, PieFed counts levels below top-level.
+    // max_depth means the same thing on every provider: the piefed adapter
+    // absorbs that server's different base (see toPiefedMaxDepth)
     const shallow = await client.getComments({
-      max_depth: mode === "piefed" ? 0 : 1,
+      max_depth: 1,
       post_id: post.id,
     });
     expect(shallow.data.map((view) => view.comment.content)).toEqual([
