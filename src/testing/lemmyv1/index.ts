@@ -6,7 +6,7 @@ import {
   OperationDef,
   RecordedCall,
 } from "../FakeInstance";
-import { depthOf, paginateByCursor } from "../pagination";
+import { CursorTokens, depthOf, paginateByCursor } from "../pagination";
 import { searchSeed, SeedSearchType } from "../search";
 import {
   SeedComment,
@@ -283,6 +283,7 @@ export class FakeLemmyV1Instance extends FakeInstance {
         id: subject.id,
         myVote: subject.myVote,
         name: subject.name,
+        read: subject.read,
         saved: subject.saved,
         score: subject.score,
         url: subject.url,
@@ -322,12 +323,17 @@ export class FakeLemmyV1Instance extends FakeInstance {
           });
 
     // v1 pages with opaque cursors the server round-trips
+    const cursors = new CursorTokens();
     const pageOf = <T>(items: T[], call: RecordedCall) => {
       const limit = call.query.get("limit");
-      return paginateByCursor(items, {
-        cursor: call.query.get("page_cursor") ?? undefined,
-        limit: limit === null ? undefined : Number(limit),
-      });
+      return paginateByCursor(
+        items,
+        {
+          cursor: call.query.get("page_cursor") ?? undefined,
+          limit: limit === null ? undefined : Number(limit),
+        },
+        cursors,
+      );
     };
     const pagedFrom = <T, W>(
       items: T[],
@@ -508,9 +514,14 @@ export class FakeLemmyV1Instance extends FakeInstance {
       return { json: pagedFrom(notifications, call, notificationView) };
     });
 
-    // Fire-and-forget side effect of many logged-in interactions
-    this.mock("POST /api/v4/post/mark_as_read/many", {
-      json: { success: true },
+    this.mock("POST /api/v4/post/mark_as_read/many", (call) => {
+      const { post_ids, read } = call.body as {
+        post_ids: number[];
+        read: boolean;
+      };
+      for (const post of seed.posts)
+        if (post_ids.includes(post.id)) post.read = read;
+      return { json: { success: true } };
     });
 
     // Vote/save writes mutate the seed store, so the returned view — and

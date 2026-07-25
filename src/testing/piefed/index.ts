@@ -326,6 +326,7 @@ export class FakePiefedInstance extends FakeInstance {
         deleted: subject.deleted,
         id: subject.id,
         myVote: subject.myVote,
+        read: subject.read,
         saved: subject.saved,
         score: subject.score,
         title: subject.name,
@@ -555,6 +556,39 @@ export class FakePiefedInstance extends FakeInstance {
       return {
         json: build.privateMessageListResponse(pageOf(messages, call).items),
       };
+    });
+
+    this.mock("GET /api/alpha/community/list", (call) => {
+      const { items, nextPage } = pageOf(seed.communities, call);
+      return {
+        json: {
+          communities: items.map((subject) =>
+            build.communityView({ community: community(subject) }),
+          ),
+          next_page: nextPage ?? null,
+        },
+      };
+    });
+
+    // Real PieFed serves this; the lemmyv1 adapter throws UnsupportedError
+    // before requesting, so only the piefed fake needs it
+    this.mock("GET /api/alpha/federated_instances", () => ({
+      json: { federated_instances: { allowed: [], blocked: [], linked: [] } },
+    }));
+
+    // Fire-and-forget on the app side, but a real server answers it — an
+    // unmocked 404 here made the shared mark-read spec vacuous on piefed
+    this.mock("POST /api/alpha/post/mark_as_read", (call) => {
+      // PieFed accepts either a single post_id or a post_ids array
+      const { post_id, post_ids, read } = call.body as {
+        post_id?: number;
+        post_ids?: number[];
+        read: boolean;
+      };
+      const ids = post_ids ?? (post_id === undefined ? [] : [post_id]);
+      for (const post of seed.posts)
+        if (ids.includes(post.id)) post.read = read;
+      return { json: { success: true } };
     });
 
     this.mock("GET /api/alpha/search", (call) => {

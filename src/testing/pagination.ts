@@ -14,13 +14,39 @@
  * fails to advance, so a consumer's paging loop can't spin forever.
  */
 
-/** Prefix marks fake cursors as opaque: nothing should parse them */
-const CURSOR_PREFIX = "seed-offset:";
-
 export interface Page<T> {
   items: T[];
   /** Wire `next_page` value; absent when the last page was served */
   nextPage?: string;
+}
+
+/**
+ * Hands out cursors a client cannot derive.
+ *
+ * A cursor that encodes its own offset (`offset:40`) lets a buggy consumer
+ * fabricate the next one and still page correctly, so tests can't tell
+ * "echoes the server's cursor" from "invents one". Tokens here are opaque
+ * counter values resolved through this map — echoing what the server sent
+ * is the only way to advance. Counter, not random, so runs stay
+ * reproducible.
+ */
+export class CursorTokens {
+  #next = 1;
+
+  #offsets = new Map<string, number>();
+
+  /** Mint a cursor pointing at `offset` */
+  issue(offset: number): string {
+    const token = `seed-cursor-${this.#next++}`;
+    this.#offsets.set(token, offset);
+    return token;
+  }
+
+  /** The offset a cursor refers to; unknown cursors start from the top */
+  offsetOf(cursor: string | undefined): number {
+    if (cursor === undefined) return 0;
+    return this.#offsets.get(cursor) ?? 0;
+  }
 }
 
 /**
@@ -37,24 +63,19 @@ export function depthOf(path: string): number {
 export function paginateByCursor<T>(
   items: T[],
   { cursor, limit }: { cursor?: string; limit?: number },
+  tokens: CursorTokens,
 ): Page<T> {
-  const offset = cursor?.startsWith(CURSOR_PREFIX)
-    ? Number(cursor.slice(CURSOR_PREFIX.length))
-    : 0;
+  const offset = tokens.offsetOf(cursor);
   const end = limit === undefined ? items.length : offset + limit;
   const page = items.slice(offset, end);
 
-  return {
-    items: page,
-    // Real Lemmy hands out a cursor whenever it filled the page — so the
-    // last full page is followed by an empty one, and consumers that stop
-    // on "no cursor" are exercised properly. `limit > 0` keeps a
-    // degenerate limit from emitting a cursor that never advances.
-    nextPage:
-      limit !== undefined && limit > 0 && page.length === limit
-        ? `${CURSOR_PREFIX}${end}`
-        : undefined,
-  };
+  // Real Lemmy hands out a cursor whenever it filled the page — so the last
+  // full page is followed by an empty one, and consumers that stop on "no
+  // cursor" are exercised properly. `limit > 0` keeps a degenerate limit
+  // from emitting a cursor that never advances.
+  const hasMore = limit !== undefined && limit > 0 && page.length === limit;
+
+  return { items: page, nextPage: hasMore ? tokens.issue(end) : undefined };
 }
 
 /**
