@@ -311,6 +311,7 @@ export function createLemmyV1Builders({
       moderator: over.moderator,
       modlog: {
         bulk_action_parent_id: null,
+        child_count: 0,
         // intentionally null-able to exercise null → undefined handling
         expires_at: null,
         id: over.id,
@@ -342,7 +343,7 @@ export function createLemmyV1Builders({
       default_listing_type: "all",
       default_post_sort_type: "active",
       email_verified: false,
-      hide_media: false,
+      hide_posts_with_media: false,
       id: over.person_id,
       infinite_scroll_enabled: false,
       interface_language: "browser",
@@ -355,6 +356,7 @@ export function createLemmyV1Builders({
       show_avatars: true,
       show_bot_accounts: true,
       show_downvotes: "show",
+      show_media: true,
       show_nsfw: false,
       show_person_votes: true,
       show_read_posts: true,
@@ -460,6 +462,7 @@ export function createLemmyV1Builders({
     return {
       community_view: communityView({ community: view.community }),
       cross_posts: [],
+      moderators: [],
       post_view: view,
     };
   }
@@ -511,6 +514,7 @@ export function createLemmyV1Builders({
           image_mode: "store_link_previews",
           image_upload_disabled: false,
           image_upload_timeout_seconds: 30,
+          max_invites_per_user_allowed: 10,
           nsfw_content_disallowed: false,
           oauth_registration: false,
           post_downvotes: "all",

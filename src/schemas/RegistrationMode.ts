@@ -6,5 +6,6 @@ import { z } from "zod/v4-mini";
 export const RegistrationMode = z.enum([
   "closed",
   "require_application",
+  "require_invitation",
   "open",
 ]);
