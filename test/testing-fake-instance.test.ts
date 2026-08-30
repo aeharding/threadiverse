@@ -58,6 +58,19 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
     expect(site.site_view.site.name).toBe("Test v1 site");
   });
 
+  it("preserves invitation-only registration mode", async () => {
+    const { client, instance } = setup();
+    const response = instance.build.getSiteResponse();
+    response.site_view.local_site.registration_mode = "require_invitation";
+    instance.mock("GET /api/v4/site", { json: response });
+
+    const site = await client.getSite();
+
+    expect(site.site_view.local_site.registration_mode).toBe(
+      "require_invitation",
+    );
+  });
+
   it("getPosts returns seeded posts through compat + validation", async () => {
     const { client } = setup();
 

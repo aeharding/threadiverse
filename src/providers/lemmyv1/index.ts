@@ -260,7 +260,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
     return {
       ...response,
       community_view: compat.toCommunityView(response.community_view),
-      moderators: response.moderators,
+      moderators: response.moderators.map(compat.toCommunityModeratorView),
     };
   }
 
@@ -314,7 +314,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
 
     return {
       ...response,
-      moderates: response.moderates,
+      moderates: response.moderates.map(compat.toCommunityModeratorView),
       person_view: compat.toPersonView(response.person_view),
     };
   }
@@ -628,7 +628,7 @@ export class UnsafeLemmyV1Client implements BaseClient {
   async markPostAsRead(
     ...params: Parameters<BaseClient["markPostAsRead"]>
   ): ReturnType<BaseClient["markPostAsRead"]> {
-    await unwrap(await this.#client.markManyPostAsRead(...params));
+    await unwrap(await this.#client.markManyPostsAsRead(...params));
   }
 
   async register(

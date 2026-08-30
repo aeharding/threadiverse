@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   toCommentView,
+  toCommunity,
+  toPostReportView,
   toPostView,
   toSupportedNotificationView,
 } from "../src/providers/lemmyv1/compat";
@@ -43,11 +45,37 @@ function basePostView() {
   };
 }
 
+describe("v1 compat - latest API shapes", () => {
+  it("normalizes optional community titles without replacing explicit ones", () => {
+    expect(toCommunity({ name: "no_title" } as never).title).toBe("no_title");
+    expect(
+      toCommunity({ name: "null_title", title: null } as never).title,
+    ).toBe("null_title");
+    expect(toCommunity({ name: "c", title: "Display" } as never).title).toBe(
+      "Display",
+    );
+    expect(toCommunity({ name: "c", title: "" } as never).title).toBe("");
+  });
+
+  it("preserves tags returned with post reports", () => {
+    const tag = { color: "color01", name: "question" };
+    const view = toPostReportView({
+      ...basePostView(),
+      post_creator: { id: 2, name: "sam" },
+      post_report: { id: 1 },
+      tags: [tag],
+    } as never);
+
+    expect(view.tags).toEqual([tag]);
+  });
+});
+
 describe("v1 compat - my_vote derivation", () => {
   it("CommentView: no comment_actions → no vote", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const v = toCommentView({ ...baseCommentView() } as any);
     expect(v.my_vote).toBeUndefined();
+    expect(v.community.title).toBe("c");
   });
 
   it("CommentView: comment_actions with null vote_is_upvote → no vote", () => {
@@ -67,6 +95,7 @@ describe("v1 compat - my_vote derivation", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     expect(v.my_vote).toBeUndefined();
+    expect(v.community.title).toBe("c");
   });
 
   it("CommentView: vote_is_upvote=true → upvote", () => {

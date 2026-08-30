@@ -27,6 +27,7 @@ export function toCommentReportView(
 ): types.CommentReportView {
   return {
     ...v,
+    community: toCommunity(v.community),
     creator_banned_from_community: !!v.community_actions?.ban_expires_at,
     creator_blocked: !!v.person_actions?.blocked_at,
     my_vote: toVote(v.comment_actions),
@@ -39,16 +40,40 @@ export function toCommentView(v: LemmyV1.CommentView): types.CommentView {
   return {
     ...v,
     banned_from_community: !!v.community_actions?.ban_expires_at,
+    community: toCommunity(v.community),
     my_vote: toVote(v.comment_actions),
     saved: !!v.comment_actions?.saved_at,
     subscribed: toFollowState(v.community_actions?.follow_state),
   };
 }
 
+export function toCommunity(community: LemmyV1.Community): types.Community {
+  return {
+    ...community,
+    // Lemmy v1 permits title to be absent. Threadiverse has historically
+    // exposed a required display title, so preserve that contract with the
+    // community's required local name as the fallback.
+    title: community.title ?? community.name,
+  };
+}
+
+export function toCommunityFollowerView(
+  v: LemmyV1.CommunityFollowerView,
+): types.CommunityFollowerView {
+  return { ...v, community: toCommunity(v.community) };
+}
+
+export function toCommunityModeratorView(
+  v: LemmyV1.CommunityModeratorView,
+): types.CommunityModeratorView {
+  return { ...v, community: toCommunity(v.community) };
+}
+
 export function toCommunityView(v: LemmyV1.CommunityView): types.CommunityView {
   return {
     ...v,
     blocked: !!v.community_actions?.blocked_at,
+    community: toCommunity(v.community),
     notifications: v.community_actions?.notifications ?? "replies_and_mentions",
     subscribed: toFollowState(v.community_actions?.follow_state),
   };
@@ -96,7 +121,9 @@ export function toModlogView(
       reason: v.modlog.reason ?? undefined,
     },
     target_comment: v.target_comment,
-    target_community: v.target_community,
+    target_community: v.target_community
+      ? toCommunity(v.target_community)
+      : undefined,
     target_person: v.target_person,
     target_post: v.target_post,
   };
@@ -104,8 +131,8 @@ export function toModlogView(
 
 export function toMyUserInfo(info: LemmyV1.MyUserInfo): types.MyUserInfo {
   return {
-    community_blocks: info.community_blocks,
-    follows: info.follows,
+    community_blocks: info.community_blocks.map(toCommunity),
+    follows: info.follows.map(toCommunityFollowerView),
     // v1 split instance_blocks into two separate lists; merge for consumers.
     instance_blocks: [
       ...info.instance_communities_blocks,
@@ -118,7 +145,7 @@ export function toMyUserInfo(info: LemmyV1.MyUserInfo): types.MyUserInfo {
       },
       person: info.local_user_view.person,
     },
-    moderates: info.moderates,
+    moderates: info.moderates.map(toCommunityModeratorView),
     person_blocks: info.person_blocks,
   };
 }
@@ -132,6 +159,7 @@ export function toPostReportView(
 ): types.PostReportView {
   return {
     ...v,
+    community: toCommunity(v.community),
     creator_banned_from_community: !!v.community_actions?.ban_expires_at,
     creator_blocked: !!v.person_actions?.blocked_at,
     hidden: !!v.post_actions?.hidden_at,
@@ -140,9 +168,7 @@ export function toPostReportView(
     read: !!v.post_actions?.read_at,
     saved: !!v.post_actions?.saved_at,
     subscribed: toFollowState(v.community_actions?.follow_state),
-    // Lemmy v1 PostReportView doesn't carry tags. See
-    // https://github.com/LemmyNet/lemmy/issues/6527
-    tags: [],
+    tags: v.tags,
     unread_comments: toUnreadComments(v.post, v.post_actions),
   };
 }
@@ -151,6 +177,7 @@ export function toPostView(v: LemmyV1.PostView): types.PostView {
   return {
     ...v,
     banned_from_community: !!v.community_actions?.ban_expires_at,
+    community: toCommunity(v.community),
     creator_blocked: !!v.person_actions?.blocked_at,
     hidden: !!v.post_actions?.hidden_at,
     my_vote: toVote(v.post_actions),
