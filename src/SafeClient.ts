@@ -1,6 +1,7 @@
 import type { UnsafePiefedClient } from "./providers/piefed";
 
 import { installEndpointMethods } from "./endpoints";
+import { UnexpectedResponseError } from "./errors";
 import { UnsafeLemmyV0Client } from "./providers/lemmyv0";
 import { UnsafeLemmyV1Client } from "./providers/lemmyv1";
 
@@ -14,7 +15,9 @@ type AnyClient =
  * against the canonical Zod schema declared in the endpoint table
  * (`./endpoints.ts`) before being returned to the consumer.
  */
-export default function buildSafeClient(_Client: AnyClient): AnyClient {
+export default function buildSafeClient<ClientType extends AnyClient>(
+  _Client: ClientType,
+): ClientType {
   // Typescript is not smart enough to infer the correct type from the union
   // Since they all implement BaseClient, cast to the first one
   const Client = _Client as typeof UnsafeLemmyV0Client;
@@ -31,9 +34,19 @@ export default function buildSafeClient(_Client: AnyClient): AnyClient {
         ) => Promise<unknown>;
 
         const response = await unsafeMethod.apply(this, params);
-        return schema ? schema.parse(response) : response;
+        if (!schema) return response;
+
+        const result = schema.safeParse(response);
+        if (!result.success)
+          throw new UnexpectedResponseError(`Malformed ${endpoint} response`, {
+            cause: result.error,
+          });
+
+        return result.data;
       },
   );
 
-  return SafeClient;
+  // The subclass preserves its provider's constructor, instance, and static
+  // surface; only endpoint implementations are replaced with validated ones.
+  return SafeClient as unknown as ClientType;
 }

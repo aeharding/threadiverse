@@ -65,6 +65,24 @@ describe("createResponseError", () => {
     expect(error.code).toBe("some_new_code");
     expect(error.software).toBe("piefed");
   });
+
+  it.each(["constructor", "__proto__", "toString", "hasOwnProperty"])(
+    "treats inherited object key %s as an unmapped server code",
+    (code) => {
+      const error = createResponseError(code, {
+        software: "piefed",
+        status: 400,
+      });
+
+      expect(error.constructor).toBe(ResponseError);
+      expect(error).toMatchObject({
+        code,
+        message: code,
+        software: "piefed",
+        status: 400,
+      });
+    },
+  );
 });
 
 describe("isErrorCode", () => {

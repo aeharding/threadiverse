@@ -1,0 +1,10 @@
+{
+  "sourceUrl": "https://piefed.social/api/alpha/swagger.json",
+  "captureDate": "2026-08-30",
+  "sha256": "fa88177c20a8fe23bbaffbfa6c0c8d0f106b7e284beb06f33733dcc9dd1362ae",
+  "generator": {
+    "package": "openapi-typescript",
+    "version": "7.13.0",
+    "typescriptVersion": "6.0.3"
+  }
+}

@@ -230,6 +230,7 @@ export function createPiefedBuilders({
 
   function personView(
     subject: Wire<Schemas["Person"]>,
+    over: { isAdmin?: boolean } = {},
   ): Wire<Schemas["PersonView"]> {
     return {
       activity_alert: false,
@@ -238,7 +239,7 @@ export function createPiefedBuilders({
         person_id: subject.id,
         post_count: 0,
       },
-      is_admin: false,
+      is_admin: over.isAdmin ?? false,
       person: subject,
     };
   }
@@ -265,12 +266,16 @@ export function createPiefedBuilders({
   /** `GET /api/alpha/user` (getPersonDetails) */
   function userResponse(
     subject: Wire<Schemas["Person"]>,
+    over: {
+      comments?: Wire<Schemas["CommentView"]>[];
+      posts?: Wire<Schemas["PostView"]>[];
+    } = {},
   ): Wire<Schemas["GetUserResponse"]> {
     return {
-      comments: [],
+      comments: over.comments ?? [],
       moderates: [],
       person_view: personView(subject),
-      posts: [],
+      posts: over.posts ?? [],
     };
   }
 
@@ -331,15 +336,45 @@ export function createPiefedBuilders({
     };
   }
 
+  /** `GET /api/alpha/modlog` response envelope */
+  function modlogResponse(
+    over: Partial<Wire<Schemas["GetModLogResponse"]>> = {},
+  ): Wire<Schemas["GetModLogResponse"]> {
+    return {
+      added: [],
+      added_to_community: [],
+      admin_purged_comments: [],
+      admin_purged_communities: [],
+      admin_purged_persons: [],
+      admin_purged_posts: [],
+      banned: [],
+      banned_from_community: [],
+      featured_posts: [],
+      hidden_communities: [],
+      locked_posts: [],
+      removed_comments: [],
+      removed_communities: [],
+      removed_posts: [],
+      transferred_to_community: [],
+      ...over,
+    };
+  }
+
   /** `GET /api/alpha/site` (getSite) */
   function getSiteResponse(
-    over: { myUser?: Wire<Schemas["Person"]>; name?: string } = {},
+    over: {
+      admins?: Wire<Schemas["PersonView"]>[];
+      enableDownvotes?: boolean;
+      myUser?: Wire<Schemas["Person"]>;
+      name?: string;
+    } = {},
   ): Wire<Schemas["GetSiteResponse"]> {
     return {
-      admins: [],
+      admins: over.admins ?? [],
       my_user: over.myUser ? myUserInfo(over.myUser) : undefined,
       site: {
         actor_id: `https://${host}/`,
+        enable_downvotes: over.enableDownvotes ?? true,
         name: over.name ?? "Test piefed site",
       },
       version,
@@ -421,6 +456,42 @@ export function createPiefedBuilders({
     return { private_messages };
   }
 
+  /** `GET /api/alpha/user/notifications` response envelope */
+  function userNotificationsResponse(
+    items: Wire<Schemas["UserNotificationItemView"]>[],
+    over: {
+      nextPage?: null | string;
+      status?: Wire<Schemas["UserNotificationsResponse"]>["status"];
+      username?: string;
+    } = {},
+  ): Wire<Schemas["UserNotificationsResponse"]> {
+    return {
+      counts: {
+        read: items.filter((item) => item.status === "Read").length,
+        total: items.length,
+        unread: items.filter((item) => item.status === "Unread").length,
+      },
+      items,
+      next_page: over.nextPage ?? null,
+      status: over.status ?? "All",
+      username: over.username ?? "recipient",
+    };
+  }
+
+  function userNotificationItemView(
+    over: Partial<Wire<Schemas["UserNotificationItemView"]>> &
+      Pick<
+        Wire<Schemas["UserNotificationItemView"]>,
+        "author" | "notif_id" | "notif_subtype" | "notif_type"
+      >,
+  ): Wire<Schemas["UserNotificationItemView"]> {
+    return {
+      notif_body: "",
+      status: "Unread",
+      ...over,
+    };
+  }
+
   /** `GET /api/alpha/post/list` (getPosts) response envelope */
   function postListResponse(
     posts: Wire<Schemas["PostView"]>[],
@@ -446,6 +517,7 @@ export function createPiefedBuilders({
     communityView,
     getSiteResponse,
     localUser,
+    modlogResponse,
     myUserInfo,
     person,
     personView,
@@ -456,6 +528,8 @@ export function createPiefedBuilders({
     privateMessageView,
     repliesResponse,
     searchResponse,
+    userNotificationItemView,
+    userNotificationsResponse,
     userResponse,
   };
 }

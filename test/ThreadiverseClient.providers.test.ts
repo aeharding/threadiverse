@@ -84,16 +84,16 @@ describe("ThreadiverseClient - Providers", () => {
         }),
       );
 
+      // Verify that fetch was called exactly 3 times (wellknown + nodeinfo + getPosts)
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+
       // Explicitly check the getPosts endpoint and options
-      const thirdCall = mockFetch.mock.calls[2][0] as Request;
+      const thirdCall = mockFetch.mock.calls[2]![0] as Request;
       expect(thirdCall).toBeInstanceOf(Request);
       expect(thirdCall.url).toContain(
         "https://piefed.example.com/api/alpha/post/list",
       );
       expect(thirdCall.method).toBe("GET");
-
-      // Verify that fetch was called at least 3 times (wellknown + nodeinfo + getPosts)
-      expect(mockFetch).toHaveBeenCalledTimes(3);
     });
   });
 });

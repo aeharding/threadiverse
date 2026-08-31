@@ -4,7 +4,7 @@
 // builder drifts from what the compat layer + canonical schemas expect,
 // this fails here — not in a consumer's e2e suite.
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { FakeLemmyV1Instance } from "../src/testing";
 import ThreadiverseClient from "../src/ThreadiverseClient";
@@ -44,7 +44,8 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
   it("discovers software via nodeinfo", async () => {
     const { client } = setup();
 
-    expect(await client.connect()).toEqual({
+    expect(await client.connect()).toMatchObject({
+      capabilities: { getFederatedInstances: false },
       mode: "lemmyv1",
       software: { name: "lemmy", version: "1.0.0-beta.1" },
     });
@@ -182,23 +183,37 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
       status: call.body && typeof call.body === "object" ? 200 : 400,
     }));
 
+    const pendingCall = instance.waitForCall("POST /api/v4/post/like");
     const { post_view } = await client.likePost({
       is_upvote: true,
       post_id: 1,
     });
     expect(post_view.post.id).toBe(1);
 
-    const call = await instance.waitForCall("POST /api/v4/post/like");
+    const call = await pendingCall;
     expect(call.body).toMatchObject({ post_id: 1 });
   });
 
-  it("answers unmocked endpoints with a 404 error", async () => {
-    const { client } = setup();
+  it("answers unmocked same-origin routes with the documented 501", async () => {
+    const { instance } = setup();
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    // resolveObject has no derived default — the fake 404s loudly
-    await expect(
-      client.resolveObject({ q: "https://example.com/post/1" }),
-    ).rejects.toThrow();
+    try {
+      const response = await instance.fetch(
+        `${instance.origin}/unmocked?consumer=voyager`,
+      );
+
+      expect(response.status).toBe(501);
+      await expect(response.json()).resolves.toEqual({
+        error: "not_implemented",
+      });
+      expect(warning).toHaveBeenCalledTimes(1);
+      expect(warning).toHaveBeenCalledWith(
+        "[FakeInstance] unmocked request: GET /unmocked?consumer=voyager",
+      );
+    } finally {
+      warning.mockRestore();
+    }
   });
 
   it("simulates aborts as network failures", async () => {
@@ -260,6 +275,48 @@ describe("FakeLemmyV1Instance + ThreadiverseClient round trip", () => {
 
     const call = await pendingCall;
     expect(call.query.get("limit")).toBe("5");
+  });
+
+  it("waitForCall supports Voyager-style assertions after the request", async () => {
+    const { client, instance } = setup();
+
+    await client.getPosts({ limit: 1 });
+
+    const call = await instance.waitForCall("GET /api/v4/post/list");
+    expect(call.query.get("limit")).toBe("1");
+  });
+
+  it("waitForNextCall ignores a prior call", async () => {
+    const { client, instance } = setup();
+
+    await client.getPosts({ limit: 1 });
+
+    const pendingCall = instance.waitForNextCall("GET /api/v4/post/list");
+    await client.getPosts({ limit: 2 });
+
+    const call = await pendingCall;
+    expect(call.query.get("limit")).toBe("2");
+  });
+
+  it("waitForPayload supports post-request canonical assertions", async () => {
+    const { client, instance } = setup();
+
+    await client.getPosts({ limit: 1 });
+
+    await expect(instance.waitForPayload("getPosts")).resolves.toMatchObject({
+      limit: 1,
+    });
+  });
+
+  it("waitForNextPayload ignores a prior canonical payload", async () => {
+    const { client, instance } = setup();
+
+    await client.getPosts({ limit: 1 });
+
+    const pendingPayload = instance.waitForNextPayload("getPosts");
+    await client.getPosts({ limit: 2 });
+
+    await expect(pendingPayload).resolves.toMatchObject({ limit: 2 });
   });
 
   it("rejects waitForCall (not the request) when a predicate throws", async () => {

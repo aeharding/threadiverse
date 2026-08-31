@@ -51,7 +51,7 @@ import { ThreadiverseClient } from "threadiverse";
 
 const client = new ThreadiverseClient("https://lemmy.world");
 
-const { data: posts } = await client.getPosts();
+const { data: posts } = await client.getPosts({});
 ```
 
 > [!WARNING]

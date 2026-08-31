@@ -41,7 +41,7 @@ import { ThreadiverseClient } from "threadiverse";
 
 const client = new ThreadiverseClient("https://lemmy.world");
 
-const posts = await client.getPosts();
+const posts = await client.getPosts({});
 ```
 
 See the [documentation](https://aeharding.github.io/threadiverse/) for
@@ -50,6 +50,6 @@ authentication, software discovery, pagination, and error handling.
 ## Testing your app
 
 `threadiverse/testing` provides fakes for consumer test suites — seed
-content, inject errors, assert request payloads — with one API across
+content, inject errors, assert request payloads — with a shared core API across
 providers. See the
 [testing guide](https://aeharding.github.io/threadiverse/guide/testing).

@@ -14,6 +14,7 @@ import {
 } from "../../errors";
 import buildSafeClient from "../../SafeClient";
 import * as compat from "./compat";
+import { errorSafeFetch } from "./errorSafeFetch";
 import { isPostCommentReport } from "./helpers";
 
 const DEFAULT_REASON = "None";
@@ -29,8 +30,16 @@ export class UnsafeLemmyV1Client implements BaseClient {
   #hasAuth: boolean;
 
   constructor(hostname: string, options: BaseClientOptions) {
-    this.#client = new LemmyV1.LemmyHttp(hostname, options);
-    this.#hasAuth = !!options.headers?.["Authorization"];
+    this.#client = new LemmyV1.LemmyHttp(hostname, {
+      ...options,
+      fetchFunction: errorSafeFetch(
+        options.fetchFunction ?? globalThis.fetch.bind(globalThis),
+      ),
+    });
+    this.#hasAuth = Object.entries(options.headers ?? {}).some(
+      ([name, value]) =>
+        name.toLowerCase() === "authorization" && Boolean(value),
+    );
   }
 
   async banFromCommunity(
@@ -469,6 +478,11 @@ export class UnsafeLemmyV1Client implements BaseClient {
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonContent"]> {
+    if (payload.mode && payload.mode !== "lemmyv1")
+      throw new InvalidPayloadError(
+        `Connected to lemmyv1, ${payload.mode} is not supported`,
+      );
+
     // Threadiverse exposes `type`; v1's wire schema is `type_` (Rust avoids
     // the reserved word). Same lowercase string values.
     const { type, ...rest } = payload;

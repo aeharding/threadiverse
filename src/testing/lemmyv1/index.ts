@@ -52,6 +52,14 @@ function query(call: RecordedCall): Record<string, string> {
  * `waitForPayload`.
  */
 const LEMMY_V1_OPERATIONS = {
+  blockCommunity: {
+    decode: body<"blockCommunity">(),
+    route: "POST /api/v4/account/block/community",
+  },
+  blockPerson: {
+    decode: body<"blockPerson">(),
+    route: "POST /api/v4/account/block/person",
+  },
   createComment: {
     decode: body<"createComment">(),
     route: "POST /api/v4/comment",
@@ -87,17 +95,34 @@ const LEMMY_V1_OPERATIONS = {
     route: "GET /api/v4/comment/list",
   },
   getCommunity: {
-    decode: (call: RecordedCall): Payload<"getCommunity"> => ({
-      name: query(call).name,
-    }),
+    decode: (call: RecordedCall): Payload<"getCommunity"> => {
+      const q = query(call);
+      return { id: numberish(q.id), name: q.name };
+    },
     route: "GET /api/v4/community",
   },
-  getModlog: { route: "GET /api/v4/modlog" },
+  getModlog: {
+    decode: (call: RecordedCall): Payload<"getModlog"> => {
+      const q = query(call);
+      return {
+        comment_id: numberish(q.comment_id),
+        community_id: numberish(q.community_id),
+        limit: numberish(q.limit),
+        mod_person_id: numberish(q.mod_person_id),
+        other_person_id: numberish(q.other_person_id),
+        page_cursor: q.page_cursor,
+        post_id: numberish(q.post_id),
+      };
+    },
+    route: "GET /api/v4/modlog",
+  },
   getNotifications: {
     decode: (call: RecordedCall): Payload<"getNotifications"> => {
       const q = query(call);
       return {
         limit: numberish(q.limit),
+        page_cursor: q.page_cursor,
+        type_: q.type_ as Payload<"getNotifications">["type_"],
         unread_only:
           q.unread_only === undefined ? undefined : q.unread_only === "true",
       };
@@ -105,9 +130,10 @@ const LEMMY_V1_OPERATIONS = {
     route: "GET /api/v4/account/notification/list",
   },
   getPersonDetails: {
-    decode: (call: RecordedCall): Payload<"getPersonDetails"> => ({
-      username: query(call).username,
-    }),
+    decode: (call: RecordedCall): Payload<"getPersonDetails"> => {
+      const q = query(call);
+      return { person_id: numberish(q.person_id), username: q.username };
+    },
     route: "GET /api/v4/person",
   },
   getPost: {
@@ -145,12 +171,24 @@ const LEMMY_V1_OPERATIONS = {
   },
   likePost: { decode: body<"likePost">(), route: "POST /api/v4/post/like" },
   listPersonContent: {
-    decode: (call: RecordedCall): Payload<"listPersonContent"> => ({
-      person_id: numberish(query(call).person_id),
-    }),
+    decode: (call: RecordedCall): Payload<"listPersonContent"> => {
+      const q = query(call);
+      return {
+        limit: numberish(q.limit),
+        page_cursor: q.page_cursor,
+        person_id: numberish(q.person_id),
+        // `type` is canonical; Lemmy v1 calls it `type_` on the wire.
+        type: q.type_,
+        username: q.username,
+      } as Payload<"listPersonContent">;
+    },
     route: "GET /api/v4/person/content",
   },
   login: { decode: body<"login">(), route: "POST /api/v4/account/auth/login" },
+  logout: {
+    decode: () => undefined,
+    route: "POST /api/v4/account/auth/logout",
+  },
   markAllAsRead: {
     route: "POST /api/v4/account/notification/mark_as_read/all",
   },
@@ -162,6 +200,24 @@ const LEMMY_V1_OPERATIONS = {
   markPostAsRead: {
     decode: body<"markPostAsRead">(),
     route: "POST /api/v4/post/mark_as_read/many",
+  },
+  removePost: {
+    decode: (call: RecordedCall): Payload<"removePost"> => {
+      const { post_id, reason, removed } = call.body as {
+        post_id: number;
+        reason?: string;
+        removed: boolean;
+      };
+
+      return {
+        post_id,
+        // The v1 adapter inserts this sentinel when canonical `reason` was
+        // omitted. Strip it so consumer assertions see their original intent.
+        ...(reason !== undefined && reason !== "None" ? { reason } : {}),
+        removed,
+      };
+    },
+    route: "POST /api/v4/post/remove",
   },
   resolveObject: {
     decode: (call: RecordedCall): Payload<"resolveObject"> => ({
@@ -215,8 +271,8 @@ export type LemmyV1Operation = keyof typeof LEMMY_V1_OPERATIONS;
  * Derived: site, post list/detail, comment list (honoring `parent_id` and
  * `max_depth`), search, community, person (+ person content), account,
  * unread counts, notifications, modlog, and the vote/save/create/edit/
- * delete/mark-read writes (which mutate the store). Lists paginate with
- * opaque `page_cursor` strings, like the real server. Use
+ * delete/remove/block/mark-read/logout writes (which mutate the store).
+ * Lists paginate with opaque `page_cursor` strings, like the real server. Use
  * `mock()` for error injection or endpoints outside this set, and
  * `calls()` / `waitForCall()` to assert on outgoing requests. Wire-level
  * builders stay available on `build`.
@@ -237,7 +293,12 @@ export class FakeLemmyV1Instance extends FakeInstance {
   /** Semantic content store the default routes are derived from */
   readonly seed = new SeedStore();
 
-  /** Wait for an operation's next request; resolves its canonical payload */
+  /** Wait strictly for an operation's next request */
+  readonly waitForNextPayload: OperationApi<
+    typeof LEMMY_V1_OPERATIONS
+  >["waitForNextPayload"];
+
+  /** Return the latest payload, or wait when none is recorded yet */
   readonly waitForPayload: OperationApi<
     typeof LEMMY_V1_OPERATIONS
   >["waitForPayload"];
@@ -259,6 +320,7 @@ export class FakeLemmyV1Instance extends FakeInstance {
     this.callsTo = api.callsTo;
     this.on = api.on;
     this.once = api.once;
+    this.waitForNextPayload = api.waitForNextPayload;
     this.waitForPayload = api.waitForPayload;
 
     // seed → wire
@@ -274,16 +336,26 @@ export class FakeLemmyV1Instance extends FakeInstance {
         name: subject.name,
         title: subject.title,
       });
+    const communityView = (subject: SeedCommunity) =>
+      build.communityView({
+        blocked: subject.blocked,
+        community: community(subject),
+      });
+    const personView = (subject: SeedPerson) =>
+      build.personView(person(subject), { blocked: subject.blocked });
     const postView = (subject: SeedPost) =>
       build.postView({
         body: subject.body,
         community: community(subject.community),
+        communityBlocked: subject.community.blocked,
         creator: person(subject.creator),
+        creatorBlocked: subject.creator.blocked,
         deleted: subject.deleted,
         id: subject.id,
         myVote: subject.myVote,
         name: subject.name,
         read: subject.read,
+        removed: subject.removed,
         saved: subject.saved,
         score: subject.score,
         url: subject.url,
@@ -395,35 +467,63 @@ export class FakeLemmyV1Instance extends FakeInstance {
     });
 
     this.mock("GET /api/v4/community", (call) => {
+      const id = call.query.get("id");
       const name = call.query.get("name")?.split("@")[0];
-      const found = seed.communities.find(
-        (candidate) => candidate.name === name,
+      const found = seed.communities.find((candidate) =>
+        id !== null ? candidate.id === Number(id) : candidate.name === name,
       );
       return found
-        ? { json: build.communityResponse({ community: community(found) }) }
+        ? {
+            json: build.communityResponse({
+              blocked: found.blocked,
+              community: community(found),
+            }),
+          }
         : notFound;
     });
 
     this.mock("GET /api/v4/person", (call) => {
+      const personId = call.query.get("person_id");
       const username = call.query.get("username")?.split("@")[0];
-      const found = seed.people.find(
-        (candidate) => candidate.name === username,
+      const found = seed.people.find((candidate) =>
+        personId !== null
+          ? candidate.id === Number(personId)
+          : candidate.name === username,
       );
-      return found ? { json: build.personResponse(person(found)) } : notFound;
+      return found
+        ? {
+            json: build.personResponse(person(found), {
+              blocked: found.blocked,
+            }),
+          }
+        : notFound;
     });
 
     this.mock("GET /api/v4/person/content", (call) => {
-      const personId = Number(call.query.get("person_id"));
+      const personIdParam = call.query.get("person_id");
+      const username = call.query.get("username")?.split("@")[0];
+      const personId =
+        personIdParam !== null
+          ? Number(personIdParam)
+          : seed.people.find((candidate) => candidate.name === username)?.id;
+      const type = call.query.get("type_");
+      const includePosts = type === null || type === "all" || type === "posts";
+      const includeComments =
+        type === null || type === "all" || type === "comments";
       const items = [
-        ...seed.posts
-          .filter((post) => post.creator.id === personId)
-          .map((post) => ({ type_: "post" as const, ...postView(post) })),
-        ...seed.comments
-          .filter((comment) => comment.creator.id === personId)
-          .map((comment) => ({
-            type_: "comment" as const,
-            ...commentView(comment),
-          })),
+        ...(includePosts
+          ? seed.posts
+              .filter((post) => post.creator.id === personId)
+              .map((post) => ({ type_: "post" as const, ...postView(post) }))
+          : []),
+        ...(includeComments
+          ? seed.comments
+              .filter((comment) => comment.creator.id === personId)
+              .map((comment) => ({
+                type_: "comment" as const,
+                ...commentView(comment),
+              }))
+          : []),
       ];
       const { items: page, nextPage } = pageOf(items, call);
       return { json: build.pagedResponse(page, nextPage ?? null) };
@@ -458,13 +558,11 @@ export class FakeLemmyV1Instance extends FakeInstance {
             kind === "comment" ? [commentView(item)] : [],
           ),
           communities: items.flatMap(([kind, item]) =>
-            kind === "community"
-              ? [build.communityView({ community: community(item) })]
-              : [],
+            kind === "community" ? [communityView(item)] : [],
           ),
           nextPage,
           persons: items.flatMap(([kind, item]) =>
-            kind === "person" ? [build.personView(person(item))] : [],
+            kind === "person" ? [personView(item)] : [],
           ),
           posts: items.flatMap(([kind, item]) =>
             kind === "post" ? [postView(item)] : [],
@@ -486,7 +584,17 @@ export class FakeLemmyV1Instance extends FakeInstance {
 
     this.mock("GET /api/v4/account", () =>
       seed.loggedInPerson
-        ? { json: build.myUserInfo({ person: person(seed.loggedInPerson) }) }
+        ? {
+            json: build.myUserInfo({
+              communityBlocks: seed.communities
+                .filter((subject) => subject.blocked)
+                .map(community),
+              person: person(seed.loggedInPerson),
+              personBlocks: seed.people
+                .filter((subject) => subject.blocked)
+                .map(person),
+            }),
+          }
         : unauthenticated,
     );
 
@@ -533,6 +641,45 @@ export class FakeLemmyV1Instance extends FakeInstance {
       seed.posts.find((candidate) => candidate.id === id);
     const findComment = (id: number) =>
       seed.comments.find((candidate) => candidate.id === id);
+
+    this.mock("POST /api/v4/account/block/community", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { block, community_id } = call.body as {
+        block: boolean;
+        community_id: number;
+      };
+      const subject = seed.communities.find(
+        (candidate) => candidate.id === community_id,
+      );
+      if (!subject) return notFound;
+      subject.blocked = block;
+      return {
+        json: {
+          community_view: communityView(subject),
+          discussion_languages: [],
+        },
+      };
+    });
+
+    this.mock("POST /api/v4/account/block/person", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { block, person_id } = call.body as {
+        block: boolean;
+        person_id: number;
+      };
+      const subject = seed.people.find(
+        (candidate) => candidate.id === person_id,
+      );
+      if (!subject) return notFound;
+      subject.blocked = block;
+      return { json: { person_view: personView(subject) } };
+    });
+
+    this.mock("POST /api/v4/account/auth/logout", () => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      seed.loggedOut();
+      return { json: { success: true } };
+    });
 
     this.mock("POST /api/v4/post/like", (call) => {
       if (!seed.loggedInPerson) return unauthenticated;
@@ -630,6 +777,18 @@ export class FakeLemmyV1Instance extends FakeInstance {
       const post = findPost(post_id);
       if (!post) return notFound;
       post.deleted = deleted;
+      return { json: { post_view: postView(post) } };
+    });
+
+    this.mock("POST /api/v4/post/remove", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { post_id, removed } = call.body as {
+        post_id: number;
+        removed: boolean;
+      };
+      const post = findPost(post_id);
+      if (!post) return notFound;
+      post.removed = removed;
       return { json: { post_view: postView(post) } };
     });
 

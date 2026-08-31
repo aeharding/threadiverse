@@ -1,4 +1,4 @@
-import { z } from "zod/v4-mini";
+import * as z from "zod/v4-mini";
 
 /**
  * A post report.
@@ -19,7 +19,10 @@ export const PostReport = z.object({
    */
   original_post_url: z.optional(z.string()),
   post_id: z.number(),
-  published_at: z.string(),
+  /**
+   * When the provider reports when this report was created.
+   */
+  published_at: z.optional(z.string()),
   reason: z.string(),
   resolved: z.boolean(),
   resolver_id: z.optional(z.number()),

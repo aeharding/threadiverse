@@ -1,4 +1,4 @@
-import { z } from "zod/v4-mini";
+import * as z from "zod/v4-mini";
 
 import type { BaseClient } from "./BaseClient";
 
@@ -38,7 +38,7 @@ const PostViewResponse = z.object({ post_view: schemas.PostView });
  * are derived from this table, so adding an endpoint means adding a row
  * here, declaring it on `BaseClient`, and implementing it in each provider.
  */
-export const endpoints = {
+export const endpoints: EndpointTable = {
   banFromCommunity: null,
   blockCommunity: CommunityViewResponse,
   blockInstance: null,
@@ -102,7 +102,7 @@ export const endpoints = {
   saveUserSettings: null,
   search: schemas.ListSearchResponse,
   uploadImage: schemas.UploadImageResponse,
-} satisfies EndpointTable;
+};
 
 export type EndpointName = keyof typeof endpoints;
 

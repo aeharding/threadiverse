@@ -1,4 +1,4 @@
-import { z } from "zod/v4-mini";
+import * as z from "zod/v4-mini";
 
 import { Community } from "./Community";
 import { CommunityFollowerView } from "./CommunityFollowerView";
