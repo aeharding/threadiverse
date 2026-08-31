@@ -1,0 +1,38 @@
+name: piefed-schema-drift
+
+on:
+  schedule:
+    - cron: "0 13 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: piefed-schema-drift
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - run: npm i -fg corepack && corepack enable
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Compare authoritative PieFed OpenAPI document
+        env:
+          PIEFED_SCHEMA_DRIFT_OUTPUT: ${{ runner.temp }}/piefed-openapi-current.json
+        run: pnpm schema:piefed:drift
+      - name: Upload changed upstream document
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: piefed-openapi-drift
+          path: ${{ runner.temp }}/piefed-openapi-current.json
+          if-no-files-found: ignore
+          retention-days: 14

@@ -2,6 +2,9 @@ dist
 coverage
 node_modules
 
+# local disposable-account credentials for opt-in live acceptance
+/.test-creds.json
+
 # generated docs
 docs/api
 docs/.vitepress/dist

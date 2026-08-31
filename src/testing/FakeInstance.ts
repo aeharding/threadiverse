@@ -60,9 +60,16 @@ export interface OperationApi<Ops extends Record<string, OperationDef>> {
   on: { [Operation in keyof Ops]: (responder: OperationResponder) => void };
   /** Override an operation's next response only, then fall back. */
   once: { [Operation in keyof Ops]: (responder: OperationResponder) => void };
+  /** Wait strictly for an operation's next matching request. */
+  waitForNextPayload<Operation extends DecodableOperation<Ops>>(
+    operation: Operation,
+    predicate?: (payload: PayloadOf<Ops[Operation]>) => boolean,
+    options?: { timeoutMs?: number },
+  ): Promise<PayloadOf<Ops[Operation]>>;
   /**
-   * Wait until an operation receives a request, then return its canonical
-   * payload.
+   * Return the latest matching canonical payload if one is already recorded,
+   * or wait for the first matching request otherwise. This supports UI tests
+   * that assert after an action has completed.
    */
   waitForPayload<Operation extends DecodableOperation<Ops>>(
     operation: Operation,
@@ -224,8 +231,8 @@ export class FakeInstance {
   /**
    * `fetch`-compatible adapter. Prefer `clientOptions()` when constructing a
    * `ThreadiverseClient`; use this directly to install a global fetch mock.
-   * Unrouted requests and `{ abort }` responses throw `TypeError`, like a
-   * real network failure.
+   * Requests to other origins and `{ abort }` responses throw `TypeError`,
+   * like a real network failure. Unmocked same-origin routes return 501.
    */
   readonly fetch: typeof fetch = async (input, init) => {
     const request = new Request(input, init);
@@ -259,7 +266,7 @@ export class FakeInstance {
    *
    * Returns `undefined` for requests to other origins (callers decide
    * whether to pass those through). Unmocked same-origin requests are
-   * answered with a loud 404 instead of escaping to the real network.
+   * answered with a loud 501 instead of escaping to the real network.
    */
   async handle(request: FakeRequest): Promise<FakeResponse | undefined> {
     const url = new URL(request.url);
@@ -289,7 +296,7 @@ export class FakeInstance {
       console.warn(
         `[FakeInstance] unmocked request: ${request.method} ${url.pathname}${url.search}`,
       );
-      return { json: { error: "not_found" }, status: 404 };
+      return { json: { error: "not_implemented" }, status: 501 };
     }
 
     return typeof responder === "function" ? responder(call) : responder;
@@ -338,18 +345,32 @@ export class FakeInstance {
   }
 
   /**
-   * Wait until a matching request is recorded, then return the latest.
-   * Resolution is push-based (no polling), so pending waiters settle the
-   * moment the request lands — only the timeout path needs real timers.
+   * Return the latest matching call if one is already recorded, or wait for
+   * the first matching request otherwise. Use `waitForNextCall()` when a
+   * previously recorded call must never satisfy the waiter.
    */
   async waitForCall(
     matcher: Matcher,
     predicate: (call: RecordedCall) => boolean = () => true,
-    { timeoutMs = 5000 } = {},
+    options: { timeoutMs?: number } = {},
   ): Promise<RecordedCall> {
     const existing = this.calls(matcher).filter(predicate).at(-1);
     if (existing) return existing;
 
+    return this.waitForNextCall(matcher, predicate, options);
+  }
+
+  /**
+   * Wait strictly for the next matching request. Previously recorded requests
+   * remain available through `calls()` and are never replayed to this waiter.
+   * Resolution is push-based (no polling), so pending waiters settle the
+   * moment the request lands — only the timeout path needs real timers.
+   */
+  async waitForNextCall(
+    matcher: Matcher,
+    predicate: (call: RecordedCall) => boolean = () => true,
+    { timeoutMs = 5000 } = {},
+  ): Promise<RecordedCall> {
     return new Promise<RecordedCall>((resolve, reject) => {
       const waiter: Waiter = {
         matcher,
@@ -374,8 +395,8 @@ export class FakeInstance {
   }
 
   /**
-   * Build the operation-level API (`on`/`once`/`callsTo`/`waitForPayload`)
-   * from a provider's operation definitions plus its error wire renderer.
+   * Build the operation-level API (`on`/`once`/`callsTo` and waiters) from a
+   * provider's operation definitions plus its error wire renderer.
    */
   protected buildOperationApi<Ops extends Record<string, OperationDef>>(
     operations: Ops,
@@ -418,6 +439,15 @@ export class FakeInstance {
       },
       on,
       once,
+      waitForNextPayload: async (operation, predicate, options) => {
+        const decode = decoderFor(operation);
+        const call = await this.waitForNextCall(
+          operations[operation]!.route,
+          predicate ? (call) => predicate(decode(call) as never) : undefined,
+          options,
+        );
+        return decode(call) as never;
+      },
       waitForPayload: async (operation, predicate, options) => {
         const decode = decoderFor(operation);
         const call = await this.waitForCall(

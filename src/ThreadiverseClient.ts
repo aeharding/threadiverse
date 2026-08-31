@@ -1,4 +1,4 @@
-import { satisfies } from "compare-versions";
+import { satisfies, validate } from "compare-versions";
 
 import {
   BaseClient,
@@ -6,6 +6,13 @@ import {
   ProviderInfo,
   ThreadiverseMode,
 } from "./BaseClient";
+import {
+  EndpointName,
+  EndpointSupportArguments,
+  getProviderCapabilities,
+  ProviderCapabilities,
+  providerSupports,
+} from "./capabilities";
 import { installEndpointMethods } from "./endpoints";
 import { UnsupportedSoftwareError } from "./errors";
 import LemmyV0Client from "./providers/lemmyv0";
@@ -25,6 +32,8 @@ export type { DiscoveryCache } from "./wellknown";
 const globalDiscoveryCache: DiscoveryCache = new Map();
 
 export interface ClientConnection {
+  /** Endpoints fully implemented by the selected compatibility mode */
+  capabilities: ProviderCapabilities;
   /** Which compat mode the client selected, e.g. `"lemmyv1"` */
   mode: ThreadiverseMode;
   /** The instance's software as reported by nodeinfo */
@@ -65,6 +74,14 @@ class ThreadiverseClient {
           ).apply(client, params);
         },
     );
+  }
+  /**
+   * Endpoints fully implemented by the selected compatibility mode. Sync —
+   * requires an established connection (`await connect()`, or any resolved API
+   * call). Use `supports(endpoint, parameters)` for partial provider features.
+   */
+  get capabilities(): ProviderCapabilities {
+    return getProviderCapabilities(this.mode);
   }
   /**
    * Which compat mode the client selected. Sync — requires an established
@@ -112,12 +129,29 @@ class ThreadiverseClient {
   }
 
   static resolveClient(software: Nodeinfo21Payload["software"]) {
-    for (const Client of ThreadiverseClient.supportedSoftware) {
+    const matchingClients = ThreadiverseClient.supportedSoftware.filter(
+      (Client) => Client.softwareName === software.name,
+    );
+    const wildcardClient = matchingClients.find(
+      (Client) => Client.softwareVersionRange === "*",
+    );
+
+    // A wildcard provider deliberately does not impose semver on nodeinfo.
+    // PieFed development/custom builds commonly report labels instead of a
+    // release number, and its compatibility mode is currently unversioned.
+    if (wildcardClient) return wildcardClient;
+
+    const isNightly = software.version.startsWith("nightly");
+
+    if (!isNightly && !validate(software.version))
+      throw new UnsupportedSoftwareError(
+        `${software.name} v${software.version} is not supported`,
+      );
+
+    for (const Client of matchingClients) {
       if (
-        Client.softwareName === software.name &&
-        (software.version.startsWith("nightly") ||
-          Client.softwareVersionRange === "*" ||
-          satisfies(software.version, Client.softwareVersionRange))
+        isNightly ||
+        satisfies(software.version, Client.softwareVersionRange)
       ) {
         return Client;
       }
@@ -133,7 +167,24 @@ class ThreadiverseClient {
   async connect(): Promise<ClientConnection> {
     await this.ensureClient();
 
-    return { mode: this.mode, software: this.software };
+    return {
+      capabilities: this.capabilities,
+      mode: this.mode,
+      software: this.software,
+    };
+  }
+
+  /**
+   * Check complete endpoint support, or a particular payload for an endpoint
+   * with provider-specific parameter support. Connects first when necessary.
+   */
+  async supports<Endpoint extends EndpointName>(
+    endpoint: Endpoint,
+    ...parameters: EndpointSupportArguments<NoInfer<Endpoint>>
+  ): Promise<boolean> {
+    await this.ensureClient();
+
+    return providerSupports(this.mode, endpoint, ...parameters);
   }
 
   private async ensureClient(): Promise<BaseClient> {

@@ -58,9 +58,18 @@ describe("toPageResponse", () => {
     });
   });
 
-  it("assumes more when there's no limit to compare against", () => {
+  it("assumes more for a non-empty page when there's no limit to compare against", () => {
     expect(toPageResponse({}, { items: 3 })).toEqual({ next_page: 2 });
     expect(toPageResponse({})).toEqual({ next_page: 2 });
+  });
+
+  it("ends after an empty page when the caller omitted limit", () => {
+    expect(toPageResponse({}, { items: 0 })).toEqual({
+      next_page: undefined,
+    });
+    expect(toPageResponse({}, { items: 0, next_page: "3" })).toEqual({
+      next_page: undefined,
+    });
   });
 
   it("rejects string cursors, which these providers can't page with", () => {

@@ -512,7 +512,9 @@ export function toModlogView(
  * makes a consumer's `while (next_page)` loop spin forever. The server's own
  * cursor wins when the endpoint returns one; otherwise a page at least as
  * long as the limit implies there may be another, and a shorter one is the
- * end.
+ * end. An empty page always ends the feed, even when the caller omitted a
+ * limit or the server supplied a cursor: advancing it would keep an
+ * already-exhausted feed alive.
  *
  * "At least" matters: endpoints that merge several requests (notifications,
  * person content, all-type search, modlog) legitimately overshoot, because
@@ -534,6 +536,8 @@ export function toPageResponse(
     throw new InvalidPayloadError(
       "lemmyv0 does not support string page_cursor",
     );
+
+  if (page?.items === 0) return { next_page: undefined };
 
   if (page?.next_page !== undefined) {
     const serverCursor =

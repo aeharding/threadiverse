@@ -1,7 +1,7 @@
 import { Search as LemmyV0Search } from "lemmy-js-client-v0";
 import { Search as LemmyV1Search } from "lemmy-js-client-v1";
 
-import { paths } from "../providers/piefed/schema";
+import type { PiefedSearchSort } from "./PiefedSortTypes";
 
 export type SearchSortType =
   | SearchSortTypeByMode[keyof SearchSortTypeByMode]
@@ -18,12 +18,8 @@ export type SearchSortTypeByMode = {
   lemmyv1: Pick<LemmyV1Search, "time_range_seconds"> & {
     mode: "lemmyv1";
   };
-  piefed: Pick<
-    Required<
-      NonNullable<paths["/api/alpha/search"]["get"]["parameters"]["query"]>
-    >,
-    "sort"
-  > & {
+  piefed: {
     mode: "piefed";
+    sort: PiefedSearchSort;
   };
 };

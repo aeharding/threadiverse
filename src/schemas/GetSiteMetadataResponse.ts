@@ -1,4 +1,4 @@
-import { z } from "zod/v4-mini";
+import * as z from "zod/v4-mini";
 
 /**
  * Site metadata, from its opengraph tags.

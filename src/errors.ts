@@ -240,23 +240,26 @@ export function detectBotChallenge(
 // error-fidelity suite (PieFed puts human-ish prose in its message field;
 // the exact strings below were captured from piefed.social 2026-07-02 —
 // the scheduled fidelity run detects when they change).
-const CONDITION_BY_CODE: Record<string, ResponseErrorConstructor> = {
-  cant_block_admin: CantBlockAdminError,
-  deleted: AccountDeletedError,
-  email_not_verified: EmailNotVerifiedError,
-  "error - unknown community. Please wait a sec and try again.": NotFoundError,
-  incorrect_login: IncorrectLoginError,
-  incorrect_totp_token: Incorrect2faError,
-  invalid_bot_action: InvalidBotActionError,
-  missing_totp_token: Missing2faError,
-  "No object found.": NotFoundError,
-  "No row was found when one was required": NotFoundError,
-  not_found: NotFoundError,
-  rate_limit_error: RateLimitedError,
-  registration_application_is_pending: RegistrationApplicationPendingError,
-  site_ban: BannedError,
-  too_many_requests: RateLimitedError,
-};
+const CONDITION_BY_CODE = new Map<string, ResponseErrorConstructor>([
+  ["cant_block_admin", CantBlockAdminError],
+  ["deleted", AccountDeletedError],
+  ["email_not_verified", EmailNotVerifiedError],
+  [
+    "error - unknown community. Please wait a sec and try again.",
+    NotFoundError,
+  ],
+  ["incorrect_login", IncorrectLoginError],
+  ["incorrect_totp_token", Incorrect2faError],
+  ["invalid_bot_action", InvalidBotActionError],
+  ["missing_totp_token", Missing2faError],
+  ["No object found.", NotFoundError],
+  ["No row was found when one was required", NotFoundError],
+  ["not_found", NotFoundError],
+  ["rate_limit_error", RateLimitedError],
+  ["registration_application_is_pending", RegistrationApplicationPendingError],
+  ["site_ban", BannedError],
+  ["too_many_requests", RateLimitedError],
+]);
 
 /**
  * Build the right `ResponseError` (condition subclass when the code maps to
@@ -268,7 +271,7 @@ export function createResponseError(
   options?: ResponseErrorOptions,
 ): ResponseError {
   const Condition =
-    CONDITION_BY_CODE[code] ??
+    CONDITION_BY_CODE.get(code) ??
     // Lemmy ≤0.19 entity-specific not-found codes
     (code.startsWith("couldnt_find_") ? NotFoundError : undefined);
 

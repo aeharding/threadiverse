@@ -11,6 +11,7 @@ import { searchSeed, SeedSearchType } from "../search";
 import {
   SeedComment,
   SeedCommunity,
+  SeedNotification,
   SeedPerson,
   SeedPost,
   SeedPrivateMessage,
@@ -83,13 +84,37 @@ const PIEFED_OPERATIONS = {
     decode: body<"createPrivateMessage">(),
     route: "POST /api/alpha/private_message",
   },
+  createPrivateMessageReport: {
+    decode: body<"createPrivateMessageReport">(),
+    route: "POST /api/alpha/private_message/report",
+  },
   deleteComment: {
     decode: body<"deleteComment">(),
     route: "POST /api/alpha/comment/delete",
   },
+  deleteImage: {
+    decode: (call: RecordedCall): Payload<"deleteImage"> => {
+      const wire = call.body as { file: string };
+      return { url: wire.file };
+    },
+    route: "POST /api/alpha/image/delete",
+  },
   deletePost: {
     decode: body<"deletePost">(),
     route: "POST /api/alpha/post/delete",
+  },
+  distinguishComment: {
+    decode: (call: RecordedCall): Payload<"distinguishComment"> => {
+      const wire = call.body as {
+        comment_reply_id: number;
+        distinguished: boolean;
+      };
+      return {
+        comment_id: wire.comment_reply_id,
+        distinguished: wire.distinguished,
+      };
+    },
+    route: "POST /api/alpha/comment/distinguish",
   },
   editComment: {
     decode: (call: RecordedCall): Payload<"editComment"> => {
@@ -99,6 +124,19 @@ const PIEFED_OPERATIONS = {
     },
     route: "PUT /api/alpha/comment",
   },
+  editCommunityNotifications: {
+    decode: (call: RecordedCall): Payload<"editCommunityNotifications"> => {
+      const wire = call.body as {
+        community_id: number;
+        subscribe: boolean;
+      };
+      return {
+        community_id: wire.community_id,
+        mode: wire.subscribe ? "all_posts" : "replies_and_mentions",
+      };
+    },
+    route: "PUT /api/alpha/community/subscribe",
+  },
   editPost: {
     decode: (call: RecordedCall): Payload<"editPost"> => {
       // wire = canonical + duplicated `title` field
@@ -107,6 +145,16 @@ const PIEFED_OPERATIONS = {
       return payload as Payload<"editPost">;
     },
     route: "PUT /api/alpha/post",
+  },
+  editPostNotifications: {
+    decode: (call: RecordedCall): Payload<"editPostNotifications"> => {
+      const wire = call.body as { post_id: number; subscribe: boolean };
+      return {
+        mode: wire.subscribe ? "all_comments" : "replies_and_mentions",
+        post_id: wire.post_id,
+      };
+    },
+    route: "PUT /api/alpha/post/subscribe",
   },
   followCommunity: {
     decode: body<"followCommunity">(),
@@ -136,15 +184,36 @@ const PIEFED_OPERATIONS = {
     route: "GET /api/alpha/comment/list",
   },
   getCommunity: {
-    decode: (call: RecordedCall): Payload<"getCommunity"> => ({
-      name: query(call).name,
-    }),
+    decode: (call: RecordedCall): Payload<"getCommunity"> => {
+      const q = query(call);
+      return { id: numberish(q.id), name: q.name };
+    },
     route: "GET /api/alpha/community",
   },
+  getModlog: {
+    decode: (call: RecordedCall): Payload<"getModlog"> => {
+      const q = query(call);
+      return {
+        comment_id: numberish(q.comment_id),
+        community_id: numberish(q.community_id),
+        limit: numberish(q.limit),
+        mod_person_id: numberish(q.mod_person_id),
+        other_person_id: numberish(q.other_person_id),
+        // PieFed's adapter injects page=1 when the canonical cursor is
+        // omitted. That default is indistinguishable from an explicit 1,
+        // so decode both as omission; later pages round-trip exactly.
+        page_cursor:
+          q.page === undefined || q.page === "1" ? undefined : Number(q.page),
+        post_id: numberish(q.post_id),
+      };
+    },
+    route: "GET /api/alpha/modlog",
+  },
   getPersonDetails: {
-    decode: (call: RecordedCall): Payload<"getPersonDetails"> => ({
-      username: query(call).username,
-    }),
+    decode: (call: RecordedCall): Payload<"getPersonDetails"> => {
+      const q = query(call);
+      return { person_id: numberish(q.person_id), username: q.username };
+    },
     route: "GET /api/alpha/user",
   },
   getPost: {
@@ -169,6 +238,12 @@ const PIEFED_OPERATIONS = {
     route: "GET /api/alpha/post/list",
   },
   getSite: { route: "GET /api/alpha/site" },
+  getSiteMetadata: {
+    decode: (call: RecordedCall): Payload<"getSiteMetadata"> => ({
+      url: query(call).url,
+    }),
+    route: "GET /api/alpha/post/site_metadata",
+  },
   getUnreadCount: { route: "GET /api/alpha/user/unread_count" },
   likeComment: {
     decode: (call: RecordedCall): Payload<"likeComment"> => {
@@ -198,17 +273,29 @@ const PIEFED_OPERATIONS = {
     decode: body<"markPostAsRead">(),
     route: "POST /api/alpha/post/mark_as_read",
   },
+  resolveCommentReport: {
+    decode: body<"resolveCommentReport">(),
+    route: "PUT /api/alpha/comment/report/resolve",
+  },
   resolveObject: {
     decode: (call: RecordedCall): Payload<"resolveObject"> => ({
       q: query(call).q,
     }),
     route: "GET /api/alpha/resolve_object",
   },
+  resolvePostReport: {
+    decode: body<"resolvePostReport">(),
+    route: "PUT /api/alpha/post/report/resolve",
+  },
   saveComment: {
     decode: body<"saveComment">(),
     route: "PUT /api/alpha/comment/save",
   },
   savePost: { decode: body<"savePost">(), route: "PUT /api/alpha/post/save" },
+  saveUserSettings: {
+    decode: body<"saveUserSettings">(),
+    route: "PUT /api/alpha/user/save_user_settings",
+  },
   search: {
     decode: (call: RecordedCall): Payload<"search"> => {
       const q = query(call);
@@ -242,6 +329,8 @@ const STATUS_TEXT: Record<number, string> = {
 };
 
 export interface FakePiefedInstanceOptions {
+  /** Whether the fake site permits post and comment downvotes */
+  enableDownvotes?: boolean;
   /** Bare hostname (no scheme) the fake instance answers for */
   host?: string;
   /** PieFed version reported via nodeinfo and `GET /api/alpha/site` */
@@ -259,10 +348,11 @@ export interface FakePiefedInstanceOptions {
  * ```
  *
  * Derived: site, post list/detail, comment list (honoring `parent_id` and
- * `max_depth`), search, community, person, unread counts, the notification
- * fan-out (replies/mentions/private messages), and the vote/save/create/
- * edit/delete/mark-read writes (which mutate the store). Lists paginate by
- * 1-based `page` number, like the real server. Use
+ * `max_depth`), search, community, person, unread counts, an empty public
+ * modlog (schema-typed overrides are supported), the notification fan-out
+ * (replies/mentions/private messages), and the vote/save/create/edit/delete/
+ * mark-read writes (which mutate the store). Lists paginate by 1-based
+ * `page` number, like the real server. Use
  * `mock()` for error injection or endpoints outside this set. Wire-level
  * builders stay available on `build`.
  */
@@ -282,12 +372,18 @@ export class FakePiefedInstance extends FakeInstance {
   /** Semantic content store the default routes are derived from */
   readonly seed = new SeedStore();
 
-  /** Wait for an operation's next request; resolves its canonical payload */
+  /** Wait strictly for an operation's next request */
+  readonly waitForNextPayload: OperationApi<
+    typeof PIEFED_OPERATIONS
+  >["waitForNextPayload"];
+
+  /** Return the latest payload, or wait when none is recorded yet */
   readonly waitForPayload: OperationApi<
     typeof PIEFED_OPERATIONS
   >["waitForPayload"];
 
   constructor({
+    enableDownvotes = true,
     host = "piefed.test",
     version = DEFAULT_PIEFED_VERSION,
   }: FakePiefedInstanceOptions = {}) {
@@ -296,6 +392,7 @@ export class FakePiefedInstance extends FakeInstance {
     const build = createPiefedBuilders({ host, version });
     this.build = build;
     const seed = this.seed;
+    const showNsfwByPerson = new Map<number, boolean>();
 
     const api = this.buildOperationApi(PIEFED_OPERATIONS, (error) => {
       const status = error.status ?? 400;
@@ -311,6 +408,7 @@ export class FakePiefedInstance extends FakeInstance {
     this.callsTo = api.callsTo;
     this.on = api.on;
     this.once = api.once;
+    this.waitForNextPayload = api.waitForNextPayload;
     this.waitForPayload = api.waitForPayload;
 
     // seed → wire
@@ -320,6 +418,15 @@ export class FakePiefedInstance extends FakeInstance {
         title: subject.displayName,
         user_name: subject.name,
       });
+    const myUserInfo = () => {
+      const subject = seed.loggedInPerson;
+      if (!subject) return undefined;
+
+      const info = build.myUserInfo(person(subject));
+      info.local_user_view.local_user.show_nsfw =
+        showNsfwByPerson.get(subject.id) ?? false;
+      return info;
+    };
     const community = (subject: SeedCommunity) =>
       build.community({
         id: subject.id,
@@ -393,6 +500,27 @@ export class FakePiefedInstance extends FakeInstance {
         read: subject.read,
         recipient: person(subject.message.recipient),
       });
+    const genericNotificationView = (
+      subject: Exclude<SeedNotification, { kind: "private_message" }>,
+    ) => {
+      const view = commentView(subject.comment);
+      const isMention = subject.kind === "mention";
+      return build.userNotificationItemView({
+        author: person(subject.comment.creator),
+        comment: view.comment,
+        comment_id: view.comment.id,
+        comment_view: isMention ? undefined : view,
+        notif_body: view.comment.body,
+        notif_id: subject.id,
+        notif_subtype: isMention
+          ? "comment_mention"
+          : "new_reply_on_followed_comment",
+        notif_type: isMention ? 6 : 4,
+        post: isMention ? undefined : postView(subject.comment.post),
+        post_id: subject.comment.post.id,
+        status: subject.read ? "Read" : "Unread",
+      });
+    };
 
     const notFound = {
       json: {
@@ -419,19 +547,35 @@ export class FakePiefedInstance extends FakeInstance {
       status: 400,
     } as const;
 
-    this.mock("GET /api/alpha/site", () => ({
-      json: build.getSiteResponse({
+    this.mock("GET /api/alpha/site", () => {
+      const response = build.getSiteResponse({
+        admins: seed.people
+          .filter((subject) => subject.admin === true)
+          .map((subject) =>
+            build.personView(person(subject), { isAdmin: true }),
+          ),
+        enableDownvotes,
         myUser: seed.loggedInPerson ? person(seed.loggedInPerson) : undefined,
         name: seed.siteName,
-      }),
-    }));
+      });
+      const currentUser = myUserInfo();
+      if (currentUser) response.my_user = currentUser;
+      return { json: response };
+    });
+
+    this.mock("GET /api/alpha/user/me", () => {
+      const currentUser = myUserInfo();
+      return currentUser ? { json: currentUser } : unauthenticated;
+    });
 
     this.mock("GET /api/alpha/post/list", (call) => {
       // The piefed adapter implements listPersonContent via person_id here
       const personId = call.query.get("person_id");
-      const posts = personId
+      let posts = personId
         ? seed.posts.filter((post) => post.creator.id === Number(personId))
         : seed.posts;
+      if (call.query.get("liked_only") === "true")
+        posts = posts.filter((post) => post.myVote === 1);
       const { items, nextPage } = pageOf(posts, call);
       return {
         json: build.postListResponse(items.map(postView), nextPage ?? null),
@@ -443,6 +587,15 @@ export class FakePiefedInstance extends FakeInstance {
         (candidate) => candidate.id === Number(call.query.get("id")),
       );
       return post ? { json: { post_view: postView(post) } } : notFound;
+    });
+
+    this.mock("GET /api/alpha/comment", (call) => {
+      const comment = seed.comments.find(
+        (candidate) => candidate.id === Number(call.query.get("id")),
+      );
+      return comment
+        ? { json: { comment_view: commentView(comment) } }
+        : notFound;
     });
 
     this.mock("GET /api/alpha/comment/list", (call) => {
@@ -459,6 +612,8 @@ export class FakePiefedInstance extends FakeInstance {
         comments = comments.filter(
           (comment) => comment.creator.id === Number(personId),
         );
+      if (call.query.get("liked_only") === "true")
+        comments = comments.filter((comment) => comment.myVote === 1);
       // parent_id = the comment's subtree (path segments include it)
       if (parentId)
         comments = comments.filter((comment) =>
@@ -491,14 +646,43 @@ export class FakePiefedInstance extends FakeInstance {
     });
 
     this.mock("GET /api/alpha/community", (call) => {
+      const id = call.query.get("id");
       const name = call.query.get("name")?.split("@")[0];
-      const found = seed.communities.find(
-        (candidate) => candidate.name === name,
+      const found = seed.communities.find((candidate) =>
+        id !== null ? candidate.id === Number(id) : candidate.name === name,
       );
       return found
         ? { json: build.communityResponse({ community: community(found) }) }
         : communityNotFound;
     });
+
+    // Modlog has no semantic seed model yet, but it is a real public route:
+    // default to its exact empty grouped envelope rather than a misleading
+    // 501. Tests can install schema-typed rows with `on.getModlog()` and
+    // `build.modlogResponse()`.
+    this.mock("GET /api/alpha/modlog", {
+      json: build.modlogResponse(),
+    });
+
+    this.mock("GET /api/alpha/comment/report/list", () =>
+      seed.loggedInPerson
+        ? { json: { comment_reports: [], next_page: null } }
+        : unauthenticated,
+    );
+
+    this.mock("GET /api/alpha/post/report/list", () =>
+      seed.loggedInPerson
+        ? { json: { next_page: null, post_reports: [] } }
+        : unauthenticated,
+    );
+
+    this.mock("PUT /api/alpha/comment/report/resolve", () =>
+      seed.loggedInPerson ? notFound : unauthenticated,
+    );
+
+    this.mock("PUT /api/alpha/post/report/resolve", () =>
+      seed.loggedInPerson ? notFound : unauthenticated,
+    );
 
     this.mock("GET /api/alpha/user/unread_count", () => {
       if (!seed.loggedInPerson) return unauthenticated;
@@ -551,6 +735,40 @@ export class FakePiefedInstance extends FakeInstance {
         : unauthenticated,
     );
 
+    this.mock("GET /api/alpha/user/notifications", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+
+      const requestedStatus = call.query.get("status");
+      const status =
+        requestedStatus === "New" ||
+        requestedStatus === "Read" ||
+        requestedStatus === "Unread"
+          ? requestedStatus
+          : "All";
+      const genericNotifications = seed.notifications.flatMap((notification) =>
+        notification.kind === "private_message"
+          ? []
+          : [genericNotificationView(notification)],
+      );
+      // Match PieFed: it paginates the Notification table before applying the
+      // requested read-status filter, so an empty wire page may still have a
+      // live cursor.
+      const { items, nextPage } = pageOf(genericNotifications, call);
+      const filteredItems = items.filter((item) => {
+        if (status === "All") return true;
+        if (status === "Read") return item.status === "Read";
+        return item.status === "Unread";
+      });
+
+      return {
+        json: build.userNotificationsResponse(filteredItems, {
+          nextPage: nextPage ?? null,
+          status,
+          username: seed.loggedInPerson.name,
+        }),
+      };
+    });
+
     this.mock("GET /api/alpha/private_message/list", (call) => {
       if (!seed.loggedInPerson) return unauthenticated;
 
@@ -564,6 +782,20 @@ export class FakePiefedInstance extends FakeInstance {
       return {
         json: build.privateMessageListResponse(pageOf(messages, call).items),
       };
+    });
+
+    this.mock("POST /api/alpha/private_message/report", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+
+      const { private_message_id } = call.body as {
+        private_message_id: number;
+      };
+      const message = seed.notifications.find(
+        (notification) =>
+          notification.kind === "private_message" &&
+          notification.message.id === private_message_id,
+      );
+      return message ? { json: {} } : notFound;
     });
 
     this.mock("GET /api/alpha/community/list", (call) => {
@@ -585,7 +817,7 @@ export class FakePiefedInstance extends FakeInstance {
     }));
 
     // Fire-and-forget on the app side, but a real server answers it — an
-    // unmocked 404 here made the shared mark-read spec vacuous on piefed
+    // unmocked 501 here made the shared mark-read spec vacuous on piefed
     this.mock("POST /api/alpha/post/mark_as_read", (call) => {
       // PieFed accepts either a single post_id or a post_ids array
       const { post_id, post_ids, read } = call.body as {
@@ -698,6 +930,15 @@ export class FakePiefedInstance extends FakeInstance {
       if (!comment) return notFound;
       comment.saved = save;
       return { json: { comment_view: commentView(comment) } };
+    });
+
+    this.mock("PUT /api/alpha/user/save_user_settings", (call) => {
+      const subject = seed.loggedInPerson;
+      if (!subject) return unauthenticated;
+
+      const { show_nsfw } = call.body as { show_nsfw: boolean };
+      showNsfwByPerson.set(subject.id, show_nsfw);
+      return { json: { my_user: myUserInfo() } };
     });
 
     // Create/edit/delete writes mutate the seed store; the returned view and
@@ -828,6 +1069,23 @@ export class FakePiefedInstance extends FakeInstance {
       return { json: { success: true } };
     });
 
+    this.mock("PUT /api/alpha/user/notification_state", (call) => {
+      if (!seed.loggedInPerson) return unauthenticated;
+      const { notif_id, read_state } = call.body as {
+        notif_id: number;
+        read_state: boolean;
+      };
+      const notification = seed.notifications.find(
+        (candidate) =>
+          candidate.kind !== "private_message" && candidate.id === notif_id,
+      );
+      if (!notification || notification.kind === "private_message")
+        return notFound;
+
+      notification.read = read_state;
+      return { json: genericNotificationView(notification) };
+    });
+
     this.mock("POST /api/alpha/user/mark_all_as_read", () => {
       if (!seed.loggedInPerson) return unauthenticated;
       for (const notification of seed.notifications) notification.read = true;
@@ -835,11 +1093,36 @@ export class FakePiefedInstance extends FakeInstance {
     });
 
     this.mock("GET /api/alpha/user", (call) => {
+      const savedOnly = call.query.get("saved_only") === "true";
+      if (savedOnly && !seed.loggedInPerson) return unauthenticated;
+
+      const personId = call.query.get("person_id");
       const username = call.query.get("username")?.split("@")[0];
-      const found = seed.people.find(
-        (candidate) => candidate.name === username,
+      const found = seed.people.find((candidate) =>
+        personId !== null
+          ? candidate.id === Number(personId)
+          : candidate.name === username,
       );
-      return found ? { json: build.userResponse(person(found)) } : notFound;
+      if (!found) return notFound;
+
+      if (!savedOnly) return { json: build.userResponse(person(found)) };
+
+      // PieFed pages saved posts and comments independently, so one wire
+      // response may contain up to twice the requested limit. Saved content
+      // belongs to the authenticated user; person_view still describes the
+      // profile requested by person_id/username.
+      const posts = pageOf(
+        seed.posts.filter((candidate) => candidate.saved),
+        call,
+      ).items.map(postView);
+      const comments = pageOf(
+        seed.comments.filter((candidate) => candidate.saved),
+        call,
+      ).items.map(commentView);
+
+      return {
+        json: build.userResponse(person(found), { comments, posts }),
+      };
     });
   }
 }

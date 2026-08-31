@@ -1,4 +1,5 @@
 src/providers/piefed/schema.ts
+src/providers/piefed/openapi.snapshot.json
 pnpm-lock.yaml
 docs/api
 docs/.vitepress/dist

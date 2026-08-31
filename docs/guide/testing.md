@@ -9,11 +9,12 @@ import { FakeLemmyV1Instance, FakePiefedInstance } from "threadiverse/testing";
 ```
 
 [`FakeLemmyV1Instance`](/api/testing/classes/FakeLemmyV1Instance) and
-[`FakePiefedInstance`](/api/testing/classes/FakePiefedInstance) expose an
-identical API (both extend
-[`FakeInstance`](/api/testing/classes/FakeInstance)). Wire knowledge lives
-inside this package, type-checked against the same upstream types the
-compat layers consume, and verified against real instances (see
+[`FakePiefedInstance`](/api/testing/classes/FakePiefedInstance) share the same
+core fake-instance API (both extend
+[`FakeInstance`](/api/testing/classes/FakeInstance)); their supported
+operations and wire builders remain provider-specific. Wire knowledge lives
+inside this package, type-checked against the same upstream types the compat
+layers consume. Selected behavior is also checked against real instances (see
 [Fidelity verification](#fidelity-verification)).
 
 ## Quick start
@@ -24,7 +25,7 @@ import { FakeLemmyV1Instance } from "threadiverse/testing";
 
 const fake = new FakeLemmyV1Instance();
 
-// Content: seed it; every read endpoint derives from the store
+// Content: supported seed-backed read endpoints derive from the store
 const alex = fake.seed.person({ name: "alex" });
 fake.seed.post({ name: "Hello **world**", creator: alex });
 fake.seed.loggedInAs(alex);
@@ -50,9 +51,9 @@ route-level escape hatch, not the primary interface.
 ## Content: the seed store
 
 `fake.seed` is a [`SeedStore`](/api/testing/classes/SeedStore) — a semantic
-content store. Seed what exists, and **all read endpoints derive from it
-consistently** — feeds, post detail, comments, site counts, profiles,
-notifications:
+content store. Seed what exists, and **supported seed-backed read endpoints
+derive from it consistently** — feeds, post detail, comments, site counts,
+profiles, notifications:
 
 ```ts
 const alex = fake.seed.person({ displayName: "Alex", name: "alex" });
@@ -129,8 +130,8 @@ await client.getPosts({});
 `once` calls queue, making fail-then-succeed flows explicit:
 
 ```ts
-fake.once.followCommunity({ error: { code: "rate_limit_error", status: 429 } });
-// first attempt fails, retry succeeds against the default route
+fake.once.getPosts({ error: { code: "rate_limit_error", status: 429 } });
+// first attempt fails; retry uses the seed-derived feed
 ```
 
 ### Custom wire responses
@@ -158,17 +159,22 @@ Assert on outgoing requests as **canonical payloads** — what your app
 _meant_, decoded from the wire and round-trip tested per provider:
 
 ```ts
-// Wait for the next request to an operation
+// Works before or after the request: returns the latest matching payload,
+// or waits when none has been recorded yet
 const payload = await fake.waitForPayload("likePost");
 // { post_id: 1, is_upvote: true }
+
+// When ordering matters, ignore history and wait strictly for the next one
+const nextPayload = await fake.waitForNextPayload("likePost");
 
 // Or inspect everything an operation has received
 const calls = fake.callsTo("likePost");
 expect(calls).toHaveLength(1);
 ```
 
-`waitForPayload` accepts an optional predicate to wait for a specific
-matching request. Both are part of the per-operation
+Both waiters accept an optional predicate for a specific matching request.
+The same distinction exists at the wire level as `waitForCall` versus
+`waitForNextCall`. All are part of the per-operation
 [`OperationApi`](/api/testing/interfaces/OperationApi), alongside `on` and
 `once`.
 
@@ -208,8 +214,8 @@ the UI; combine with `waitForPayload` to assert what the app sent.
 
 Requests to the fake's host that no seed route or override handles return
 `501` with a console warning (`[FakeInstance] unmocked request: …`), and
-requests to foreign origins throw a `TypeError` — a spec drifting to the
-network fails fast instead of hanging.
+`fake.fetch` throws a `TypeError` for foreign-origin requests. The Playwright
+`install(page)` adapter leaves foreign origins untouched.
 
 ## Fidelity verification
 
@@ -217,8 +223,71 @@ The fakes are verified against reality in two ways:
 
 - Wire shapes are **type-checked against the same upstream API types** the
   compat layers use (`lemmy-js-client`, PieFed's Swagger).
-- A scheduled suite verifies the fakes' responses — especially **error
-  responses** — against live Lemmy and PieFed instances: same status, same
-  body key-set, same machine-readable code, and the identical
-  `ResponseError` surfacing through a real `ThreadiverseClient` in both
-  cases.
+- A weekly scheduled suite probes selected read-only error scenarios against
+  live Lemmy and PieFed instances, checking that real and fake clients surface
+  the same `ResponseError` subclass and, when the real provider exposes one,
+  the same HTTP status.
+
+Maintainers can also run the authenticated acceptance suite against disposable
+Voyager test accounts:
+
+```sh
+LIVE_AUTH=1 pnpm vitest run test/live-authenticated.test.ts
+```
+
+It reads the ignored project-root `.test-creds.json` by default;
+`THREADIVERSE_TEST_CREDS` can select another file and
+`THREADIVERSE_TEST_ACCOUNT` one account by key. With no account selector, it
+exercises every configured account. Keep the file owner-only (`chmod 600
+.test-creds.json`); the exact root filename is ignored by git. The existing
+shared-instance shape remains supported:
+
+```json
+{
+  "instance": "lemmy.example",
+  "accounts": {
+    "test-user": "password"
+  }
+}
+```
+
+To cover more than one provider in the same run, put the instance on each
+account record (the record key is only a selector; `username` is sent to the
+server):
+
+```json
+{
+  "accounts": {
+    "lemmy": {
+      "instance": "lemmy.example",
+      "username": "test-user",
+      "password": "password"
+    },
+    "piefed": {
+      "instance": "piefed.example",
+      "username": "test-user",
+      "password": "password"
+    }
+  }
+}
+```
+
+Secrets are loaded only at runtime and failures are redacted. The suite has an
+explicit endpoint requirement matrix for each provider mode and exercises
+login, logout, and authenticated/person-scoped reads against the real APIs. It
+does not make persistent content mutations.
+
+Successful authentication and route existence are reported separately. Until
+a PieFed test account is configured, safe unauthenticated probes still check
+the real PieFed login/logout, notification-state, report, and community
+ban/unban routes and HTTP methods: only expected `4xx` auth/validation
+rejections pass; `404`, `405`, and `501` fail. The route-only run also performs
+a successful public canonical profile-feed read. Run that coverage without any
+credential file with:
+
+```sh
+LIVE_PIEFED_ROUTES=1 pnpm vitest run test/live-authenticated.test.ts
+```
+
+`THREADIVERSE_PIEFED_ROUTE_INSTANCE` overrides the default
+`https://piefed.social` probe target.

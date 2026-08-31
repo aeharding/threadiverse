@@ -18,6 +18,18 @@ import {
 } from "../src/testing";
 import ThreadiverseClient from "../src/ThreadiverseClient";
 
+type MatrixFake = FakeLemmyV1Instance | FakePiefedInstance;
+
+function getCommentCalls(fake: MatrixFake) {
+  if (fake instanceof FakeLemmyV1Instance) return fake.callsTo("getComments");
+  return fake.callsTo("getComments");
+}
+
+function getPostCalls(fake: MatrixFake) {
+  if (fake instanceof FakeLemmyV1Instance) return fake.callsTo("getPosts");
+  return fake.callsTo("getPosts");
+}
+
 function seedScenario(seed: SeedStore) {
   const alex = seed.person({ displayName: "Alex", name: "alex" });
   const cats = seed.community({ name: "cats", title: "Cats" });
@@ -72,6 +84,39 @@ describe.each([
     expect(person_view.person.name).toBe("alex");
   });
 
+  it("resolves Voyager's numeric community and person identifiers", async () => {
+    const { alex, cats, client, fake } = setup();
+    const communityPayload =
+      fake instanceof FakeLemmyV1Instance
+        ? fake.waitForNextPayload("getCommunity")
+        : fake.waitForNextPayload("getCommunity");
+    const personPayload =
+      fake instanceof FakeLemmyV1Instance
+        ? fake.waitForNextPayload("getPersonDetails")
+        : fake.waitForNextPayload("getPersonDetails");
+
+    const [{ community_view }, { person_view }] = await Promise.all([
+      client.getCommunity({ id: cats.id }),
+      client.getPersonDetails({ person_id: alex.id }),
+    ]);
+
+    expect(community_view.community.id).toBe(cats.id);
+    expect(person_view.person.id).toBe(alex.id);
+    await expect(communityPayload).resolves.toEqual({ id: cats.id });
+    await expect(personPayload).resolves.toEqual({ person_id: alex.id });
+
+    const communityCalls =
+      fake instanceof FakeLemmyV1Instance
+        ? fake.callsTo("getCommunity")
+        : fake.callsTo("getCommunity");
+    const personCalls =
+      fake instanceof FakeLemmyV1Instance
+        ? fake.callsTo("getPersonDetails")
+        : fake.callsTo("getPersonDetails");
+    expect(communityCalls).toEqual([{ id: cats.id }]);
+    expect(personCalls).toEqual([{ person_id: alex.id }]);
+  });
+
   it("injects canonical errors that surface as condition classes", async () => {
     const { client, fake } = setup();
 
@@ -96,7 +141,7 @@ describe.each([
 
     await client.getPosts({ limit: 7 });
 
-    const payloads = fake.callsTo("getPosts");
+    const payloads = getPostCalls(fake);
     expect(payloads).toHaveLength(1);
     expect(payloads[0]).toMatchObject({ limit: 7 });
   });
@@ -322,7 +367,8 @@ describe.each([
 
     // Canonical payloads stay canonical even where the wire request had to
     // be adjusted for the provider
-    expect(fake.callsTo("getComments")[0]).toMatchObject({ max_depth: 3 });
+    const calls = getCommentCalls(fake);
+    expect(calls[0]).toMatchObject({ max_depth: 3 });
   });
 
   it("honors max_depth relative to the requested parent", async () => {
@@ -540,6 +586,230 @@ describe.each([
   });
 });
 
+describe("piefed saved content", () => {
+  it("requires an authenticated user for saved_only profile requests", async () => {
+    const fake = new FakePiefedInstance();
+    const person = fake.seed.person({ name: "alex" });
+    const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
+
+    await expect(
+      client.listPersonSaved({ limit: 1, person_id: person.id }),
+    ).rejects.toBeInstanceOf(IncorrectLoginError);
+  });
+
+  it("pages seeded saved posts and comments independently like PieFed", async () => {
+    const fake = new FakePiefedInstance();
+    const me = fake.seed.person({ id: 1, name: "me" });
+    const creator = fake.seed.person({ id: 2, name: "creator" });
+    fake.seed.loggedInAs(me);
+
+    const firstPost = fake.seed.post({
+      creator,
+      id: 10,
+      name: "Saved post one",
+      saved: true,
+    });
+    const secondPost = fake.seed.post({
+      creator,
+      id: 11,
+      name: "Saved post two",
+      saved: true,
+    });
+    const unsavedPost = fake.seed.post({
+      creator,
+      id: 12,
+      name: "Not saved",
+    });
+    fake.seed.comment({
+      content: "Saved comment one",
+      creator,
+      id: 20,
+      post: firstPost,
+      saved: true,
+    });
+    fake.seed.comment({
+      content: "Saved comment two",
+      creator,
+      id: 21,
+      post: secondPost,
+      saved: true,
+    });
+    fake.seed.comment({
+      content: "Not saved",
+      creator,
+      id: 22,
+      post: unsavedPost,
+    });
+
+    const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
+    const itemIds = (
+      items: Awaited<ReturnType<typeof client.listPersonSaved>>["data"],
+    ) =>
+      items.map((item) =>
+        "comment" in item
+          ? `comment:${item.comment.id}`
+          : `post:${item.post.id}`,
+      );
+
+    const first = await client.listPersonSaved({
+      limit: 1,
+      person_id: me.id,
+    });
+    expect(new Set(itemIds(first.data))).toEqual(
+      new Set(["comment:20", "post:10"]),
+    );
+    expect(first.next_page).toBe(2);
+
+    const second = await client.listPersonSaved({
+      limit: 1,
+      page_cursor: first.next_page,
+      person_id: me.id,
+    });
+    expect(new Set(itemIds(second.data))).toEqual(
+      new Set(["comment:21", "post:11"]),
+    );
+    expect(second.next_page).toBe(3);
+
+    const third = await client.listPersonSaved({
+      limit: 1,
+      page_cursor: second.next_page,
+      person_id: me.id,
+    });
+    expect(third.data).toEqual([]);
+    expect(third.next_page).toBeUndefined();
+
+    expect(
+      fake
+        .calls("GET /api/alpha/user")
+        .map((call) => Object.fromEntries(call.query)),
+    ).toEqual([
+      { limit: "1", person_id: "1", saved_only: "true" },
+      { limit: "1", page: "2", person_id: "1", saved_only: "true" },
+      { limit: "1", page: "3", person_id: "1", saved_only: "true" },
+    ]);
+  });
+});
+
+describe("piefed report defaults", () => {
+  it("serves authenticated empty report lists with the requested filters", async () => {
+    const fake = new FakePiefedInstance();
+    fake.seed.loggedInAs(fake.seed.person({ name: "moderator" }));
+    const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
+
+    const response = await client.listReports({
+      community_id: 9,
+      limit: 3,
+      unresolved_only: true,
+    });
+
+    expect(response.data).toEqual([]);
+    expect(response.next_page).toBeUndefined();
+    const expectedQuery = {
+      community_id: "9",
+      limit: "3",
+      page: "1",
+      unresolved_only: "true",
+    };
+    expect(
+      fake
+        .calls("GET /api/alpha/comment/report/list")
+        .map((call) => Object.fromEntries(call.query)),
+    ).toEqual([expectedQuery]);
+    expect(
+      fake
+        .calls("GET /api/alpha/post/report/list")
+        .map((call) => Object.fromEntries(call.query)),
+    ).toEqual([expectedQuery]);
+  });
+
+  it("auth-gates report lists and returns not-found for unseeded resolves", async () => {
+    const fake = new FakePiefedInstance();
+    const moderator = fake.seed.person({ name: "moderator" });
+    const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
+
+    await expect(client.listReports({ limit: 1 })).rejects.toBeInstanceOf(
+      IncorrectLoginError,
+    );
+    await expect(
+      client.resolveCommentReport({ report_id: 17, resolved: true }),
+    ).rejects.toBeInstanceOf(IncorrectLoginError);
+    await expect(
+      client.resolvePostReport({ report_id: 18, resolved: false }),
+    ).rejects.toBeInstanceOf(IncorrectLoginError);
+
+    fake.seed.loggedInAs(moderator);
+    await expect(
+      client.resolveCommentReport({ report_id: 17, resolved: true }),
+    ).rejects.toBeInstanceOf(NotFoundError);
+    await expect(
+      client.resolvePostReport({ report_id: 18, resolved: false }),
+    ).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("allows report resolve overrides while recording canonical payloads", async () => {
+    const fake = new FakePiefedInstance();
+    fake.seed.loggedInAs(fake.seed.person({ name: "moderator" }));
+    const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
+    const commentPayload = { report_id: 17, resolved: true };
+    const postPayload = { report_id: 18, resolved: false };
+    const nextComment = fake.waitForNextPayload("resolveCommentReport");
+    const nextPost = fake.waitForNextPayload("resolvePostReport");
+    fake.on.resolveCommentReport({ json: {} });
+    fake.on.resolvePostReport({ json: {} });
+
+    await Promise.all([
+      client.resolveCommentReport(commentPayload),
+      client.resolvePostReport(postPayload),
+    ]);
+
+    await expect(nextComment).resolves.toEqual(commentPayload);
+    await expect(nextPost).resolves.toEqual(postPayload);
+    expect(fake.callsTo("resolveCommentReport")).toEqual([commentPayload]);
+    expect(fake.callsTo("resolvePostReport")).toEqual([postPayload]);
+  });
+});
+
+describe("lemmyv1 person content", () => {
+  it("resolves usernames and filters posts or comments by canonical type", async () => {
+    const fake = new FakeLemmyV1Instance();
+    const alex = fake.seed.person({ name: "alex" });
+    const bob = fake.seed.person({ name: "bob" });
+    const alexPost = fake.seed.post({ creator: alex, name: "Alex post" });
+    fake.seed.post({ creator: bob, name: "Bob post" });
+    fake.seed.comment({
+      content: "Alex comment",
+      creator: alex,
+      post: alexPost,
+    });
+    fake.seed.comment({
+      content: "Bob comment",
+      creator: bob,
+      post: alexPost,
+    });
+    const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
+
+    const posts = await client.listPersonContent({
+      mode: "lemmyv1",
+      type: "posts",
+      username: "alex@remote.example",
+    });
+    expect(
+      posts.data.flatMap((item) => ("comment" in item ? [] : [item.post.name])),
+    ).toEqual(["Alex post"]);
+
+    const comments = await client.listPersonContent({
+      mode: "lemmyv1",
+      type: "comments",
+      username: "alex@remote.example",
+    });
+    expect(
+      comments.data.flatMap((item) =>
+        "comment" in item ? [item.comment.content] : [],
+      ),
+    ).toEqual(["Alex comment"]);
+  });
+});
+
 describe("lemmyv1 cursors", () => {
   it("hands out cursors a consumer cannot derive", async () => {
     // Real Lemmy cursors are opaque tokens. If the fake's encoded its own
@@ -568,6 +838,26 @@ describe("lemmyv1 cursors", () => {
 });
 
 describe("seeded notifications (lemmyv1)", () => {
+  it("preserves Voyager's notification cursor and kind for request assertions", async () => {
+    const fake = new FakeLemmyV1Instance();
+    fake.seed.loggedInAs(fake.seed.person({ name: "alex" }));
+    const client = new ThreadiverseClient(fake.origin, fake.clientOptions());
+    const payload = {
+      limit: 25,
+      page_cursor: "voyager-inbox-cursor",
+      type_: "subscribed" as const,
+      unread_only: true,
+    };
+    const nextPayload = fake.waitForNextPayload("getNotifications");
+
+    await expect(client.getNotifications(payload)).resolves.toEqual({
+      data: [],
+    });
+
+    await expect(nextPayload).resolves.toEqual(payload);
+    expect(fake.callsTo("getNotifications")).toEqual([payload]);
+  });
+
   it("derives inbox endpoints from seeded notifications", async () => {
     const fake = new FakeLemmyV1Instance();
     const seed = fake.seed;

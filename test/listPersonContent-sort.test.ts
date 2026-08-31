@@ -10,6 +10,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { BaseClientOptions } from "../src/BaseClient";
+import { InvalidPayloadError } from "../src/errors";
 import ThreadiverseClient from "../src/ThreadiverseClient";
 
 function makeMockedClient(
@@ -51,6 +52,57 @@ function makeMockedClient(
 }
 
 describe("listPersonContent - sort propagation", () => {
+  describe("lemmyv1", () => {
+    it("maps canonical username and type fields to the v1 wire query", async () => {
+      let capturedUrl: string | undefined;
+      const client = makeMockedClient(
+        "v1.test.lemmy",
+        { name: "lemmy", version: "1.0.0-beta.1" },
+        (urlStr) => {
+          if (urlStr.includes("/api/v4/person/content")) {
+            capturedUrl = urlStr;
+            return new Response(
+              JSON.stringify({ items: [], next_page: null, prev_page: null }),
+              { status: 200 },
+            );
+          }
+        },
+      );
+
+      await client.listPersonContent({
+        limit: 5,
+        mode: "lemmyv1",
+        type: "comments",
+        username: "alex@example.com",
+      });
+
+      expect(capturedUrl).toBeDefined();
+      const params = new URLSearchParams(capturedUrl!.split("?")[1]);
+      expect(Object.fromEntries(params)).toEqual({
+        limit: "5",
+        type_: "comments",
+        username: "alex@example.com",
+      });
+    });
+
+    it("rejects a payload explicitly keyed to another provider", async () => {
+      const client = makeMockedClient(
+        "v1.test.lemmy",
+        { name: "lemmy", version: "1.0.0-beta.1" },
+        () => undefined,
+      );
+
+      await expect(
+        client.listPersonContent({
+          mode: "piefed",
+          person_id: 1,
+          sort: "TopWeek",
+          type: "posts",
+        }),
+      ).rejects.toBeInstanceOf(InvalidPayloadError);
+    });
+  });
+
   describe("lemmyv0", () => {
     it("forwards caller's sort to getPersonDetails", async () => {
       let capturedUrl: string | undefined;
@@ -154,6 +206,24 @@ describe("listPersonContent - sort propagation", () => {
       expect(capturedUrl).toBeDefined();
       const params = new URLSearchParams(capturedUrl!.split("?")[1]);
       expect(params.get("sort")).toBe("New");
+      expect(params.has("type")).toBe(false);
+    });
+
+    it("rejects a payload explicitly keyed to another provider", async () => {
+      const client = makeMockedClient(
+        "v0.test.lemmy",
+        { name: "lemmy", version: "0.19.11" },
+        () => undefined,
+      );
+
+      await expect(
+        client.listPersonContent({
+          mode: "piefed",
+          person_id: 1,
+          sort: "TopWeek",
+          type: "posts",
+        }),
+      ).rejects.toBeInstanceOf(InvalidPayloadError);
     });
   });
 
@@ -174,8 +244,6 @@ describe("listPersonContent - sort propagation", () => {
       await client.listPersonContent({
         mode: "piefed",
         person_id: 1,
-        // @ts-expect-error piefed's sort enum isn't typed end-to-end here;
-        // the test is asserting wire-level forwarding, not type-checking.
         sort: "TopWeek",
         type: "posts",
       });
@@ -203,7 +271,6 @@ describe("listPersonContent - sort propagation", () => {
       await client.listPersonContent({
         mode: "piefed",
         person_id: 1,
-        // @ts-expect-error see note above
         sort: "Hot",
         type: "comments",
       });

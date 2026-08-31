@@ -1,7 +1,7 @@
 import { ListCommunities as LemmyV0ListCommunities } from "lemmy-js-client-v0";
 import { ListCommunities as LemmyV1ListCommunities } from "lemmy-js-client-v1";
 
-import { paths } from "../providers/piefed/schema";
+import type { PiefedCommunitySort } from "./PiefedSortTypes";
 
 export type CommunitySortType =
   | CommunitySortTypeByMode[keyof CommunitySortTypeByMode]
@@ -20,14 +20,8 @@ export type CommunitySortTypeByMode = {
     Required<Pick<LemmyV1ListCommunities, "sort">> & {
       mode: "lemmyv1";
     };
-  piefed: Pick<
-    Required<
-      NonNullable<
-        paths["/api/alpha/community/list"]["get"]["parameters"]["query"]
-      >
-    >,
-    "sort"
-  > & {
+  piefed: {
     mode: "piefed";
+    sort: PiefedCommunitySort;
   };
 };

@@ -45,6 +45,71 @@ getters [`client.mode`](/api/index/classes/ThreadiverseClient#mode) and
 [`client.software`](/api/index/classes/ThreadiverseClient#software) work
 too.
 
+### Endpoint capabilities
+
+Preflight optional features before showing their UI instead of calling an
+endpoint and catching `UnsupportedError`:
+
+```ts
+if (await client.supports("getFederatedInstances")) {
+  const { federated_instances } = await client.getFederatedInstances();
+  // Show Voyager's instance browser
+}
+```
+
+For an endpoint with provider-specific parameter support, include the relevant
+parameter in the check. For example, PieFed supports its native upvoted feed but
+does not expose a complete downvoted feed:
+
+```ts
+const canShowUpvoted = await client.supports("listPersonLiked", {
+  like_type: "liked_only",
+});
+const canShowDownvoted = await client.supports("listPersonLiked", {
+  like_type: "disliked_only",
+});
+```
+
+The same payload-aware form covers other partial provider features, such as
+PieFed's inability to remove all of a person's existing community content as
+part of a ban:
+
+```ts
+const canBanAndRemoveContent = await client.supports("banFromCommunity", {
+  remove_or_restore_data: true,
+});
+```
+
+Image deletion also varies by provider. Lemmy v0 requires the nonempty
+pictrs token returned by its uploader; Lemmy v1 and PieFed verify ownership
+from authentication and can delete a tokenless upload:
+
+```ts
+const image = { delete_token: upload.delete_token ?? "", url: upload.url };
+if (await client.supports("deleteImage", image)) {
+  await client.deleteImage(image);
+}
+```
+
+PieFed's activity-alert switches are another partial feature. It can represent
+`all_posts` or `replies_and_mentions` for a community, and `all_comments` or
+`replies_and_mentions` for a post. It cannot represent the richer `mute` mode
+or community `all_posts_and_comments`, so preflight the exact mode before
+offering it:
+
+```ts
+const canMuteCommunity = await client.supports("editCommunityNotifications", {
+  mode: "mute",
+}); // false on PieFed
+```
+
+`supports()` connects implicitly. After `connect()`, complete endpoint support
+is also available on both the returned `capabilities` map and the sync
+`client.capabilities` getter. These endpoint-level flags are conservative: a
+provider that supports only some valid parameters is `false`. Neither form
+guarantees that the current account is authorized or that the instance's policy
+permits the operation.
+
 Discovery results are cached per hostname in a process-wide cache by
 default. Pass your own `Map` as `discoveryCache` to scope it — useful
 server-side or in tests:
@@ -94,7 +159,7 @@ await client.createComment({
   content: "Nice post!",
 });
 
-await client.likePost({ post_id: post_view.post.id, score: 1 });
+await client.likePost({ is_upvote: true, post_id: post_view.post.id });
 ```
 
 Every method also accepts trailing

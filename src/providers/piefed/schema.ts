@@ -135,7 +135,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -229,7 +229,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -301,7 +301,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -349,7 +349,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -442,7 +442,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -497,7 +497,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -555,7 +555,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         /** Edit community. */
@@ -590,7 +590,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         /** Create a new community. */
@@ -625,7 +625,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -684,7 +684,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -736,7 +736,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -831,7 +831,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -880,7 +880,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         post?: never;
@@ -931,7 +931,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -981,7 +981,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -1029,7 +1029,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -1080,7 +1080,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         post?: never;
@@ -1131,7 +1131,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -1181,7 +1181,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -1230,7 +1230,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         /** Create a new post flair in the community */
@@ -1265,7 +1265,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -1315,7 +1315,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -1362,7 +1362,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         /** Edit feed. */
@@ -1397,7 +1397,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         /** Create a new feed. */
@@ -1432,7 +1432,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -1490,7 +1490,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -1542,7 +1542,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -1592,7 +1592,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -1639,7 +1639,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -1691,7 +1691,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -1747,7 +1747,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -1844,9 +1844,54 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
                 /** @description Too Many Requests */
                 429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/user/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout / Revoke JWT token */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LogoutResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1947,7 +1992,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -1998,7 +2043,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -2049,7 +2094,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -2101,7 +2146,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -2195,7 +2240,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         post?: never;
@@ -2245,7 +2290,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         post?: never;
@@ -2294,7 +2339,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -2345,7 +2390,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         post?: never;
@@ -2484,7 +2529,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -2534,7 +2579,107 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/user/follow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Follow a user */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UserFollowRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserFollowResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/user/unfollow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unfollow a user */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UserUnfollowRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserUnfollowResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -2584,7 +2729,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -2634,7 +2779,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -2684,7 +2829,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -2734,7 +2879,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -2837,7 +2982,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -2889,7 +3034,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -2938,7 +3083,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         post?: never;
@@ -2988,7 +3133,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         post?: never;
@@ -3035,7 +3180,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         /** Edit a comment. */
@@ -3070,7 +3215,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         /** Create a comment. */
@@ -3105,7 +3250,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -3164,7 +3309,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -3214,7 +3359,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -3266,10 +3411,60 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/comment/report/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Resolve or unresolve a comment report */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PutCommentReportResolveRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetCommentReportResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+            };
+        };
         post?: never;
         delete?: never;
         options?: never;
@@ -3318,7 +3513,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -3368,7 +3563,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -3418,7 +3613,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -3468,7 +3663,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -3518,7 +3713,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -3566,7 +3761,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -3628,7 +3823,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -3690,7 +3885,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -3738,7 +3933,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         /** Edit a post. */
@@ -3773,7 +3968,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         /** Create a new post. */
@@ -3808,7 +4003,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -3868,7 +4063,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -3916,7 +4111,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -3968,7 +4163,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -4017,7 +4212,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         post?: never;
@@ -4067,7 +4262,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         post?: never;
@@ -4118,7 +4313,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -4168,9 +4363,113 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/post/report/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get list of comment reports. */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Limit reports to within a single community */
+                    community_id?: number;
+                    limit?: number;
+                    page?: number;
+                    /** @description Get the reports for a single post */
+                    post_id?: number;
+                    unresolved_only?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetPostReportListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/post/report/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Resolve or unresolve a report */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PutPostReportResolveRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PostReportResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+            };
+        };
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4218,7 +4517,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -4268,7 +4567,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -4318,7 +4617,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -4368,7 +4667,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -4418,7 +4717,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -4466,7 +4765,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -4518,7 +4817,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -4568,7 +4867,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -4618,7 +4917,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -4677,7 +4976,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -4736,7 +5035,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -4795,7 +5094,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -4852,7 +5151,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -4905,7 +5204,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -4955,7 +5254,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -5004,7 +5303,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         /** Create a new private message. */
@@ -5039,7 +5338,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
                 /** @description Too Many Requests */
                 429: {
                     headers: {
@@ -5098,7 +5397,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -5148,7 +5447,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         delete?: never;
@@ -5186,7 +5485,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PrivateMessageResponse"];
+                        "application/json": components["schemas"]["PrivateMessageReportResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -5198,9 +5497,263 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/private_message/conversation/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report a conversation */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReportConversationRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/private_message/report/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get list of individual private message reports */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Restrict reports to within a single conversation */
+                    conversation_id?: number;
+                    /** @description Restrict reports to a single message */
+                    private_message_id?: number;
+                    limit?: number;
+                    page?: number;
+                    unresolved_only?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetPrivateMessageReportListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/private_message/conversation/report/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get list of reported conversations and conversations containing a reported private message */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Restrict reports to a single conversation */
+                    conversation_id?: number;
+                    limit?: number;
+                    page?: number;
+                    unresolved_only?: boolean;
+                    /** @description Number of most recent messages in the conversation to include in the response */
+                    message_history_limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetConversationReportListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/private_message/report/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Resolve or unresolve a private message report */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PutPrivateMessageReportResolveRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PrivateMessageReportResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alpha/private_message/conversation/report/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Resolve or unresolve a reported conversation */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PutConversationReportResolveRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DefaultError"];
+                    };
+                };
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
+            };
+        };
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5247,7 +5800,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         put?: never;
@@ -5296,7 +5849,7 @@ export interface paths {
                         "application/json": components["schemas"]["DefaultError"];
                     };
                 };
-                422: components["responses"]["UNPROCESSABLE_ENTITY"];
+                422: components["responses"]["UNPROCESSABLE_CONTENT"];
             };
         };
         post?: never;
@@ -5536,6 +6089,7 @@ export interface components {
             show_nsfw: boolean;
             show_read_posts: boolean;
             show_scores: boolean;
+            manually_approves_followers?: boolean | null;
         };
         LocalUserView: {
             counts: components["schemas"]["PersonAggregates"];
@@ -5595,6 +6149,7 @@ export interface components {
             defederation: string[];
             trusts: string[];
             registration_mode: string;
+            software: string;
         };
         GetSiteInstanceChooserSearchResponseItem: {
             id: number;
@@ -6566,6 +7121,9 @@ export interface components {
         UserLoginResponse: {
             jwt: string;
         };
+        LogoutResponse: {
+            success: boolean;
+        };
         UserUnreadCountsResponse: {
             /** @description Post and comment mentions */
             mentions: number;
@@ -6786,6 +7344,18 @@ export interface components {
         UserSetFlairResponse: {
             person_view?: components["schemas"]["PersonView"];
         };
+        UserFollowRequest: {
+            user_id: number;
+        };
+        UserFollowResponse: {
+            ok?: string;
+        };
+        UserUnfollowRequest: {
+            user_id: number;
+        };
+        UserUnfollowResponse: {
+            ok?: string;
+        };
         UserSetNoteRequest: {
             person_id: number;
             /** @description Pass a value of null to remove existing note */
@@ -6940,6 +7510,10 @@ export interface components {
         GetCommentReportListResponse: {
             comment_reports: components["schemas"]["CommentReportView"][];
             next_page?: string | null;
+        };
+        PutCommentReportResolveRequest: {
+            report_id: number;
+            resolved: boolean;
         };
         RemoveCommentRequest: {
             comment_id: number;
@@ -7114,6 +7688,14 @@ export interface components {
         PostReportResponse: {
             post_report_view: components["schemas"]["PostReportView"];
         };
+        GetPostReportListResponse: {
+            post_reports: components["schemas"]["PostReportView"][];
+            next_page?: string | null;
+        };
+        PutPostReportResolveRequest: {
+            report_id: number;
+            resolved: boolean;
+        };
         LockPostRequest: {
             post_id: number;
             locked: boolean;
@@ -7260,6 +7842,85 @@ export interface components {
             private_message_id: number;
             reason: string;
         };
+        PrivateMessageReport: {
+            id: number;
+            /** @description User id of the reporter */
+            creator_id: number;
+            private_message_id: number;
+            original_pm_text: string;
+            reason: string | null;
+            resolved: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            published: string;
+        };
+        PrivateMessageReportView: {
+            private_message_report?: components["schemas"]["PrivateMessageReport"];
+            private_message?: components["schemas"]["PrivateMessage"];
+            private_message_creator?: components["schemas"]["Person"];
+            creator?: components["schemas"]["Person"];
+        };
+        PrivateMessageReportResponse: {
+            private_message_report_view?: components["schemas"]["PrivateMessageReportView"];
+        };
+        ReportConversationRequest: {
+            conversation_id: number;
+            reason: string;
+        };
+        GetPrivateMessageReportListResponse: {
+            private_message_reports: components["schemas"]["PrivateMessageReportView"][];
+            next_page?: string | null;
+        };
+        ConversationReport: {
+            id: number;
+            /** @description User id of the reporter */
+            creator_id: number;
+            conversation_id: number;
+            reason: string | null;
+            /** @description Any other additional information provided by the reporter */
+            description: string | null;
+            resolved: boolean;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            published: string;
+        };
+        ConversationInfoView: {
+            id: number;
+            members?: components["schemas"]["Person"][];
+            creator_id: number;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            published: string;
+            /**
+             * Format: datetime
+             * @example 2025-06-07T02:29:07.980084Z
+             */
+            updated: string;
+        };
+        ConversationReportView: {
+            conversation_report: components["schemas"]["ConversationReport"];
+            conversation_information: components["schemas"]["ConversationInfoView"];
+            message_history?: components["schemas"]["PrivateMessageView"][];
+            creator: components["schemas"]["Person"];
+        };
+        GetConversationReportListResponse: {
+            conversation_reports: components["schemas"]["ConversationReportView"][];
+            next_page?: string | null;
+        };
+        PutPrivateMessageReportResolveRequest: {
+            report_id: number;
+            resolved: boolean;
+        };
+        PutConversationReportResolveRequest: {
+            report_id: number;
+            resolved: boolean;
+        };
         UserRegistration: {
             answer: string | null;
             /**
@@ -7292,8 +7953,8 @@ export interface components {
         };
     };
     responses: {
-        /** @description Unprocessable Entity */
-        UNPROCESSABLE_ENTITY: {
+        /** @description Unprocessable Content */
+        UNPROCESSABLE_CONTENT: {
             headers: {
                 [name: string]: unknown;
             };

@@ -42,8 +42,11 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "pnpm lint && pnpm test:types && vitest run --coverage",
-    "test:types": "tsc --noEmit --skipLibCheck",
+    "schema:piefed:check": "node scripts/piefed-schema.mjs check",
+    "schema:piefed:drift": "node scripts/piefed-schema.mjs drift",
+    "schema:piefed:generate": "node scripts/piefed-schema.mjs generate",
+    "test": "pnpm schema:piefed:check && pnpm lint && pnpm test:types && vitest run --coverage",
+    "test:types": "tsc -p tsconfig.test.json",
     "build": "unbuild",
     "prepack": "pnpm build",
     "release": "pnpm test && pnpm publish"
@@ -62,6 +65,7 @@
     "eslint": "10.4.0",
     "eslint-config-unjs": "0.6.2",
     "eslint-plugin-perfectionist": "^5.9.0",
+    "openapi-typescript": "7.13.0",
     "prettier": "^3.8.3",
     "typedoc": "^0.28.19",
     "typedoc-plugin-markdown": "^4.12.0",
@@ -76,5 +80,5 @@
   "resolutions": {
     "threadiverse": "link:."
   },
-  "packageManager": "pnpm@10.8.1"
+  "packageManager": "pnpm@10.34.5"
 }

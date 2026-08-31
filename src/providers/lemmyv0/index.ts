@@ -27,7 +27,9 @@ export class UnsafeLemmyV0Client implements BaseClient {
 
   static softwareName = "lemmy" as const;
 
-  static softwareVersionRange = ">=0.19.0";
+  // All 1.0 prereleases are excluded deliberately. Lemmy v1 support starts
+  // at alpha.5; earlier alphas must not silently fall back to the v0 wire API.
+  static softwareVersionRange = ">=0.19.0 <1.0.0-0";
 
   #client: LemmyV0.LemmyHttp;
 
@@ -582,12 +584,35 @@ export class UnsafeLemmyV0Client implements BaseClient {
     payload: Parameters<BaseClient["listPersonContent"]>[0],
     options?: RequestOptions,
   ): ReturnType<BaseClient["listPersonContent"]> {
+    if (payload.mode && payload.mode !== "lemmyv0")
+      throw new InvalidPayloadError(
+        `Connected to lemmyv0, ${payload.mode} is not supported`,
+      );
+
+    // Narrow the provider-keyed union before constructing the v0 request.
+    // `type` is canonical response filtering and `page_back` belongs to v1;
+    // neither is part of Lemmy v0's getPersonDetails wire contract.
+    const providerParams =
+      payload.mode === "lemmyv0"
+        ? {
+            limit: payload.limit,
+            page_cursor: payload.page_cursor,
+            person_id: payload.person_id,
+            sort: payload.sort,
+            username: payload.username,
+          }
+        : {
+            limit: payload.limit,
+            page_cursor: payload.page_cursor,
+            person_id: payload.person_id,
+          };
+
     const response = await this.#client.getPersonDetails(
       {
+        ...compat.fromPageParams(providerParams),
         // Default to New when the caller didn't pick a sort; otherwise
-        // honor what they chose (spread comes after to take precedence).
-        sort: "New",
-        ...compat.fromPageParams(payload),
+        // honor the v0-keyed value narrowed above.
+        sort: payload.mode === "lemmyv0" ? (payload.sort ?? "New") : "New",
       },
       options,
     );

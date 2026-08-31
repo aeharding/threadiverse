@@ -111,6 +111,7 @@ export function createLemmyV1Builders({
     id: number;
     myVote?: -1 | 0 | 1;
     name: string;
+    removed?: boolean;
     score?: number;
     url?: string;
   }): Wire<LemmyV1.Post> {
@@ -132,7 +133,7 @@ export function createLemmyV1Builders({
       newest_comment_time_at: now,
       nsfw: false,
       published_at: now,
-      removed: false,
+      removed: over.removed ?? false,
       report_count: 0,
       unresolved_report_count: 0,
       url: over.url,
@@ -143,12 +144,15 @@ export function createLemmyV1Builders({
   function postView(over: {
     body?: string;
     community?: Wire<LemmyV1.Community>;
+    communityBlocked?: boolean;
     creator: Wire<LemmyV1.Person>;
+    creatorBlocked?: boolean;
     deleted?: boolean;
     id: number;
     myVote?: -1 | 0 | 1;
     name: string;
     read?: boolean;
+    removed?: boolean;
     saved?: boolean;
     score?: number;
     url?: string;
@@ -158,11 +162,15 @@ export function createLemmyV1Builders({
     return {
       can_mod: false,
       community: resolvedCommunity,
+      community_actions: over.communityBlocked
+        ? { blocked_at: now }
+        : undefined,
       creator: over.creator,
       creator_banned: false,
       creator_banned_from_community: false,
       creator_is_admin: false,
       creator_is_moderator: false,
+      person_actions: over.creatorBlocked ? { blocked_at: now } : undefined,
       post: post({ ...over, community: resolvedCommunity }),
       post_actions: actions(
         over.myVote ?? 0,
@@ -371,10 +379,12 @@ export function createLemmyV1Builders({
   /** Raw v1 MyUserInfo returned by `GET /api/v4/account` (getMyUser) */
   function myUserInfo(over: {
     admin?: boolean;
+    communityBlocks?: Wire<LemmyV1.Community>[];
     person: Wire<LemmyV1.Person>;
+    personBlocks?: Wire<LemmyV1.Person>[];
   }): Wire<LemmyV1.MyUserInfo> {
     return {
-      community_blocks: [],
+      community_blocks: over.communityBlocks ?? [],
       discussion_languages: [],
       follows: [],
       instance_communities_blocks: [],
@@ -390,12 +400,20 @@ export function createLemmyV1Builders({
       },
       moderates: [],
       multi_community_follows: [],
-      person_blocks: [],
+      person_blocks: over.personBlocks ?? [],
     };
   }
 
-  function personView(subject: Wire<LemmyV1.Person>): Wire<LemmyV1.PersonView> {
-    return { banned: false, is_admin: false, person: subject };
+  function personView(
+    subject: Wire<LemmyV1.Person>,
+    over: { blocked?: boolean } = {},
+  ): Wire<LemmyV1.PersonView> {
+    return {
+      banned: false,
+      is_admin: false,
+      person: subject,
+      person_actions: over.blocked ? { blocked_at: now } : undefined,
+    };
   }
 
   /** `GET /api/v4/search` (search) */
@@ -422,6 +440,7 @@ export function createLemmyV1Builders({
   /** `GET /api/v4/person` (getPersonDetails) */
   function personResponse(
     subject: Wire<LemmyV1.Person>,
+    over: { blocked?: boolean } = {},
   ): Wire<LemmyV1.GetPersonDetailsResponse> {
     return {
       moderates: [],
@@ -430,23 +449,31 @@ export function createLemmyV1Builders({
         banned: false,
         is_admin: false,
         person: subject,
+        person_actions: over.blocked ? { blocked_at: now } : undefined,
       },
     };
   }
 
   /** `GET /api/v4/community` (getCommunity) */
   function communityView(
-    over: { community?: Wire<LemmyV1.Community> } = {},
+    over: {
+      blocked?: boolean;
+      community?: Wire<LemmyV1.Community>;
+    } = {},
   ): Wire<LemmyV1.CommunityView> {
     return {
       can_mod: false,
       community: over.community ?? community(),
+      community_actions: over.blocked ? { blocked_at: now } : undefined,
       tags: [],
     };
   }
 
   function communityResponse(
-    over: { community?: Wire<LemmyV1.Community> } = {},
+    over: {
+      blocked?: boolean;
+      community?: Wire<LemmyV1.Community>;
+    } = {},
   ): Wire<LemmyV1.GetCommunityResponse> {
     return {
       community_view: communityView(over),

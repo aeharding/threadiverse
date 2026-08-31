@@ -8,9 +8,17 @@ on:
     - cron: "0 12 * * 1" # Mondays 12:00 UTC
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: live-smoke
+  cancel-in-progress: false
+
 jobs:
   live-smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - run: npm i -fg corepack && corepack enable
@@ -18,7 +26,8 @@ jobs:
         with:
           node-version: 22
           cache: "pnpm"
-      - run: pnpm install
-      - run: pnpm vitest run test/live-smoke.test.ts test/live-fidelity.test.ts
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm vitest run test/live-smoke.test.ts test/live-fidelity.test.ts test/live-authenticated.test.ts
         env:
+          LIVE_PIEFED_ROUTES: "1"
           LIVE_SMOKE: "1"

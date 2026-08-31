@@ -35,6 +35,8 @@ export interface SeedComment {
 }
 
 export interface SeedCommunity {
+  /** Blocked by the logged-in user (defaults false; mutated by block writes) */
+  blocked?: boolean;
   id: number;
   name: string;
   title: string;
@@ -55,6 +57,10 @@ export type SeedNotification =
     };
 
 export interface SeedPerson {
+  /** Instance administrator (defaults false). */
+  admin?: boolean;
+  /** Blocked by the logged-in user (defaults false; mutated by block writes) */
+  blocked?: boolean;
   displayName?: string;
   id: number;
   name: string;
@@ -72,6 +78,8 @@ export interface SeedPost {
   name: string;
   /** Read by the logged-in user (mutated by mark-as-read writes) */
   read: boolean;
+  /** Removed by a moderator (defaults false; mutated by remove writes) */
+  removed?: boolean;
   /** Saved by the logged-in user (mutated by save writes) */
   saved: boolean;
   /** Base score at `myVote` 0; the logged-in user's vote is added on top */
@@ -170,9 +178,15 @@ export class SeedStore {
   }
 
   community(
-    over: { id?: number; name?: string; title?: string } = {},
+    over: {
+      blocked?: boolean;
+      id?: number;
+      name?: string;
+      title?: string;
+    } = {},
   ): SeedCommunity {
     const community: SeedCommunity = {
+      blocked: over.blocked ?? false,
       // First community defaults to 111 so seeds agree with the wire-level
       // builders' default community out of the box
       id: over.id ?? (this.communities.length === 0 ? 111 : this.#nextId++),
@@ -191,6 +205,11 @@ export class SeedStore {
     this.loggedInPerson = person;
   }
 
+  /** Clear the authenticated user, as a successful logout does. */
+  loggedOut(): void {
+    this.loggedInPerson = undefined;
+  }
+
   mention(over: {
     comment: SeedComment;
     id?: number;
@@ -200,11 +219,15 @@ export class SeedStore {
   }
 
   person(over: {
+    admin?: boolean;
+    blocked?: boolean;
     displayName?: string;
     id?: number;
     name: string;
   }): SeedPerson {
     const person: SeedPerson = {
+      admin: over.admin ?? false,
+      blocked: over.blocked ?? false,
       displayName: over.displayName,
       id: over.id ?? this.#nextId++,
       name: over.name,
@@ -222,6 +245,7 @@ export class SeedStore {
     myVote?: -1 | 0 | 1;
     name: string;
     read?: boolean;
+    removed?: boolean;
     saved?: boolean;
     score?: number;
     url?: string;
@@ -235,6 +259,7 @@ export class SeedStore {
       myVote: over.myVote ?? 0,
       name: over.name,
       read: over.read ?? false,
+      removed: over.removed ?? false,
       saved: over.saved ?? false,
       score: over.score ?? 1,
       url: over.url,

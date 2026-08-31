@@ -44,7 +44,12 @@ describe("FakePiefedInstance + ThreadiverseClient round trip", () => {
   it("discovers software via nodeinfo", async () => {
     const { client } = setup();
 
-    expect(await client.connect()).toEqual({
+    expect(await client.connect()).toMatchObject({
+      capabilities: {
+        getModlog: true,
+        listPersonLiked: false,
+        register: false,
+      },
       mode: "piefed",
       software: { name: "piefed", version: "1.2.0" },
     });
@@ -78,6 +83,131 @@ describe("FakePiefedInstance + ThreadiverseClient round trip", () => {
     expect(data.map((view) => view.comment.content)).toEqual([
       "A piefed comment",
     ]);
+  });
+
+  it("serves a canonical empty modlog by default and records its payload", async () => {
+    const { client, instance } = setup();
+
+    const response = await client.getModlog({ community_id: 3 });
+
+    expect(response.data).toEqual([]);
+    expect(response.next_page).toBeUndefined();
+    expect(instance.calls("GET /api/alpha/modlog")).toHaveLength(1);
+    expect(instance.callsTo("getModlog")[0]).toMatchObject({
+      community_id: 3,
+      // The adapter pins PieFed's native default for exact exhaustion.
+      limit: 10,
+    });
+  });
+
+  it("maps schema-typed modlog overrides through the real adapter", async () => {
+    const { client, instance } = setup();
+    const moderator = instance.build.person({
+      id: 10,
+      user_name: "moderator",
+    });
+    const community = instance.build.community({
+      id: 20,
+      name: "removed-community",
+    });
+    instance.on.getModlog({
+      json: instance.build.modlogResponse({
+        removed_communities: [
+          {
+            community,
+            mod_remove_community: {
+              community_id: community.id,
+              id: 30,
+              mod_person_id: moderator.id,
+              reason: "Community deleted",
+              removed: true,
+              when_: "2026-08-30T12:00:00Z",
+            },
+            moderator,
+          },
+        ],
+      }),
+    });
+
+    const response = await client.getModlog({ community_id: community.id });
+
+    expect(response.data).toEqual([
+      expect.objectContaining({
+        moderator: expect.objectContaining({ id: moderator.id }),
+        modlog: {
+          expires_at: undefined,
+          id: 30,
+          is_revert: false,
+          kind: "admin_remove_community",
+          published_at: "2026-08-30T12:00:00Z",
+          reason: "Community deleted",
+        },
+        target_community: expect.objectContaining({ id: community.id }),
+      }),
+    ]);
+  });
+
+  it("filters native liked feeds before paginating derived content", async () => {
+    const instance = new FakePiefedInstance({ host: "liked.piefed.fake.test" });
+    const neutralPost = instance.seed.post({
+      id: 1,
+      myVote: 0,
+      name: "Neutral post",
+    });
+    instance.seed.post({ id: 2, myVote: 1, name: "First liked post" });
+    instance.seed.post({ id: 3, myVote: 1, name: "Second liked post" });
+    instance.seed.comment({
+      content: "Neutral comment",
+      id: 11,
+      myVote: 0,
+      post: neutralPost,
+    });
+    instance.seed.comment({
+      content: "First liked comment",
+      id: 12,
+      myVote: 1,
+      post: neutralPost,
+    });
+    instance.seed.comment({
+      content: "Second liked comment",
+      id: 13,
+      myVote: 1,
+      post: neutralPost,
+    });
+    const client = new ThreadiverseClient(
+      instance.origin,
+      instance.clientOptions(),
+    );
+
+    const first = await client.listPersonLiked({
+      like_type: "liked_only",
+      limit: 1,
+    });
+    expect(
+      first.data
+        .map((item) => ("comment" in item ? item.comment.id : item.post.id))
+        .sort((a, b) => a - b),
+    ).toEqual([2, 12]);
+    expect(first.next_page).toBe(2);
+
+    const second = await client.listPersonLiked({
+      like_type: "liked_only",
+      limit: 1,
+      page_cursor: first.next_page,
+    });
+    expect(
+      second.data
+        .map((item) => ("comment" in item ? item.comment.id : item.post.id))
+        .sort((a, b) => a - b),
+    ).toEqual([3, 13]);
+    expect(second.next_page).toBe(3);
+
+    const final = await client.listPersonLiked({
+      like_type: "liked_only",
+      limit: 1,
+      page_cursor: second.next_page,
+    });
+    expect(final).toEqual({ data: [] });
   });
 
   it("getCommunity and getPersonDetails pass canonical validation", async () => {
